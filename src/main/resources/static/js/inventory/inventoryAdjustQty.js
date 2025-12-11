@@ -1,7 +1,4 @@
 //전역변수
-let currentIvid; // 재고id
-let currentIvQty; // 현재 재고수량
-let expectOutboundQty; // 출고예정수량
 
 // 수량 조절 모달 초기화
 function resetAdjustQtyModal() {
@@ -14,14 +11,9 @@ function resetAdjustQtyModal() {
     document.getElementById('adjustReason').value = '';
 }
 
-// 수량 조절 모달 열기 (재고id, 출고예정수량 저장)
+// 수량 조절 모달 열기
 function openAdjustQtyModal(rowData) {
 	resetAdjustQtyModal();
-//	console.log(rowData);
-	currentIvid = rowData.ivId;
-	currentIvQty = rowData.ivAmount;
-	expectOutboundQty = rowData.expectObAmount;
-	
 	
 	const modalEl = document.getElementById('adjustModal');
 	const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -120,7 +112,7 @@ saveBtn.addEventListener('click', async () => {
 	const adjustData = getAdjustData();
 	
 	const response = 
-	await fetch(`/api/inventorys/${currentIvid}/adjustQty`, {
+	await fetch(`/api/inventories/${currentIvid}/adjustQty`, {
 		method: 'POST',
 		headers: {
 			[csrfHeader]: csrfToken,

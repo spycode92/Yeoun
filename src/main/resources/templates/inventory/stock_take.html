@@ -10,7 +10,7 @@
 
 <th:block layout:fragment="content">
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">재고 관리 /</span> 재고 실사</h4>
+        <h2 class="fw-bold py-3 mb-4">재고 실사</h2>
 
         <div class="row">
             <!-- Location Selection -->
@@ -20,29 +20,25 @@
                         <h5 class="mb-0">실사 위치 선택</h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label" for="takeZone">Zone</label>
-                            <select class="form-select" id="takeZone">
-                                <option value="A">A존</option>
-                                <option value="B">B존</option>
-                                <option value="C">C존</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="takeRack">Rack</label>
-                            <input type="text" class="form-control" id="takeRack" placeholder="예: 01">
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col">
-                                <label class="form-label" for="takeRow">Row</label>
-                                <input type="text" class="form-control" id="takeRow" placeholder="예: 1">
-                            </div>
-                            <div class="col">
-                                <label class="form-label" for="takeColumn">Column</label>
-                                <input type="text" class="form-control" id="takeColumn" placeholder="예: 1">
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primary w-100">조회</button>
+	                    <div class="col mb-3">
+	                        <label for="zone" class="form-label">Zone</label>
+	                        <select id="zone" class="form-select"></select>
+	                    </div>
+	                    <div class="col mb-3">
+	                        <label for="rack" class="form-label">Rack</label>
+	                        <select id="rack" class="form-select"></select>
+	                    </div>
+	                    <div class="d-flex">
+		                    <div class="col mb-3">
+		                        <label for="row" class="form-label">Row</label>
+		                        <select id="row" class="form-select"></select>
+		                    </div>
+		                    <div class="col mb-3">
+		                        <label for="column" class="form-label">Column</label>
+		                        <select id="column" class="form-select"></select>
+		                    </div>
+	                    </div>
+                        <button type="button" class="btn btn-primary w-100" id="btnSelect">조회</button>
                     </div>
                 </div>
             </div>
@@ -51,48 +47,21 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">실사 입력</h5>
-                        <button type="button" class="btn btn-primary">실사 반영</button>
+                        <h5 class="mb-0" id="stockTakeHead">실사 위치</h5>
+                        <div>
+	                        <button type="button" class="btn btn-secondary" id="btnCompleteInput">입력완료</button>
+	                        <button type="button" class="btn btn-primary" id="btnApplySelected">일괄 반영</button>
+                        </div>
                     </div>
                     <div class="table-responsive text-nowrap">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>상품명</th>
-                                    <th>LOT 번호</th>
-                                    <th>전산 수량</th>
-                                    <th>실재고 수량</th>
-                                    <th>차이</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>공병 300ml</td>
-                                    <td>LOT-001</td>
-                                    <td>100</td>
-                                    <td>
-                                        <input type="number" class="form-control form-control-sm" value="100"
-                                            style="width: 80px;">
-                                    </td>
-                                    <td><span class="badge bg-label-success">0</span></td>
-                                </tr>
-                                <tr>
-                                    <td>튜브</td>
-                                    <td>LOT-002</td>
-                                    <td>50</td>
-                                    <td>
-                                        <input type="number" class="form-control form-control-sm" value="48"
-                                            style="width: 80px;">
-                                    </td>
-                                    <td><span class="badge bg-label-danger">-2</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    	<div id="stockTakeGrid"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </th:block>
-
+<th:block layout:fragment="myScript">
+    <script th:src="@{/js/inventory/inventoryStockTake.js}"></script>
+</th:block>
 </html>

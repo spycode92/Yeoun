@@ -39,8 +39,8 @@
 
     <li class="nav-item">
         <a class="nav-link"
-           th:classappend="${status == 'SHIPPING'} ? 'active' : ''"
-           th:href="@{/sales/orders(status='SHIPPING')}">
+           th:classappend="${status == 'SHIPPED'} ? 'active' : ''"
+           th:href="@{/sales/orders(status='SHIPPED')}">
             출하
         </a>
     </li>

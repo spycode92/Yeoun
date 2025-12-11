@@ -19,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Table(name = "MATERIAL_ORDER")
@@ -41,6 +40,8 @@ public class MaterialOrder {
 	private String dueDate; // 납기일
 	@Column(nullable = false)
 	private String totalAmount; // 발주한 총금액
+	@Column(nullable = true)
+	private String planId; // 생산계획 ID
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
 	
@@ -65,4 +66,7 @@ public class MaterialOrder {
 		this.totalAmount = totalAmount;
 	}
 	
+	public void changeStatus(String status) {
+		this.status = status;
+	}
 }

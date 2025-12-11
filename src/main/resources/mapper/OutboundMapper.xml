@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.outbound.mapper.OutboundMapper">
+
+	<!-- 원재료 리스트 조회 -->
+	<resultMap type="com.yeoun.outbound.dto.OutboundOrderDTO" id="OutboundOrderMap">
+		<id property="outboundId" column="OUTBOUND_ID"/>
+		<result property="workOrderId"  column="WORK_ORDER_ID"/>
+		<result property="shipmentId"  column="SHIPMENT_ID"/>
+		<result property="status"  column="STATUS"/>
+		<result property="startDate"  column="EXPECT_OUTBOUND_DATE"/>
+		<result property="outboundDate"  column="OUTBOUND_DATE"/>
+		<result property="createdName"  column="CREATEDUSER"/>
+		<result property="processEmpName"  column="PROCESSEMPNAME"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
+		
+		<collection property="items" ofType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
+			<id property="outboundItemId" column="OUTBOUND_ITEM_ID"/>
+			<result property="matId" column="MAT_ID"/>
+			<result property="matName" column="MAT_NAME"/>
+			<result property="prdId" column="PRD_ID"/>
+			<result property="prdName" column="PRD_NAME"/>
+			<result property="lotNo" column="LOT_NO"/>
+			<result property="outboundQty" column="OUTBOUND_AMOUNT"/>
+			<result property="orderqQty" column="ORDER_QTY"/>
+			<result property="shipmentQty" column="SHIPMENT_QTY"/>
+			<result property="matQty" column="MAT_QTY"/>
+			<result property="ivId" column="IV_ID"/>
+			<result property="locationId" column="LOCATION_ID"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findAllOutboundList" resultMap="OutboundOrderMap">
+		SELECT
+			o.OUTBOUND_ID
+			, e1.EMP_NAME AS CREATEDUSER
+			, e2.EMP_NAME AS PROCESSEMPNAME
+			, o.WORK_ORDER_ID
+			, o.SHIPMENT_ID
+			, o.STATUS
+			, o.EXPECT_OUTBOUND_DATE
+			, o.OUTBOUND_DATE
+			, oi.OUTBOUND_ITEM_ID
+			, oi.LOT_NO
+			, oi.OUTBOUND_AMOUNT
+			, s.CLIENT_NAME
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_NAME END AS PRD_NAME		
+		FROM
+			OUTBOUND o
+		LEFT JOIN
+			OUTBOUND_ITEM oi
+		ON
+			o.OUTBOUND_ID = oi.OUTBOUND_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			o.REQUEST_BY = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			oi.ITEM_ID = mat.MAT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			oi.ITEM_ID = prd.PRD_ID
+		LEFT JOIN
+			SHIPMENT s
+		ON
+			o.SHIPMENT_ID = s.SHIPMENT_ID
+		WHERE 
+			o.EXPECT_OUTBOUND_DATE &gt;= #{start}
+		AND 
+			o.EXPECT_OUTBOUND_DATE &lt;= #{end}
+		<if test="keyword != null and keyword != '' and keyword != 'null'">
+		    AND (
+		        NVL(mat.MAT_NAME, '') LIKE '%' || #{keyword} || '%'
+		        OR NVL(prd.PRD_NAME, '') LIKE '%' || #{keyword} || '%'
+		        OR UPPER(NVL(oi.LOT_NO, ' '))  LIKE '%' || #{keyword} || '%'
+    		)
+		</if>
+		ORDER BY
+			o.EXPECT_OUTBOUND_DATE DESC
+	</select>
+	
+	<select id="findOutbound" resultMap="OutboundOrderMap">
+		SELECT
+			o.OUTBOUND_ID
+			, e1.EMP_NAME AS CREATEDUSER
+			, e2.EMP_NAME AS PROCESSEMPNAME
+			, o.WORK_ORDER_ID
+			, o.SHIPMENT_ID
+			, o.STATUS
+			, o.EXPECT_OUTBOUND_DATE
+			, o.OUTBOUND_DATE
+			, oi.OUTBOUND_ITEM_ID
+			, oi.LOT_NO
+			, oi.OUTBOUND_AMOUNT
+			, oi.IV_ID
+			, oi.LOCATION_ID
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN NVL(bom.MAT_QTY, 0) END AS MAT_QTY
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN w.PLAN_QTY END AS ORDER_QTY
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_NAME END AS PRD_NAME	
+		FROM
+			OUTBOUND o
+		LEFT JOIN
+			OUTBOUND_ITEM oi
+		ON
+			o.OUTBOUND_ID = oi.OUTBOUND_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			o.REQUEST_BY = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			oi.ITEM_ID = mat.MAT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			oi.ITEM_ID = prd.PRD_ID
+		LEFT JOIN
+			WORK_ORDER w
+		ON
+			w.ORDER_ID = o.WORK_ORDER_ID
+		LEFT JOIN
+			SHIPMENT s
+		ON
+			s.SHIPMENT_ID = o.SHIPMENT_ID
+		LEFT JOIN
+			INVENTORY i
+		ON
+			oi.IV_ID = i.IV_ID
+		LEFT JOIN
+			BOM_MST bom
+		ON 
+			bom.PRD_ID = w.PRD_ID
+			AND bom.MAT_ID = oi.ITEM_ID
+		LEFT JOIN
+			WAREHOUSE_LOCATION wl
+		ON
+			wl.LOCATION_ID = i.LOCATION_ID
+		WHERE
+			o.OUTBOUND_ID = #{outboundId}
+		ORDER BY
+			o.EXPECT_OUTBOUND_DATE DESC
+	</select>
+	
+	<resultMap type="com.yeoun.outbound.dto.OutboundOrderDTO" id="ShipmentOrderMap">
+	    <!-- 상위 객체 (Shipment)의 식별자 -->
+	    <id property="shipmentId" column="SHIPMENT_ID"/>
+	    
+	    <!-- 상위 객체의 일반 필드 -->
+	    <result property="clientName" column="CLIENT_NAME"/>
+	    <result property="startDate" column="SHIPMENT_DATE"/>
+	    <result property="createdName" column="CREATED_NAME"/>
+	    <result property="createdId" column="CREATED_ID"/>
+	    <result property="status"  column="STATUS"/>
+	    <result property="outboundId" column="OUTBOUND_ID"/>
+	    <result property="processEmpName" column="PROCESS_BY"/>
+	    <!-- 필요하다면 다른 상위 필드 추가 (outboundId 등은 쿼리에 없으므로 제외하거나 null 처리됨) -->
+	
+	    <!-- 하위 객체 리스트 (Items) -->
+	    <collection property="items" ofType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
+	        <!-- 하위 객체의 식별자 (필수! 리스트 내에서 유니크해야 함) -->
+	        <id property="itemId" column="OUTBOUND_ITEM_ID"/> <!-- ROW_NUMBER()로 만든 가상 ID -->
+	        
+	        <!-- 하위 객체의 일반 필드 -->
+	        <result property="prdId" column="PRD_ID"/>
+	        <result property="prdName" column="PRD_NAME"/>
+	        <result property="shipmentQty" column="SHIPMENT_QTY"/>
+	        <result property="orderqQty" column="ORDER_QTY"/>
+	        <result property="lotNo" column="LOT_NO"/>
+	        <result property="locationId" column="LOCATION_ID"/>
+	        <result property="ivId" column="IV_ID"/>
+	    </collection>
+	</resultMap>
+	
+	<!-- 출하 지시서 목록 조회(상태추가) -->
+	<select id="findAllShipment" resultMap="ShipmentOrderMap">
+		SELECT
+			s.SHIPMENT_ID
+			, s.CLIENT_NAME
+			, s.EMP_ID AS CREATED_ID
+			, s.SHIPMENT_DATE
+			, e.emp_name AS CREATED_NAME
+			, ROW_NUMBER() OVER (PARTITION BY s.SHIPMENT_ID ORDER BY sl.PRD_ID) AS ITEM_ID
+			, sl.LOT_QTY AS SHIPMENT_QTY
+			, sl.PRD_ID 
+			, prd.PRD_NAME
+			, ( SELECT COALESCE(SUM(iv.IV_AMOUNT), 0) - COALESCE(SUM(iv.EXPECT_OB_AMOUNT), 0) 
+             	FROM INVENTORY iv 
+                WHERE iv.ITEM_ID = sl.PRD_ID) AS ORDER_QTY
+            , ROW_NUMBER() OVER (PARTITION BY s.SHIPMENT_ID ORDER BY sl.PRD_ID) AS ITEM_ID
+		FROM
+			SHIPMENT s
+		LEFT JOIN
+			SHIPMENT_ITEM sl
+		ON
+			s.SHIPMENT_ID = sl.SHIPMENT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			prd.PRD_ID = sl.PRD_ID
+		LEFT JOIN
+			INVENTORY iv
+		ON
+			iv.ITEM_ID = sl.PRD_ID
+		LEFT JOIN
+			EMP e
+		ON
+			s.EMP_ID = e.EMP_ID
+		WHERE 
+			s.SHIPMENT_STATUS = 'RESERVED'
+		GROUP BY
+			s.SHIPMENT_ID
+		    , s.CLIENT_NAME
+		    , s.EMP_ID
+		    , s.SHIPMENT_DATE
+		    , e.emp_name
+		    , sl.PRD_ID
+		    , prd.PRD_NAME
+		    , sl.LOT_QTY
+		ORDER BY
+       		s.SHIPMENT_ID, sl.PRD_ID
+	</select>
+	
+	<!-- 완제품 출고 상세 정보 조회 -->
+	<select id="findShipmentOutbound" resultMap="ShipmentOrderMap">
+		SELECT
+			s.SHIPMENT_ID
+			, s.CLIENT_NAME
+			, s.EMP_ID AS CREATED_ID
+			, s.SHIPMENT_DATE
+			, o.STATUS
+			, o.OUTBOUND_ID
+			, e1.emp_name AS CREATED_NAME
+			, e2.emp_name AS PROCESS_BY
+			, NVL(sl.LOT_QTY, 0) AS SHIPMENT_QTY
+			, sl.PRD_ID 
+			, prd.PRD_NAME
+			, oi.LOCATION_ID
+			, oi.LOT_NO
+			, oi.IV_ID
+			, NVL(oi.OUTBOUND_AMOUNT, 0) AS ORDER_QTY
+		FROM
+			SHIPMENT s
+		LEFT JOIN
+			SHIPMENT_ITEM sl
+		ON
+			s.SHIPMENT_ID = sl.SHIPMENT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			prd.PRD_ID = sl.PRD_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			s.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+			OUTBOUND o
+		ON
+			o.SHIPMENT_ID = s.SHIPMENT_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
+		LEFT JOIN
+			OUTBOUND_ITEM oi
+		ON
+			oi.OUTBOUND_ID = o.OUTBOUND_ID
+			AND oi.ITEM_ID = sl.PRD_ID
+		LEFT JOIN
+			INVENTORY iv
+		ON
+			iv.ITEM_ID = sl.PRD_ID
+			AND iv.LOT_NO = oi.LOT_NO
+		WHERE
+			o.OUTBOUND_ID = #{outboundId}
+		ORDER BY
+       		s.SHIPMENT_ID, sl.PRD_ID
+	</select>
+</mapper>
+
+
+
+
+

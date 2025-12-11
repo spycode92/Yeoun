@@ -64,24 +64,20 @@
                             type="submit">
                         검색
                     </button>
-                    
-                </div>               
-                    <a class="btn btn-primary ms-auto" th:href="@{/sales/client/create}">
-			        + 신규 거래처 등록
-			    </a>
-            </form>
-       
-            
-            </div>
+                  </div>
 
-  	
-      </div>
+        </form>
 
-			    
-		
+    </div>
 
-
-    
+    <!-- 신규 거래처 등록 버튼 : 우측 정렬 -->
+    <div class="col-12 col-lg-auto ms-lg-auto d-grid">
+        <a class="btn btn-primary w-100"
+           th:href="@{/sales/client/create}">
+            등록
+        </a>
+    </div>
+</div>
 
     <!-- ===========================================================
          AG GRID 영역

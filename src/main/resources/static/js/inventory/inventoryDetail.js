@@ -1,8 +1,21 @@
 //전역변수
-let detailRowData;
+let detailRowData; // 재고상세 데이터
+let currentIvid; // 재고id
+let currentIvQty; // 현재 재고수량
+let expectOutboundQty; // 출고예정수량
+let currentLoc; // 현재위치
+let canUseQty; // 이동가능수량
 
 // 1) 모달 필드 초기화
 function resetDetailModal() {
+	//전역변수값 초기화
+	detailRowData = null;
+	currentIvid = null;
+	currentIvQty = null;
+	expectOutboundQty = null;
+	currentLoc = null;
+	canUseQty = null;
+	
 	document.getElementById('detailIvId').value = '';
 	document.getElementById('detailLotNo').value = '';
 	document.getElementById('detailCategory').value = '';
@@ -18,7 +31,15 @@ function resetDetailModal() {
 // 2) rowData를 받아서 모달에 바인딩 + 모달 오픈
 function openDetailModal(rowData, sameLotList = []) {
 	resetDetailModal();
+	// 전역변수 값 지정
 	detailRowData = rowData;
+	
+	currentIvid = rowData.ivId;
+	currentIvQty = rowData.ivAmount;
+	expectOutboundQty = rowData.expectObAmount;
+	currentLoc = rowData.locationId; 
+	canUseQty = rowData.ivAmount - rowData.expectObAmount;
+	
 	// 기본 정보 세팅
 	document.getElementById('detailIvId').value = rowData.ivId || '';
 	document.getElementById('detailLotNo').value = rowData.lotNo || '';
@@ -86,8 +107,8 @@ function openDetailModal(rowData, sameLotList = []) {
 }
 
 //수량조절 버튼 클릭 이벤트
-const btnAdjustQty = document.getElementById('adjustBtn');
-btnAdjustQty.addEventListener('click', () => {
+const detailBtnAdjustQty = document.getElementById('adjustBtn');
+detailBtnAdjustQty.addEventListener('click', () => {
 	openAdjustQtyModal(detailRowData);
 });
 
@@ -97,7 +118,11 @@ detailBtnMove.addEventListener('click', () => {
 	openMoveModal(detailRowData);	
 });
 
-
+//폐기 버튼 클릭 이벤트
+const detailBtnDisposal = document.getElementById('detailBtnDisposal');
+detailBtnDisposal.addEventListener('click', () => {
+	openDisposalModal(detailRowData);
+});
 
 
 

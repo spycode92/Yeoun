@@ -786,21 +786,21 @@ VALUES ('2511793','ONLINE',SYSDATE,'IN','WFH',SYSDATE,'MANUAL','Y',SYSDATE,1,NUL
 --MES 기준정보관리 PRODUCT_MST
 -- 완제품 향수
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('BG030',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','봄결30ml','액체향수 25년 출시1번 용량 30ml - 과일향, 꽃향','ACTIVE',EA,50000,null,null,'액체향수',null,null,null,null,'10');
+values ('BG030',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','봄결30ml','액체향수 25년 출시1번 용량 30ml - 과일향, 꽃향','ACTIVE',EA,50000,null,null,'LIQUID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('BG100',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','봄결100ml','액체향수 25년 출시1번 용량 100ml - 과일향, 꽃향','ACTIVE',EA,140000,null,null,'액체향수',null,null,null,null,'10');
+values ('BG100',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','봄결100ml','액체향수 25년 출시1번 용량 100ml - 과일향, 꽃향','ACTIVE',EA,140000,null,null,'LIQUID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('LG050',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','빛결50ml','액체향수 25년 출시2번 용량 50ml - 자연향, 풀향','ACTIVE',EA,90000,null,null,'액체향수',null,null,null,null,'10');
+values ('LG050',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','빛결50ml','액체향수 25년 출시2번 용량 50ml - 자연향, 풀향','ACTIVE',EA,90000,null,null,'LIQUID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('LG100',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','빛결100ml','액체향수 25년 출시2번 용량 100ml - 자연향, 풀향','ACTIVE',EA,140000,null,null,'액체향수',null,null,null,null,'10');
+values ('LG100',to_date('25/12/02','RR/MM/DD'),'2511793',36,'완제품','빛결100ml','액체향수 25년 출시2번 용량 100ml - 자연향, 풀향','ACTIVE',EA,140000,null,null,'LIQUID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('HG005',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','한결5g','고체향수 25년 출시1번 용량 5g - 시원한향, 남자스킨향','ACTIVE',EA,30000,null,null,'고체향수',null,null,null,null,'10');
+values ('HG005',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','한결5g','고체향수 25년 출시1번 용량 5g - 시원한향, 남자스킨향','ACTIVE',EA,30000,null,null,'SOLID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('HG010',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','한결10g','고체향수 25년 출시1번 용량 10g - 시원한향, 남자스킨향','ACTIVE',EA,50000,null,null,'고체향수',null,null,null,null,'10');
+values ('HG010',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','한결10g','고체향수 25년 출시1번 용량 10g - 시원한향, 남자스킨향','ACTIVE',EA,50000,null,null,'SOLID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('LG030',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','빛결30ml','액체향수 25년 출시2번 용량 30ml - 자연향, 풀향','ACTIVE',EA,50000,null,null,'액체향수',null,null,null,null,'10');
+values ('LG030',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','빛결30ml','액체향수 25년 출시2번 용량 30ml - 자연향, 풀향','ACTIVE',EA,50000,null,null,'LIQUID',null,null,null,null,'10');
 Insert into PRODUCT_MST (PRD_ID,CREATED_DATE,CREATED_ID,EFFECTIVE_DATE,PRD_CAT,PRD_NAME,PRD_SPEC,PRD_STATUS,PRD_UNIT,UNIT_PRICE,UPDATED_DATE,UPDATED_ID,ITEM_NAME,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,MIN_QTY) 
-values ('BG050',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','봄결50ml','액체향수 25년 출시1번 용량 50ml - 과일향, 꽃향','ACTIVE',EA,90000,null,null,'액체향수',null,null,null,null,'10');
+values ('BG050',to_date('25/12/03','RR/MM/DD'),'2511793',36,'완제품','봄결50ml','액체향수 25년 출시1번 용량 50ml - 과일향, 꽃향','ACTIVE',EA,90000,null,null,'LIQUID',null,null,null,null,'10');
 
 -- 원재료 향료1. 고체향수 (한결)
 INSERT INTO material_mst(MAT_ID,MAT_NAME,MAT_TYPE,MAT_UNIT,EFFECTIVE_DATE,MAT_DESC,CREATED_ID,CREATED_DATE,UPDATED_ID,UPDATED_DATE)

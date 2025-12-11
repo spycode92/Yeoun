@@ -41,7 +41,7 @@ public class MaterialOrderItem {
 	private MaterialOrder materialOrder; // 발주 ID
 	
 	@Column(nullable = false)
-	private String itemId; // 발주상품ID
+	private Long itemId; // 발주상품ID
 	
 	@Column(nullable = false)
 	private Long orderAmount; // 발주량
@@ -59,7 +59,7 @@ public class MaterialOrderItem {
 	private Long totalPrice; // 총금액 
 	
 	@Builder
-	public MaterialOrderItem(String itemId, Long orderAmount, Long unitPrice,
+	public MaterialOrderItem(Long itemId, Long orderAmount, Long unitPrice,
 							Long supplyAmount, Long vat, Long totalPrice) {
 		this.itemId = itemId;
 		this.orderAmount = orderAmount;

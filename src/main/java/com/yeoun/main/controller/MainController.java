@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -43,8 +44,14 @@ public class MainController {
 	private final AttendanceService attendanceService;
 	private final ApprovalDocService approvalDocService;
 
+	private final SimpMessagingTemplate messagingTemplate;
 	@GetMapping("/test")
 	public String test() {
+        // 1) 테스트용 알림 DTO (원하는 구조로)
+        String dto = "새 입고가 완료되었습니다. 새로고침 해주세요.";
+
+        // 2) /alarm/inventory 로 브로드캐스트
+        messagingTemplate.convertAndSend("/alarm/inventory", dto);
 		return "/main/organizationChartModal";
 	}
 

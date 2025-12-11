@@ -1,0 +1,193 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+    <head>
+        <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+        <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+
+        <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+        <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+        <style>
+            .status-active {
+                background-color: #e8f5e9 !important;
+                color: #2e7d32 !important;
+                font-weight: bold;
+            }
+            .status-inactive {
+                background-color: #ffe0b2 !important;
+                color: #ef6c00 !important;
+            }
+            .highlight-eq {
+                background-color: #e3f2fd !important;
+                color: #1565c0 !important;
+                font-weight: bold;
+            }
+        </style>
+
+    </head>
+
+    <body>
+    <th:block layout:fragment="content">
+        <div class="custom-body container-xxl flex-grow-1 container-p-y">
+            <h2>설비 / 라인 관리</h2>
+
+            <div class="nav-align-top mb-4">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link active" role="tab"
+                                data-bs-toggle="tab" data-bs-target="#navs-equipment-tab"
+                                aria-controls="navs-equipment-tab" aria-selected="true">
+                            설비 관리
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" role="tab"
+                                data-bs-toggle="tab" data-bs-target="#navs-line-tab"
+                                aria-controls="navs-line-tab" aria-selected="false">
+                            라인 관리
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+
+                    <!-- =============================== -->
+                    <!-- 설비 관리 탭 -->
+                    <!-- =============================== -->
+                    <div class="tab-pane fade show active" id="navs-equipment-tab" role="tabpanel">
+                        <h5 class="card-title mb-0">설비 목록</h5>
+
+                        <div class="d-flex justify-content-end" style="margin:10px;">
+                            <button id="addEquipmentRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
+                            <button id="saveEquipmentRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+                            <button id="deleteEquipmentRowBtn" class="btn btn-danger" type="button">삭제</button>
+                        </div>
+
+                        <div id="equipmentGrid" style="display: grid; margin-right:5px;"></div>
+                    </div>
+
+                    <!-- =============================== -->
+                    <!-- 라인 관리 탭 -->
+                    <!-- =============================== -->
+                    <div class="tab-pane fade" id="navs-line-tab" role="tabpanel">
+                        <h5 class="card-title mb-0">라인 목록</h5>
+
+                        <div class="d-flex justify-content-end" style="margin:10px;">
+                            <button id="addLineRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
+                            <button id="saveLineRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+                            <button id="deleteLineRowBtn" class="btn btn-danger" type="button">삭제</button>
+                        </div>
+
+                        <div id="lineGrid" style="display: grid; margin-right:5px;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </th:block>
+    </body>
+
+    <th:block layout:fragment="myScript">
+		<script>
+	      let equipmentGrid = null;
+	      let lineGrid = null;
+	      
+		  document.addEventListener("DOMContentLoaded", () => {
+		
+		    const gridE = document.getElementById("equipmentGrid");
+		    if (!gridE) {
+		      console.error("equipmentGrid 요소 없음!");
+		      return;
+		    }
+		    const gridL = document.getElementById("lineGrid");
+		    if (!gridL) {
+		      console.error("lineGrid 요소 없음!");
+		      return;
+		    }
+		
+		    // 1) equipmentGrid 생성
+		    equipmentGrid = new tui.Grid ({
+		      el: gridE,
+		      bodyHeight: 450,
+		      rowHeaders: ["rowNum"],
+		      scrollX: false,
+		      scrollY: true,
+		      pageOptions: {
+		        useClient: true,
+		        perPage: 10
+		      },
+		      columnOptions: {resizable: true},
+		      columns: [
+		        {header: "ID", name: "equipId", width: 160, align: "center"},
+		        {header: "이름(한)", name: "koName", align: "left"},
+		        {header: "이름(영)", name: "equipName", align: "left"},
+		        {
+		          header: "등록일자",
+		          name: "createdDate",
+		          align: "center",
+		          formatter: ({ value }) => formatDate(value)
+		        },
+		        {
+		          header: "상세",
+		          name: "btn",
+		          width: 90,
+		          align: "center",
+		          formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
+		        }
+		      ]
+		    });
+		
+		    // 2) lineGrid 생성
+		    lineGrid = new tui.Grid ({
+		      el: gridL,
+		      bodyHeight: 450,
+		      rowHeaders: ["rowNum"],
+		      scrollX: false,
+		      scrollY: true,
+		      pageOptions: {
+		        useClient: true,
+		        perPage: 10
+		      },
+		      columnOptions: {resizable: true},
+		      columns: [
+		        {header: "ID", name: "lineId", width: 160, align: "center"},
+		        {header: "라인명", name: "lineName", align: "left"},
+		        {header: "상태", name: "status", align: "center"},
+		        {
+		          header: "등록일자",
+		          name: "createdDate",
+		          align: "center",
+		          formatter: ({ value }) => formatDate(value)
+		        },
+		        {
+		          header: "상세",
+		          name: "btn",
+		          width: 90,
+		          align: "center",
+		          formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
+		        }
+		      ]
+		    });
+		  });
+		  
+		  document
+			  .querySelectorAll('button[data-bs-toggle="tab"]')
+			  .forEach(tab => {
+			    tab.addEventListener('shown.bs.tab', function (e) {
+			      const targetId = e.target.getAttribute('data-bs-target');
+	
+			      if (targetId === '#navs-equipment-tab') {
+			        if (equipmentGrid) equipmentGrid.refreshLayout();
+			      } else if (targetId === '#navs-line-tab') {
+			        if (lineGrid) lineGrid.refreshLayout();
+			      }
+			    });
+			});
+	
+		</script>
+    </th:block>
+
+</th:block>

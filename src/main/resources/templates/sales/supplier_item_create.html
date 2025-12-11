@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <h2 class="mb-4">협력사 취급 품목 추가</h2>       
+    
+
+    <!-- 돌아가기 -->
+    <a th:href="@{/sales/client/{id}(id=${clientId})}"
+       class="btn btn-outline-secondary mb-3">← 협력사 상세로 이동</a>
+
+    <div class="card">
+        <div class="card-body">
+
+            <!-- ===========================
+                 🔥 카테고리 탭
+            ============================ -->
+            <ul class="nav nav-tabs mb-3">
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${category} == 'RAW' ? 'active'"
+                       th:href="@{/sales/client/{id}/items/create(id=${clientId}, cat='RAW')}">
+                        원재료
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${category} == 'SUB' ? 'active'"
+                       th:href="@{/sales/client/{id}/items/create(id=${clientId}, cat='SUB')}">
+                        부자재
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${category} == 'PKG' ? 'active'"
+                       th:href="@{/sales/client/{id}/items/create(id=${clientId}, cat='PKG')}">
+                        포장재
+                    </a>
+                </li>
+
+            </ul>
+
+            <!-- ===========================
+                 🔥 품목 추가 FORM
+            ============================ -->
+            <form th:action="@{/sales/client/{id}/items/create(id=${clientId})}"
+                  method="post">
+
+                <input type="hidden" name="category" th:value="${category}"/>
+
+                <div class="row g-3">
+
+                    <!-- 원자재 선택 -->
+                    <div class="col-md-6">
+                        <label class="form-label">원자재 선택</label>
+                        <select class="form-select" name="materialId" required>
+                            <option value="">선택하세요</option>
+
+                            <th:block th:each="m : ${materials}">
+                                <option th:value="${m.matId}"
+                                        th:text="${m.matName + ' (' + m.matUnit + ')'}"></option>
+                            </th:block>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">단가</label>                       
+                        <input type="number" name="unitPrice" class="form-control" min="0" step="10" required>                        
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">최소발주수량</label>
+                        <input type="number" name="moq" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-md-3">
+				        <label class="form-label">단위</label>
+				        <select name="unit" class="form-select" required>
+				            <option value="">단위 선택</option>
+				            <option value="EA">EA</option>
+				            <option value="KG">KG</option>
+				            <option value="G">G</option>
+				            <option value="ML">ML</option>
+				            <option value="L">L</option>
+				            <option value="PACK">PACK</option>
+				            <option value="SET">SET</option>
+				        </select>
+				    </div>
+                    
+					<div class="col-md-3">
+					    <label class="form-label">발주 단위 (ORDER UNIT)</label>
+					    <input type="text" name="orderUnit" class="form-control" required>
+					</div>                 
+                    
+                    
+				    <div class="col-md-3">
+				        <label class="form-label">납기일</label>
+				        <input type="number" name="leadDays" class="form-control" required min="0" value="0">
+				    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">공급 여부</label>
+                        <select name="supplyAvailable" class="form-select">
+                            <option value="Y">가능</option>
+                            <option value="N">불가</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <hr class="my-4">
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">저장</button>
+                    <a th:href="@{/sales/client/{id}(id=${clientId})}"
+                       class="btn btn-secondary">취소</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</th:block>
+</html>

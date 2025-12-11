@@ -37,7 +37,7 @@ public class ProdEquip {
       sequenceName = "EQUIP_SEQ",
       allocationSize = 1
     )
-	private Integer equipId;
+	private Long equipId;
     
     // 설비 코드 (기준정보 타입)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

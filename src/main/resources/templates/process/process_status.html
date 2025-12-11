@@ -1,69 +1,140 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
-<body>
+
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	
-	<h2>공정 현황</h2>
-	
-	<div class="row g-2 align-items-center">
-	
-	 <!-- Search Filter -->
-<!--         <div class="card mb-4"> -->
-<!--             <div class="card-body"> -->
-                <form id="processSearchForm">
-                    <div class="row gx-3 gy-2 align-items-center">
-					    <!-- 작업일자 -->
-					    <div class="col-md-3">
-					      <label class="form-label" for="workDate">작업일자</label>
-					      <input type="date" class="form-control" id="workDate">
-					    </div>
-					    <!-- 제품 구분-->
-                        <div class="col-md-2">
-                            <label class="form-label" for="searchProduct">제품</label>
-                            <select class="form-select" id="searchProduct">
-                                <option value="">전체</option>
-                            </select>
-                        </div>
-					    <!-- 상태 구분-->
-                        <div class="col-md-2">
-                            <label class="form-label" for="searchHStatus">상태</label>
-                            <select class="form-select" id="searchHStatus">
-                                <option value="">전체</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="searchKeyword">검색어 (작업지시번호/제품명)</label>
-                            <input type="text" class="form-control" id="searchKeyword" placeholder="검색어 입력">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-outline-primary  w-100" id="btnSearchProcess">검색</button>
-                        </div>
-                    </div>
-                </form>
-<!--             </div> -->
-<!--         </div> -->
+		<h2>공정 현황</h2>
+		
+		<div class="row g-2 align-items-center">
+			<form id="processSearchForm">
+				<div class="row gx-3 gy-2 align-items-center">
+					<!-- 작업일자 -->
+					<div class="col-md-3">
+					  <label class="form-label" for="workDate">작업지시일자</label>
+					  <input type="date" class="form-control" id="workDate">
+					</div>
+					<!-- 제품 구분-->
+					<div class="col-md-2">
+						<label class="form-label" for="searchProcess">현재공정</label>
+						<select class="form-select" id="searchProcess">
+							<option value="">전체</option>
+						</select>
+					</div>
+					<!-- 상태 구분-->
+					<div class="col-md-2">
+						<label class="form-label" for="searchHStatus">상태</label>
+						<select class="form-select" id="searchHStatus">
+							<option value="">전체</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label" for="searchKeyword">검색어</label>
+						<input type="text" class="form-control" id="searchKeyword" placeholder="검색어 입력">
+					</div>
+					<div class="col-md-2">
+						<label class="form-label d-block">&nbsp;</label>
+						<button type="button" class="btn btn-outline-primary w-100" id="btnSearchProcess">검색</button>
+					</div>
+				</div>
+			</form>
+		</div>
 
+		<br>
+
+		<div class="card">
+			<div class="card-body p-0">
+				<div id="processGrid"></div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- DETAIL MODAL (공정 단계 전체 보기) -->
+	<div class="modal fade" id="detailModal" tabindex="-1">
+	  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title">작업지시 공정 상세</h5>
+	        <button class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+	
+	      <div class="modal-body">
+	
+	        <!-- SUMMARY -->
+	        <div class="row g-2 mb-3 small" id="summaryGrid"></div>
+	
+	        <div class="table-responsive small">
+	          <table class="table table-bordered table-sm" id="stepTable">
+	            <thead class="table-light">
+	            <tr>
+	              <th>단계</th>
+	              <th>공정코드</th>
+	              <th>공정명</th>
+	              <th>상태</th>
+	              <th>시작</th>
+	              <th>종료</th>
+	              <th>작업</th>
+	              <th>특이사항</th>
+	            </tr>
+	            </thead>
+	            <tbody></tbody>
+	          </table>
+	        </div>
+	
+	      </div>
+	
+	      <div class="modal-footer">
+	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+	      </div>
+	    </div>
+	  </div>
 	</div>
 
-	<br>
-	
-<!-- 	<div class="card-body p-0"> -->
-<!-- 	    <div id="grid"></div> -->
-<!--     </div> -->
-    
-<!--     <br> -->
-    
-<!--     <nav aria-label="인사 발령 페이지네이션"> -->
-<!-- 	  <ul class="pagination justify-content-center" id="hrPagination"></ul> -->
-<!-- 	</nav> -->
-    
-	
-	</div>
 
-<!-- <script src="/js/hr/hrList.js"></script>		 -->
+
+	<!-- QC MODAL (QC 측정값 입력) -->
+	<div class="modal fade" id="qcModal" tabindex="-1">
+	  <div class="modal-dialog modal-lg">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title">QC 검사 입력</h5>
+	        <button class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
 	
+	      <div class="modal-body">
+	
+	        <div class="mb-3">
+	          <label class="form-label fw-bold">작업지시번호</label>
+	          <input type="text" class="form-control" id="qcWorkOrder" readonly>
+	        </div>
+	
+	        <div class="table-responsive small">
+	          <table class="table table-bordered align-middle">
+	            <thead class="table-light">
+	            <tr>
+	              <th>QC 항목</th>
+	              <th>기준(min~max)</th>
+	              <th>측정값</th>
+	            </tr>
+	            </thead>
+	            <tbody id="qcItemTbody">
+	            </tbody>
+	          </table>
+	        </div>
+	
+	      </div>
+	
+	      <div class="modal-footer">
+	        <button class="btn btn-primary" id="btnSaveQC">저장</button>
+	        <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+
+	<script src="/js/process/processStatus.js"></script>		
+
 </th:block>
-</body>
+</th:block>

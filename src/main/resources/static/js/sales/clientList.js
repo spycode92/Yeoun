@@ -72,17 +72,17 @@ function initClientGrid() {
 		    }
 		},
 
-        {
-            headerName: "상세",
-            width: 120,
-            cellRenderer: p => {
-                if (!p.data) return "";
-                return `
-                    <button class="btn btn-sm btn-outline-primary"
-                        onclick="showClientDetail('${p.data.clientId}')">
-                        상세
-                    </button>
-                `;
+		// ✅ 상세 버튼 추가
+		    {
+		        headerName: "상세",
+		        width: 110,
+		        cellRenderer: (params) => {
+		            return `
+		                <button class="btn btn-sm btn-primary"
+		                        onclick="goDetail('${params.data.clientId}')">
+		                    상세
+		                </button>
+		            `;
             },
             cellStyle: { textAlign: "center" }
         }
@@ -226,4 +226,11 @@ function showClientDetail(clientId) {
             console.error("❌ 상세 조회 실패:", err);
             alert("상세 조회 오류가 발생했습니다.\n" + err.message);
         });
+}
+
+/* ==========================================================
+   화면 이동
+========================================================== */
+function goDetail(clientId) {
+    location.href = `/sales/client/${clientId}`;
 }

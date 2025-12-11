@@ -11,29 +11,35 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="row g-2">
+                	<div class="col mb-3">
+	                	<label for="ivQtyDisposal" class="form-label">현재수량</label>
+	                	<input type="text" id="ivQtyDisposal" class="form-control" readonly>
+                	</div>
+                	<div class="col mb-3">
+	                	<label for="exPectObQtyDisposal" class="form-label">출고예정수량</label>
+	                	<input type="text" id="exPectObQtyDisposal" class="form-control" readonly>
+                	</div>
+                	<div class="col mb-3">
+	                	<label for="canDisposalAmount" class="form-label">폐기가능수량</label>
+	                	<input type="text" id="canDisposalAmount" class="form-control" readonly>
+                	</div>
+                </div>
                 <div class="mb-3">
                     <label for="disposalQty" class="form-label">폐기 수량</label>
                     <input type="number" id="disposalQty" class="form-control" placeholder="0">
                 </div>
                 <div class="mb-3">
-                    <label for="disposalReason" class="form-label">폐기 사유</label>
-                    <select id="disposalReason" class="form-select">
-                        <option value="EXPIRY">유통기한 경과</option>
-                        <option value="DAMAGED">파손</option>
-                        <option value="OTHER">기타</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="disposalFile" class="form-label">사진 첨부 (선택)</label>
-                    <input class="form-control" type="file" id="disposalFile">
+                    <label for="disposalReason" class="form-label">사유</label>
+                    <textarea id="disposalReason" class="form-control" rows="3"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger">폐기 처리</button>
+                <button type="button" class="btn btn-danger" id="disposalBtn">폐기 처리</button>
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
             </div>
         </div>
     </div>
 </div>
 
-<!--     <script th:src="@{/js/inventory/inventory_list.js(v=2)}"></script> -->
+<script th:src="@{/js/inventory/inventoryDisposal.js}"></script>

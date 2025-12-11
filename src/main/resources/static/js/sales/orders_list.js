@@ -5,8 +5,8 @@ const statusBadge = (value) => {
     const map = {
         "REQUEST":  { text: "수주요청", color: "primary" },
         "RECEIVED": { text: "접수완료", color: "success" },
-        "CONFIRMED": { text: "확정", color: "purple" },
-        "SHIPPING": { text: "출하중", color: "warning" },
+        "CONFIRMED": { text: "수주확정", color: "warning" },
+        "SHIPPED": { text: "출하완료", color: "secondary" },
         "CANCEL":   { text: "취소", color: "secondary" }
     };
 
@@ -42,15 +42,23 @@ document.addEventListener("DOMContentLoaded", () => {
 			{ headerName: "담당자", field: "managerName", width: 150 },
 			{ headerName: "메모", field: "memo", flex: 1 },
 						    
-            {
-                headerName: "",
-                width: 100,
-                cellRenderer: p =>
-                    `<button class="btn btn-outline-primary btn-sm"
-                        onclick="location.href='/sales/orders/${p.data.orderId}'">상세</button>`
-            }
+			{
+			    headerName: "상세",
+			    width: 100,
+			    cellRenderer: params => `
+			        <button class="btn btn-outline-primary btn-sm"
+			                onclick="openOrderDetail('${params.data.orderId}')">
+			            상세
+			        </button>
+			    `
+			}
+
         ],
-        rowHeight: 42
+        rowHeight: 42,
+		
+		pagination: true,
+		       paginationPageSize: 20,
+		       paginationPageSizeSelector: [10, 20, 50, 100],
     };
 
     

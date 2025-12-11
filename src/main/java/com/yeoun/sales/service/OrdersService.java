@@ -8,10 +8,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.yeoun.sales.dto.OrderDetailDTO;
+import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderListDTO;
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.entity.OrderItem;
 import com.yeoun.sales.entity.Orders;
+import com.yeoun.sales.enums.OrderItemStatus;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.sales.repository.OrderItemRepository;
 import com.yeoun.sales.repository.OrdersRepository;
@@ -104,6 +107,14 @@ public class OrdersService {
             String orderMemo,
             HttpServletRequest req
     ) {
+    	
+    	  /* -----------------------------------
+         * 0) 거래처(Client) 조회 
+         ------------------------------------ */
+        Client clientEntity = em.find(Client.class, clientId);
+        if (clientEntity == null) {
+            throw new IllegalArgumentException("거래처 정보를 찾을 수 없습니다: " + clientId);
+        }
 
         /* -----------------------------
            1) 주문번호 생성
@@ -116,7 +127,7 @@ public class OrdersService {
         ----------------------------- */
         Orders order = Orders.builder()
                 .orderId(orderId)
-                .clientId(clientId)
+                .client(clientEntity) 
                 .empId(empId)
                 .orderDate(LocalDate.parse(orderDate))
                 .deliveryDate(LocalDate.parse(deliveryDate))
@@ -151,12 +162,12 @@ public class OrdersService {
 
             OrderItem item = OrderItem.builder()
                     .orderId(orderId)
-                    .productId(prdId)
+                    .prdId(prdId)
                     .orderQty(new BigDecimal(qtyStr))
                     .unitPrice(new BigDecimal(priceStr))
                     .totalPrice(new BigDecimal(amountStr))
                     .itemMemo(memo)
-                    .itemStatus("ORDER")
+                    .itemStatus(OrderItemStatus.REQUEST.name())
                     .build();
 
             orderItemRepository.save(item);
@@ -194,5 +205,22 @@ public class OrdersService {
     private String nvl(String v) {
         return (v == null ? "" : v);
     }
+    
+    
+    /* ============================================================
+    6) 생산계획 수주항목조회
+  ============================================================ */
+    
+    public List<Map<String, Object>> getOrderItemsForPlan(String group) {
+        return ordersRepository.findOrderItemsForPlan(group);
+    }
+
+    public List<OrderItemDTO> getConfirmedOrderItems() {
+        return orderItemRepository.findConfirmedOrderItems();
+    }
+    
+    
+   
+
 
 }

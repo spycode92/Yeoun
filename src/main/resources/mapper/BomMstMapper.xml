@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.masterData.mapper.BomMstMapper">
+
+	<select id="findByPrdIdList" resultType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
+		SELECT
+			b.PRD_ID
+			, b.MAT_ID
+			, b.MAT_QTY
+			, b.MAT_UNIT
+			, p.PRD_NAME
+			, m.MAT_NAME
+		FROM
+			BOM_MST b
+		LEFT JOIN
+			PRODUCT_MST p
+		ON
+			b.PRD_ID = p.PRD_ID
+		LEFT JOIN
+			MATERIAL_MST m
+		ON
+			b.MAT_ID = m.MAT_ID
+		WHERE
+			b.PRD_ID = #{prdId}
+	</select>
+</mapper>
+
+
+
+
+

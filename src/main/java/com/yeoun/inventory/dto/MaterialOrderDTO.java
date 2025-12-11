@@ -1,5 +1,6 @@
 package com.yeoun.inventory.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,13 +10,14 @@ import com.yeoun.inventory.entity.MaterialOrder;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
-@Builder
+@NoArgsConstructor
 public class MaterialOrderDTO {
 	private String orderId; // 발주Id
 	private String clientId; // 거래처Id
@@ -25,6 +27,9 @@ public class MaterialOrderDTO {
 	private String totalAmount; // 총금액
 	private LocalDateTime createdDate; // 생성일
 	private List<MaterialOrderItemDTO> items;
+	
+	private String clientName; 
+	private LocalDateTime expectArrivalDate;
 	
 	// ----------------------------------------
 	// DTO <-> Entity 변환

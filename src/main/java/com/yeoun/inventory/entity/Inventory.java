@@ -1,11 +1,9 @@
 package com.yeoun.inventory.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.masterData.entity.MaterialMst;
@@ -100,9 +98,23 @@ public class Inventory {
 	private Long expectObAmount = 0l; // 출고예정수량
 	
 	@Column(nullable = false)
-	private String ivStatus; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/폐기DISPOSAL
+	private String ivStatus; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/유통기한지남EXPIRED
 	
-	
+	public Inventory createMovedInventory(WarehouseLocation newLocation, Long moveQty) {
+	    Inventory movedInventory = new Inventory();
+	    movedInventory.setLotNo(this.lotNo);
+	    movedInventory.setWarehouseLocation(newLocation);
+	    movedInventory.setItemId(this.itemId);
+	    movedInventory.setItemType(this.itemType);
+	    movedInventory.setIvAmount(moveQty);
+	    movedInventory.setExpirationDate(this.expirationDate);
+	    movedInventory.setManufactureDate(this.manufactureDate);
+	    movedInventory.setIbDate(this.ibDate);
+	    movedInventory.setExpectObAmount(0L); // 이동 시 출고예정수량 0으로 초기화할 수도 있음
+	    movedInventory.setIvStatus(this.ivStatus);
+	    
+	    return movedInventory;
+	}
 	
 	
 	

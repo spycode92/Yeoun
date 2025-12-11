@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.ProductMst;
+import com.yeoun.sales.dto.OrderDetailDTO;
+import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderListDTO;
 import com.yeoun.sales.service.ClientService;
 import com.yeoun.sales.service.OrdersService;
@@ -135,5 +138,31 @@ public class OrdersController {
 
         return "redirect:/sales/orders";
     }
+    
+    /* ================================
+    생산계획 작성용 — 수주항목 조회 API
+    (제품 정보까지 JOIN)
+ ================================ */
+	 @GetMapping("/order-items")
+	 @ResponseBody
+	 public List<Map<String, Object>> getOrderItemsForPlan(
+	         @RequestParam(required = false) String group
+	 ) {
+	     return ordersService.getOrderItemsForPlan(group);
+ }
+
+	 @GetMapping("/confirmed-items")
+	 @ResponseBody
+	 public List<OrderItemDTO> getConfirmedOrderItems() {
+	     return ordersService.getConfirmedOrderItems();
+	 }
+
+
+//	 //수주 상세
+//	 @GetMapping("/orders/detail/{orderId}")
+//	 @ResponseBody
+//	 public OrderDetailDTO getOrderDetail(@PathVariable String orderId) {
+//	     return ordersService.getOrderDetail(orderId);
+//	 }
 
 }

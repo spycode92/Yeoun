@@ -1,0 +1,114 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+	<head>
+		<style>
+		/* ===================== 탭 커스텀 ===================== */
+		.pay-tabs {
+			border-bottom: 2px solid #e5e7eb; /* 라인 */
+			margin-bottom: 1.5rem;
+		}
+		
+		.pay-tabs .nav-link {
+			position: relative;
+			color: #6b7280;
+			font-weight: 600;
+			padding: 0.75rem 1.5rem;
+			border: none;
+			border-radius: 8px 8px 0 0;
+			transition: all 0.25s ease;
+		}
+		
+		.pay-tabs .nav-link:hover {
+			color: #0d6efd;
+			background: #f1f5ff;
+		}
+		
+		.pay-tabs .nav-link.active {
+			color: #0d6efd;
+			background: #ffffff;
+			box-shadow: 0 -2px 8px rgba(13, 110, 253, 0.1);
+		}
+		
+		.pay-tabs .nav-link.active::after {
+			content: '';
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: -2px;
+			height: 3px;
+			background: #0d6efd;
+			border-radius: 2px;
+			animation: underlineIn 0.3s ease forwards;
+		}
+		
+		@keyframes underlineIn {
+			from {width: 0;
+			margin-left: 50%;
+			}
+			
+			to {
+				width: 100%;
+				margin-left: 0;
+			}
+			
+			}
+			.modal-dialog {
+				max-height: 90vh;
+				margin: auto;
+			}
+			
+			.modal-content {
+				max-height: 90vh;
+				overflow: hidden;
+			}
+			
+			.modal-body {
+				overflow-y: auto;
+				max-height: calc(90vh - 150px); /* 헤더 + 푸터 제외한 영역 */
+			}
+			
+			#clientResult {
+				max-height: 180px;
+				overflow-y: auto;
+				background-color: white;
+				z-index: 9999;
+			}
+			
+			#clientSearch:focus {
+				border-color: #6ea8fe;
+				box-shadow: 0 0 6px rgba(110, 168, 254, 0.5);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="custom-body container-xxl flex-grow-1 container-p-y"
+			layout:fragment="content">
+			<div class="d-flex">
+				<h2>출고관리</h2>
+			</div>
+			<ul class="nav pay-tabs">
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/inventory/outbound/materialList}"
+					th:classappend="${activeTab}=='mat' ? 'active'">원재료 출고</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/inventory/outbound/productList}"
+					th:classappend="${activeTab}=='pro' ? 'active'">완제품 출고</a></li>
+			</ul>
+			<div
+				th:replace="${activeTab == 'mat'} ? ~{outbound/material_list :: material} : ~{outbound/product_list :: product}">
+			</div>
+			<br>
+		</div>
+		<nav aria-label="">
+			<ul class="pagination justify-content-center" id=""></ul>
+		</nav>
+		<th:block layout:fragment="myScript">
+			<script type="text/javascript"
+				src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/outbound/productGrid.js"></script>
+			<script src="/js/outbound/materialGrid.js"></script>
+		</th:block>
+	</body>
+</th:block>

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.sales.enums.ShipmentStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,36 +20,26 @@ import java.time.LocalDateTime;
 public class Shipment {
 
     // 1) 출하ID (PK)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id   
     @Column(name = "SHIPMENT_ID", nullable = false)
     @Comment("출하 이력을 구분하기 위한 고유 식별자 (SHP + YYYYMMDD + 4자리 Sequence)")
-    private Long shipmentId;
+    private String shipmentId;
 
     // 2) 수주ID (ORDER FK)
     @Column(name = "ORDER_ID", nullable = false)
     @Comment("수주 마스터의 식별자 (FK)")
-    private Long orderId;
+    private String orderId;
 
     // 3) 출하일자
     @Column(name = "SHIPMENT_DATE")
     @Comment("출하 처리 일자")
-    private LocalDate shipmentDate;
-
-    // 4) 출하수량
-    @Column(name = "SHIPMENT_QTY", precision = 18, scale = 2, nullable = false)
-    @Comment("출하된 수량")
-    private BigDecimal shipmentQty;
-
-    // 5) LOT 번호
-    @Column(name = "LOT_NO", length = 50, nullable = false)
-    @Comment("출하에 사용된 LOT 식별 번호")
-    private String lotNo;
+    private LocalDate shipmentDate;    
 
     // 6) 출하상태
-    @Column(name = "SHIPMENT_STATUS", length = 20, nullable = false)
-    @Comment("출하 이력 상태 (예: SHIPPED)")
-    private String shipmentStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "SHIPMENT_STATUS")
+    private ShipmentStatus shipmentStatus;
+
 
     // 7) 담당자ID (EMP FK)
     @Column(name = "EMP_ID", length = 20, nullable = false)
@@ -84,24 +76,32 @@ public class Shipment {
     @Comment("수주 대상 거래처 ID")
     private String clientId;
 
-    // 14) 제품ID (PRODUCT FK)
-    @Column(name = "PRODUCT_ID", length = 30, nullable = false)
-    @Comment("해당 출하에 포함된 제품 ID")
-    private String productId;
 
 
     // =============================
     // 기본값 처리
     // =============================
-    @PrePersist
-    public void prePersist() {
-        if (this.shipmentStatus == null) this.shipmentStatus = "SHIPPED";   // Default
-        if (this.shipmentDate == null) this.shipmentDate = LocalDate.now(); // SYSDATE
-        if (this.createdAt == null) this.createdAt = LocalDateTime.now();   // SYSDATE
-    }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+		@PrePersist
+		public void prePersist() {
+		    // 기본 상태값
+		    if (this.shipmentStatus == null) 
+		        this.shipmentStatus = ShipmentStatus.WAITING;
+		
+		    if (this.shipmentDate == null) 
+		        this.shipmentDate = LocalDate.now();
+		
+		    if (this.createdAt == null) 
+		        this.createdAt = LocalDateTime.now();
+		}
+		
+		@PreUpdate
+		public void preUpdate() {
+		    this.updatedAt = LocalDateTime.now();
+		}
+		
+		// 상태 변경 편의 메서드
+		public void changeStatus(ShipmentStatus status) {
+		    this.shipmentStatus = status;
+		}
 }

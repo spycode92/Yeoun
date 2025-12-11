@@ -28,7 +28,6 @@ public class ChatController {
 	// 	  이 때, 경로 변수처럼 바인딩이 필요할 때 @PathVariable 대신 @DestinationVariable 어노테이션 사용(방법은 동일)
 	// => 수신된 메세지를 다시 다른 클라이언트들에게 전송할 경우 @SendTo 어노테이션 활용
 	
-	
 	// ====================================================
 	// 1. 메시지 전송 
 	// 클라이언트 -> app/chat/send

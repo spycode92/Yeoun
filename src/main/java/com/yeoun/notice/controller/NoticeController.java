@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/notices")
+@RequestMapping("/notice")
 public class NoticeController {
 	private final NoticeService noticeService;
 	

@@ -73,7 +73,9 @@
 <!-- Toast Grid CSS-->
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
 <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
-
+<!-- bootstrap css -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <!-- Helpers -->
 <script th:src="@{/assets/vendor/js/helpers.js}"></script>
 
@@ -99,6 +101,21 @@
 				<!-- header 추가 되고 --> 
 				<th:block th:insert="~{fragments/header}"></th:block>
 <!-- 				<th:block layout:fragment="nav"></th:block> -->
+				<!-- 페이지 알림 뱃지 추가 -->
+				<span id="refresh-badge"
+					class="badge bg-danger refresh-badge"
+					style="display:none;">
+					<span class="badge-text"></span>
+				    <!-- 새로고침 버튼 -->
+				    <button type="button" class="badge-refresh-btn" title="새로고침">
+				        <i class="bi bi-arrow-repeat"></i>
+				    </button>
+				
+				    <!-- 닫기 버튼 -->
+				    <button type="button" class="badge-close-btn" title="닫기">
+				        <i class="bi bi-x-lg"></i>
+				    </button>
+				</span>
 				<!-- Content 추가 -->
 				<th:block layout:fragment="content"></th:block>
 				<!-- header 추가 되고 --> 

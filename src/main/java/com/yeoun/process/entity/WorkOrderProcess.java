@@ -6,10 +6,17 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.masterData.entity.ProcessMst;
+import com.yeoun.masterData.entity.RouteStep;
+import com.yeoun.order.entity.WorkOrder;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,20 +32,23 @@ public class WorkOrderProcess {
 	
 	// 작업공정ID
 	@Id
-	@Column(name = "WOP_ID", length = 20)
+	@Column(name = "WOP_ID")
 	private String wopId;
 	
 	// 작업지시번호
-	@Column(name = "ORDER_ID", length = 16, nullable = false)
-	private String orderId; 
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ORDER_ID")
+	private WorkOrder workOrder;
 	
 	// 라우트단계ID
-	@Column(name = "ROUTE_STEP_ID", length = 20, nullable = false)
-    private String routeStepId;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ROUTE_STEP_ID")
+    private RouteStep routeStep;
 	
 	// 공정ID
-	@Column(name = "PROCESS_ID", length = 20, nullable = false)
-    private String processId;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "PROCESS_ID")
+    private ProcessMst process;
 	
 	// 공정순번
 	@Column(name = "STEP_SEQ", nullable = false)

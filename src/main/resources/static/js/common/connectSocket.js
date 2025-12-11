@@ -11,6 +11,7 @@ let stompClient  = null;
 let connected = false;
 
 
+
 //===============================
 //	STOMP 연결 설정
 //===============================
@@ -24,7 +25,7 @@ function connectWebSocket(onConnected) {
 	}, function () {
 	    connected = true;
 	    console.log("STOMP 연결 성공!!!!!!!!!!!!!");
-	    
+		
 	    if(onConnected) onConnected();
 	    
 	}, function (error) {

@@ -23,9 +23,9 @@ public class Orders {
     private String orderId;
 
     // 2) 거래처ID
-    @Column(name = "CLIENT_ID", length = 30, nullable = false)
-    @Comment("주문을 요청한 거래처의 ID")
-    private String clientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CLIENT_ID")
+    private Client client;
 
     // 3) 담당자ID (내부 직원)
     @Column(name = "EMP_ID", length = 30, nullable = false)
@@ -96,6 +96,7 @@ public class Orders {
     @Column(name = "CREATED_BY", length = 30)
     @Comment("최초 등록 사용자(EMP)")
     private String createdBy;
+    
 
 
     /* ============================================
@@ -106,5 +107,11 @@ public class Orders {
         if (this.orderStatus == null) this.orderStatus = "REQUEST";  // 기본 상태
         if (this.createdAt == null) this.createdAt = LocalDateTime.now();
         if (this.orderDate == null) this.orderDate = LocalDate.now();
+    }
+    
+    // -----------------------------
+    // 수주 상태값 변경
+    public void changeStatus(String orderStatus) {
+    	this.orderStatus = orderStatus;
     }
 }

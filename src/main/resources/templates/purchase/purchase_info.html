@@ -1,0 +1,134 @@
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr"
+	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
+	data-template="vertical-menu-template-free"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+<title>여운</title>
+<meta name="description" content="" />
+<!-- FontAweosome -->
+<!-- <script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script> -->
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+	rel="stylesheet" />
+
+<!-- Icons. Uncomment required icon fonts -->
+<link rel="stylesheet" th:href="@{/assets/vendor/fonts/boxicons.css}" />
+
+<!-- Core CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/core.css}"
+      class="template-customizer-core-css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/theme-default.css}"
+      class="template-customizer-theme-css" />
+<link rel="stylesheet" th:href="@{/assets/css/demo.css}" />
+
+<!-- Vendors CSS -->
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css}" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/apex-charts/apex-charts.css}" />
+
+<link rel="stylesheet" th:href="@{/css/common.css}"/>
+
+<!-- Socket -->
+<link rel="stylesheet" th:href="@{/css/messenger/header.css}">
+
+<!-- Page CSS -->
+
+<!-- Toast Grid CSS-->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
+
+<!-- Helpers -->
+<script th:src="@{/assets/vendor/js/helpers.js}"></script>
+
+<!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+<!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+<script th:src="@{/assets/js/config.js}"></script>
+	</head>
+	<body>
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+    
+    <h2 class="mb-4 fw-bold">발주 상세정보</h2>
+
+    <!-- 상세정보 카드 전체 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-bold">기본 정보</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="text-muted small">발주번호</label>
+                    <div class="fw-semibold fs-6" th:text="${materialOrderDTO.orderId}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="text-muted small">거래처</label>
+                    <div class="fw-semibold fs-6" th:text="${materialOrderDTO.clientName}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="text-muted small">납기 예정일</label>
+                    <div class="fw-semibold fs-6" th:text="${materialOrderDTO.dueDate}"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="text-muted small">총 금액</label>
+                    <div class="fw-semibold fs-6"
+                         th:text="${#numbers.formatInteger(materialOrderDTO.totalAmount, 3, 'COMMA')} + ' 원'">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+			<!-- 품목 테이블 -->
+			<div class="card shadow-sm">
+				<div class="card-header bg-light">
+					<h5 class="mb-0 fw-bold">발주 품목 목록</h5>
+				</div>
+			</div>
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+					<thead class="table-light">
+						<tr>
+							<th class="text-center">품목명</th>
+							<th class="text-center">발주량</th>
+	                        <th class="text-center">단가</th>
+	                        <th class="text-center">공급가액</th>
+	                        <th class="text-center">부가세</th>
+	                        <th class="text-center">합계</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="item : ${materialOrderDTO.items}">
+							<td class="text-center" th:text="${item.matName}"></td>
+							<td class="text-center" th:text="${item.orderAmount}"></td>
+							<td class="text-end" th:text="${#numbers.formatInteger(item.unitPrice, 3, 'COMMA')}"></td>
+							<td class="text-end" th:text="${#numbers.formatInteger(item.supplyAmount, 3, 'COMMA')}"></td>
+	                        <td class="text-end" th:text="${#numbers.formatInteger(item.VAT, 3, 'COMMA')}"></td>
+	                        <td class="text-end fw-bold" 
+	                            th:text="${#numbers.formatInteger(item.totalPrice, 3, 'COMMA')}"></td>
+                    	</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>

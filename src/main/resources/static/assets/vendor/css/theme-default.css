@@ -698,7 +698,7 @@ a:hover {
   color: #566a7f;
 }
 .bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) {
-  background-color: #fff;
+  /*background-color: #fff;*/*데쉬보드 메뉴바 활성화 색상*/
 }
 .bg-menu-theme.menu-horizontal .menu-sub > .menu-item.active > .menu-link:not(.menu-toggle) {
   background-color: white;

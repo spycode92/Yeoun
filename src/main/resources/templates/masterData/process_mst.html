@@ -1,61 +1,183 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
+<head>
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	<h2>공정관리</h2>
-	   <!-- SEARCH / FILTER -->
-		<div class="d-flex justify-content-between">
-			<div class="d-flex justify-content-start">
-        	     <div class="d-flex">
-             			<label style="width:200px;">제품군</label>
-             			<select class="form-select" id="searchFamily">
-               			<option value="">전체</option>
-               			<option value="PF-FRUIT">PF-FRUIT (과일/꽃 액체향수)</option>
-               			<option value="PF-NATUR">PF-NATUR (자연/풀 액체향수)</option>
-               			<option value="PF-SOLID">PF-SOLID (고체향수)</option>
-             			</select>
-           		</div>
-			</div>
-	        <div class="d-flex justify-content-start">
-	         	<div class="d-flex col-md-4">
-             			<label>라우트명</label>
-             			<input type="text" class="form-control" id="searchRouteName" placeholder="예: 과일/꽃향 액체향수 공정">
-           		</div>
-			</div>
-			<div class="col-md-4 text-md-end">
-             		<button type="button" class="btn btn-primary" onclick="searchRoute()">조회</button>
-             		<button type="button" class="btn btn-success ms-1" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
-           	</div>
-		</div>
-	
-
-	 <div class="nav-align-top mb-4">
-         <ul class="nav nav-tabs" role="tablist">
-           <li class="nav-item">
-             <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#nav-process-tab" aria-controls="navs-process-tab" aria-selected="true">
-               제품별 공정 라우트
-             </button>
-           </li>
-           <li class="nav-item">
-             <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-processCode-tab" aria-controls="navs-processCode-tab" aria-selected="false">
-               공정코드관리
-             </button>
-           </li>
-         </ul>
-         <div class="tab-content" style="height: 700px;">
-           <div class="tab-pane fade show active"  id="navs-process-tab" role="tabpanel">
-             <h2>제품별 공정 라우트</h2>
-             <div id="processGrid" style="display: grid;margin-right:20px;"></div>
-           </div>
-           <div class="tab-pane fade" id="navs-processCode-tab" role="tabpanel">
-             <h2>공정 코드 관리</h2>
-  				<div id="processCodeGrid"></div>
-           </div>
-         </div>
-       </div>
+	 	<div class="nav-align-top mb-4">
+	         <ul class="nav nav-tabs" role="tablist">
+	           <li class="nav-item">
+	             <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-process-tab" aria-controls="navs-process-tab" aria-selected="true">
+	               제품별 공정 라우트
+	             </button>
+	           </li>
+	           <li class="nav-item">
+	             <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-processCode-tab" aria-controls="navs-processCode-tab" aria-selected="false">
+	               공정코드관리
+	             </button>
+	           </li>
+	         </ul>
+	         <div class="tab-content" >
+	           <div class="tab-pane fade show active"  id="navs-process-tab" role="tabpanel">
+	           		<h2>제품별 공정 라우트</h2>
+	           		<div class="d-flex justify-content-between">
+						<div class="d-flex justify-content-start">
+			             	 <div class="mb-6 mb-0" style="width: 260px;">
+				        	    <select  id="processprdId" class="form-select">
+				        	    	<option value="" selected disabled hidden>제품명(제품코드)</option>
+			        	    		 <option th:each="item, iterStat : ${prdMstList}" 
+										 		th:value="${item.prdId}" 
+										 		th:text="${item.prdName} +' (' + ${item.prdId} + ')'"
+												name="prdId">
+									</option>
+				        	    </select>
+				        	  </div>
+				         	  <div class="mb-6 mb-0" style="width: 280px;margin-left:5px;">
+			             			<input type="text" id="routeName" name="routeName" class="form-control"  placeholder="라우트명">
+			           		  </div>
+			           			<button type="button" class="btn btn-primary" onclick="productRouteSearch()" style="margin-left:5px;">조회</button>
+						 </div>
+						 <div class="col-md-4 text-md-end">
+			             	<button type="button" class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#route-modal" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
+							<button id="modifyProcessRowBtn" class="btn btn-danger" type="button">삭제</button>
+			           	 </div>
+					</div>
+	             	<br>
+	             <div id="processGrid" style="display: grid;margin-right:10px;"></div>
+	           </div>
+	           <div class="tab-pane fade" id="navs-processCode-tab" role="tabpanel">
+	             	<h2>공정 코드 관리</h2>
+				 	<div class="d-flex justify-content-end" style="margin:10px;">
+			            <button id="addProcessCodeRowBtn" class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
+						<button id="saveProcessCodeRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+			  			<button id="modifyProcessCodeRowBtn" class="btn btn-danger" type="button">삭제</button>
+			        </div>
+	  				<div id="processCodeGrid" style="display: grid;margin-right:10px;"></div>
+	           </div>
+	         </div>
+       	</div>
 	</div>
+	
+	<!-- 신규라우트 등록 모달 -->
+	<div class="modal fade" id="route-modal" tabindex="-1">
+	  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="routeModalTitle">라우트 등록</h5>
+	        <button class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+	      <div class="modal-body">
+	
+	        <!-- 라우트 기본정보 -->
+	        <div class="border rounded p-3 mb-3 bg-light">
+	          <div class="row g-3 small">
+	            <div class="col-md-3">
+	              <label class="form-label">라우트ID</label>
+	              <input type="text" class="form-control" id="modalRouteId" readonly
+	                     placeholder="저장 시 자동생성 (예: RT-FRUIT)">
+	            </div>
+	            <div class="col-md-3">
+	              	<label class="form-label">제품코드</label>
+	              	<select  id="modalProcessprdId" class="form-select">
+						<option value="" selected>제품명(제품코드)</option>
+			    		 <option th:each="item, iterStat : ${prdMstList}" 
+							 		th:value="${item.prdId}" 
+							 		th:text="${item.prdName} +' (' + ${item.prdId} + ')'"
+									name="prdId">
+						</option>
+					</select>
+	            </div>
+	            <div class="col-md-4">
+	              <label class="form-label">라우트명</label>
+	              <input type="text" class="form-control" id="modalRouteName"
+	                     placeholder="예: 과일향수 공정 라우트">
+	            </div>
+	            <div class="col-md-2">
+	              <label class="form-label">사용여부</label>
+	              <select class="form-select" id="modalRouteUseYn">
+	                <option value="Y">Y</option>
+	                <option value="N">N</option>
+	              </select>
+	            </div>
+	            <div class="col-md-12">
+	              <label class="form-label">비고</label>
+	              <input type="text" class="form-control" id="modalRouteRemark"
+	                     placeholder="예: 숙성 공정 제외, 액체향수 전용 라우트">
+	            </div>
+				<div id="userAndDate">
+					<div class="col-md-3 me-1">
+					<label class="form-label">생성자</label>
+					<input type="text" class="form-control" id="modalRouteCreatedId" readonly>
+					</div>
+					<div class="col-md-3 me-1">
+					<label class="form-label">생성일시</label>
+					<input type="text" class="form-control" id="modalRouteCreatedDate" readonly>
+					</div>
+					<div class="col-md-3 me-1">
+					<label class="form-label">수정자</label>
+					<input type="text" class="form-control" id="modalRouteUpdatedId" readonly>
+					</div>
+					<div class="col-md-3 me-1">
+					<label class="form-label">수정일시</label>
+					<input type="text" class="form-control" id="modalRouteUpdatedDate" readonly>
+					</div>
+				</div>
+	          </div>
+	        </div>
+	
+	        <!-- 라우트 단계 정의 헤더 (공정코드 조회 버튼 + 단계 추가) -->
+	        <div class="d-flex justify-content-between align-items-center mb-2">
+	          <h6 class="mb-0">공정 단계</h6>
+	          <div>
+	            <button class="btn btn-outline-secondary btn-sm me-1" type="button" 
+	                    onclick="openProcessLookupModal()">
+	              공정코드 조회
+	            </button>
+	            <button class="btn btn-outline-primary btn-sm" type="button"
+	                    onclick="addRouteStepRow()">
+	              + 단계 추가
+	            </button>
+	          </div>
+	        </div>
+	        <div id="processStepGrid" style="display: grid;margin-right:5px;"></div>
+	      </div>
+	      <div class="modal-footer">
+	        <button id="saveRouteBtn" class="btn btn-primary btn-sm" type="button">저장</button>
+	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<!-- 공정코드 조회용 모달 -->
+	<div class="modal fade" id="processLookup-modal" tabindex="-1">
+	  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title">공정코드 조회</h5>
+	        <button class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+	      <div class="modal-body small">
+	        <p class="text-muted mb-2">
+	          라우트 단계에서 사용할 수 있는 공정 코드 목록입니다. (PROCESS_MASTER 기준)
+	        </p>
+	       	<div id="routeStepCodeGrid" style="display: grid;margin-right:5px;"></div>
+
+	      </div>
+	      <div class="modal-footer">
+	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
 </th:block>
 </body>
 <th:block layout:fragment="myScript"> 

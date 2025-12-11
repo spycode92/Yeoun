@@ -2,6 +2,8 @@ package com.yeoun.sales.service;
 
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.repository.ClientRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -134,10 +136,6 @@ public class ClientService {
     }
 
     /* 사업자번호 중복 체크 API용 */
-
-//    public boolean existsByBusinessNo(String businessNo) {
-//        return clientRepository.existsByBusinessNo(cleanBizNo(businessNo));
-//    }
     
     private String cleanBizNo(String no) {
         if (no == null) return null;
@@ -147,6 +145,31 @@ public class ClientService {
     public boolean existsByBusinessNoClean(String businessNo) {
         return clientRepository.existsBizNoClean(businessNo);
     }
+    
+    
+ 
+ // 고객사 정보 수정
+    @Transactional
+    public void update(Client req) {
+        Client c = clientRepository.findById(req.getClientId()).orElseThrow();
+        
+        c.setCeoName(req.getCeoName());
+        c.setManagerName(req.getManagerName());
+        c.setManagerDept(req.getManagerDept());
+        c.setManagerTel(req.getManagerTel());
+        c.setManagerEmail(req.getManagerEmail());
+        c.setAddr(req.getAddr());
+        c.setAddrDetail(req.getAddrDetail());
+        
+        c.setPostCode(req.getPostCode());   
+
+        c.setBankName(req.getBankName());         
+        c.setAccountNumber(req.getAccountNumber());
+        c.setAccountName(req.getAccountName());
+
+        c.setStatusCode(req.getStatusCode());
+    }
+
 
 
 

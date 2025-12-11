@@ -108,4 +108,56 @@ public class FileUtil {
 			deleteFile(fileAttachDTO);
 		}
 	}
+
+	// Base64 문자열을 파일로 저장 (Base64 디코딩 포함)
+	public FileAttachDTO saveFileFromBase64(String base64Image, String originalFileName, String category,
+			String refTable, Long refId) throws IOException {
+		if (base64Image == null || base64Image.isEmpty()) {
+			return null;
+		}
+
+		// Base64 헤더 제거 (data:image/png;base64,...)
+		String[] parts = base64Image.split(",");
+		String imageString = parts.length > 1 ? parts[1] : parts[0];
+
+		byte[] fileData = java.util.Base64.getDecoder().decode(imageString);
+
+		return saveFileFromBytes(fileData, originalFileName, category, refTable, refId);
+	}
+
+	// Base64 문자열(또는 byte[])을 파일로 저장
+	public FileAttachDTO saveFileFromBytes(byte[] fileData, String originalFileName, String category, String refTable,
+			Long refId) throws IOException {
+		if (uploadBaseLocation == null || uploadBaseLocation.trim().isEmpty()) {
+			throw new IOException("파일 업로드 경로(uploadBaseLocation)가 설정되지 않았습니다.");
+		}
+
+		// [ 파일 저장될 디렉토리 생성 ]
+		LocalDate today = LocalDate.now();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+		String subDir = today.format(dtf);
+
+		Path uploadDir = Paths.get(uploadBaseLocation, subDir).toAbsolutePath().normalize();
+
+		if (!Files.exists(uploadDir)) {
+			Files.createDirectories(uploadDir);
+		}
+
+		String uuid = UUID.randomUUID().toString();
+		String realFileName = uuid + "_" + originalFileName;
+
+		Path destinationPath = uploadDir.resolve(realFileName);
+
+		Files.write(destinationPath, fileData);
+
+		return FileAttachDTO.builder()
+				.refTable(refTable)
+				.refId(refId)
+				.category(category)
+				.fileName(realFileName)
+				.originFileName(originalFileName)
+				.filePath(subDir)
+				.fileSize((long) fileData.length)
+				.build();
+	}
 }

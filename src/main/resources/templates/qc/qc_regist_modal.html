@@ -1,0 +1,157 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="qc-regist-modal">
+
+<!-- 검사등록 모달 -->
+<div class="modal fade" id="qcRegModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+		<h5 class="modal-title">
+		  QC등록 –
+		  <span id="qcModalTitleOrder"></span> /
+		  <span id="qcModalTitleProductName"></span>
+		  <small class="text-muted" id="qcModalTitleProductCode"></small>
+		</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="qcRegForm">
+          
+          <input type="hidden" id="qcResultId" name="qcResultId">
+          <input type="hidden" id="orderId" name="orderId">
+          <input type="hidden" id="qcPlanQty" name="qcPlanQty">
+
+            <!-- 1행 : 기본 작업 정보 -->
+			<div class="row mb-3">
+			  <div class="col-md-3">
+			    <label class="form-label">작업지시번호</label>
+			    <div id="qcOrderIdText" class="fw-semibold"></div>
+			  </div>
+			  <div class="col-md-3">
+			    <label class="form-label">제품</label>
+			    <div id="qcProductText"></div> 
+			  </div>
+			  <div class="col-md-2">
+			    <label class="form-label">지시수량</label>
+			    <div id="qcPlanQtyText"></div>  <!-- 300 EA -->
+			  </div>
+			  <div class="col-md-2">
+			    <label class="form-label">LOT 번호</label>
+			    <div id="qcLotNoText">-</div>
+			  </div>
+			</div>
+			
+			<!-- 2행 : 검사 입력 정보 -->
+			<div class="row mb-3">
+			  <div class="col-md-3">
+			    <label class="form-label required">검사일자</label>
+			    <input type="date"
+			           class="form-control form-control-sm"
+			           id="inspectionDate"
+			           name="inspectionDate"
+			           required>
+			  </div>
+			  <div class="col-md-3">
+			    <label class="form-label required">검사자</label>
+			    <!-- 실제 저장용 사번 -->
+				<input type="hidden"
+				       id="inspectorId"
+				       name="inspectorId"
+				       th:value="${loginEmpId}">
+				
+				<!-- 화면에 보여줄 이름 -->
+				<input type="text"
+				       class="form-control form-control-sm"
+				       id="inspectorName"
+				       th:value="${loginEmpName}"
+				       readonly>
+			  </div>
+			</div>
+
+
+          <div class="table-responsive mb-3">
+            <table class="table table-sm table-bordered align-middle">
+              <thead class="table-light">
+              <tr>
+                <th style="width: 90px;">QC 항목명</th>
+                <th style="width: 50px;">단위</th>
+                <th style="width: 200px;">기준값</th>
+                <th style="width: 120px;">측정값</th>
+                <th style="width: 100px;">판정</th>
+                <th>비고</th>
+              </tr>
+              </thead>
+              <tbody id="qcDetailTbody"></tbody>
+            </table>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label required">전체 판정</label>
+              <select class="form-select form-select-sm"
+                      id="overallResult"
+                      name="overallResult"
+                      required>
+                <option value="">선택</option>
+                <option value="PASS">PASS</option>
+                <option value="FAIL">FAIL</option>
+              </select>
+            </div>
+
+            <div class="col-md-9">
+              <label class="form-label">불합격 사유</label>
+              <textarea class="form-control form-control-sm"
+                        id="failReason"
+                        name="failReason"
+                        rows="1"
+                        placeholder="불합격일 경우 주요 사유를 입력하세요."
+                        readonly></textarea>
+            </div>
+          </div>
+          
+          <!-- 3행 : 수량/비고 입력 영역 추가 -->
+          <div class="row g-3 mt-3">
+            <div class="col-md-3">
+              <label class="form-label">양품 수량(EA)</label>
+              <input type="number"
+                     class="form-control form-control-sm"
+                     id="qcGoodQty"
+                     name="qcGoodQty"
+                     min="0"
+                     placeholder="예: 995">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">불량 수량(EA)</label>
+              <input type="number"
+                     class="form-control form-control-sm"
+                     id="qcDefectQty"
+                     name="qcDefectQty"
+                     min="0"
+                     placeholder="예: 5">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">비고</label>
+              <textarea class="form-control form-control-sm"
+                        id="qcRemark"
+                        name="qcRemark"
+                        rows="1"
+                        placeholder="기타 메모 (재작업 예정, 샘플 보관 등)"></textarea>
+            </div>
+          </div>
+          
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+        <button class="btn btn-primary btn-sm" id="btnQcSave" type="button">저장</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</th:block>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.inbound.mapper.InboundMapper">
+
+	<!-- 원재료 리스트 조회 -->
+	<resultMap type="com.yeoun.inbound.dto.ReceiptDTO" id="ReceiptMap">
+		<id property="inboundId" column="INBOUND_ID"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
+		<result property="expectArrivalDate"  column="EXPECT_ARRIVAL_DATE"/>
+		<result property="inboundStatus"  column="INBOUND_STATUS"/>
+		<result property="materialId"  column="MATERIAL_ID"/>
+		<result property="prodId"  column="PROD_ID"/>
+		<result property="orderEmpName"  column="ORDEREMPNAME"/>
+		<result property="materialEmpName"  column="MATERIALEMPNAME"/>
+		
+		<result property="workOrderEmpName" column="WORKORDEREMPNAME"/>
+		
+		<collection property="items" ofType="com.yeoun.inbound.dto.ReceiptItemDTO">
+			<id property="inboundItemId" column="INBOUND_ITEM_ID"/>
+			<result property="itemName" column="ITEMNAME"/>
+			<result property="itemId" column="ITEMId"/>
+			<result property="itemType" column="ITEM_TYPE"/>
+			<result property="lotNo" column="LOT_NO"/>
+			<result property="inboundAmount" column="INBOUND_AMOUNT"/>
+			<result property="requestAmount" column="REQUEST_AMOUNT"/>
+			<result property="disposeAmount" column="DISPOSE_AMOUNT"/>
+			<result property="manufactureDate" column="MANUFACTURE_DATE"/>
+			<result property="expirationDate" column="EXPIRATION_DATE"/>
+			<result property="locationId" column="LOCATION_ID"/>
+			<result property="unitPrice" column="UNIT_PRICE"/>
+			<result property="supplyAmount" column="SUPPLY_AMOUNT"/>
+			<result property="totalPrice" column="TOTAL_PRICE"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findAllMaterialInbound" resultMap="ReceiptMap">
+		SELECT
+			i.INBOUND_ID
+			, i.EXPECT_ARRIVAL_DATE
+			, i.INBOUND_STATUS
+			, i.MATERIAL_ID
+			, i.PROD_ID
+			, c.CLIENT_NAME
+			, e1.EMP_NAME AS orderEmpName
+			, e2.EMP_NAME AS materialEmpName
+			, it.INBOUND_ITEM_ID
+			, it.LOT_NO
+			, it.ITEM_TYPE
+			, it.INBOUND_AMOUNT
+			, it.REQUEST_AMOUNT
+			, it.DISPOSE_AMOUNT
+			, it.MANUFACTURE_DATE
+			, it.EXPIRATION_DATE
+			, it.LOCATION_ID
+			, mi.UNIT_PRICE
+			, mi.SUPPLY_AMOUNT
+			, mi.TOTAL_PRICE
+			, CASE
+				WHEN
+					mat.MAT_NAME IS NOT NULL THEN mat.MAT_NAME
+				ELSE 
+					prd.PRD_NAME
+			  END AS itemName
+			, CASE
+				WHEN
+					mat.MAT_ID IS NOT NULL THEN mat.MAT_ID
+				ELSE 
+					prd.PRD_ID
+			  END AS itemId
+		FROM
+			INBOUND i
+		LEFT JOIN
+			MATERIAL_ORDER m
+		ON
+			i.MATERIAL_ID = m.ORDER_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			m.CLIENT_ID = c.CLIENT_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			m.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			i.EMP_ID = e2.EMP_ID
+		LEFT JOIN
+			INBOUND_ITEM it
+		ON
+			i.INBOUND_ID = it.INBOUND_ID
+		LEFT JOIN
+			MATERIAL_ORDER_ITEM mi
+		ON
+			mi.ORDER_ID = m.ORDER_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			it.ITEM_ID = mat.MAT_ID
+			AND it.ITEM_TYPE IN ('RAW', 'SUB', 'PKG')
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			it.ITEM_ID = prd.PRD_ID
+			AND it.ITEM_TYPE = 'FG'
+		WHERE 
+			i.EXPECT_ARRIVAL_DATE &gt;= #{startDate}
+		AND 
+			i.EXPECT_ARRIVAL_DATE &lt;= #{endDate}
+		<choose>
+			<when test="searchType == 'client'">
+				AND c.CLIENT_NAME LIKE '%' || #{keyword} || '%'
+			</when>
+			<when test="searchType == 'mat'">
+			    AND (
+	    		 mat.MAT_NAME LIKE '%' || #{keyword} || '%'
+	    		 OR prd.PRD_NAME LIKE '%' || #{keyword} || '%'
+	    		)
+			</when>
+			<when test="searchType == 'lot'">
+				AND it.LOT_NO LIKE '%' || #{keyword} || '%'
+			</when>
+			<otherwise>
+				AND (
+					c.CLIENT_NAME LIKE '%' || #{keyword} || '%'
+					OR NVL(mat.MAT_NAME, '') LIKE '%' || #{keyword} || '%'
+					OR NVL(prd.PRD_NAME, '') LIKE '%' || #{keyword} || '%'
+					OR it.LOT_NO LIKE '%' || #{keyword} || '%'
+				)
+			</otherwise>
+		</choose>
+		ORDER BY
+			i.EXPECT_ARRIVAL_DATE DESC
+	</select>
+	
+	<select id="findInbound" resultMap="ReceiptMap">
+		SELECT
+			i.INBOUND_ID
+			, i.EXPECT_ARRIVAL_DATE
+			, i.INBOUND_STATUS
+			, i.MATERIAL_ID
+			, i.PROD_ID
+			, c.CLIENT_NAME
+			, e1.EMP_NAME AS orderEmpName
+			, e2.EMP_NAME AS materialEmpName
+			, E3.EMP_NAME AS workOrderEmpName
+			, it.INBOUND_ITEM_ID
+			, it.LOT_NO
+			, it.ITEM_TYPE
+			, it.INBOUND_AMOUNT
+			, it.REQUEST_AMOUNT
+			, it.DISPOSE_AMOUNT
+			, it.MANUFACTURE_DATE
+			, it.EXPIRATION_DATE
+			, it.LOCATION_ID
+			, mi.UNIT_PRICE
+			, mi.SUPPLY_AMOUNT
+			, mi.TOTAL_PRICE
+			, CASE
+				WHEN
+					mat.MAT_NAME IS NOT NULL THEN mat.MAT_NAME
+				ELSE 
+					prd.PRD_NAME
+			  END AS itemName
+			, CASE
+				WHEN
+					mat.MAT_ID IS NOT NULL THEN mat.MAT_ID
+				ELSE
+					prd.PRD_ID
+			  END AS itemId
+		FROM
+			INBOUND i
+		LEFT JOIN
+			MATERIAL_ORDER m
+		ON
+			i.MATERIAL_ID = m.ORDER_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			m.CLIENT_ID = c.CLIENT_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			m.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			i.EMP_ID = e2.EMP_ID
+		LEFT JOIN
+			INBOUND_ITEM it
+		ON
+			i.INBOUND_ID = it.INBOUND_ID
+		LEFT JOIN
+			MATERIAL_ORDER_ITEM mi
+		ON
+			mi.ORDER_ID = m.ORDER_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			it.ITEM_ID = mat.MAT_ID
+			AND it.ITEM_TYPE IN ('RAW', 'SUB', 'PKG')
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			it.ITEM_ID = prd.PRD_ID
+			AND it.ITEM_TYPE = 'FG'
+			
+		LEFT JOIN
+			WORK_ORDER wo
+		ON 
+			i.PROD_ID = wo.ORDER_ID
+		LEFT JOIN
+			EMP e3
+		ON
+			wo.CREATED_ID = e3.EMP_ID
+			
+		WHERE 
+			i.INBOUND_ID = #{inboundId}
+		ORDER BY
+			it.INBOUND_ITEM_ID
+	</select>
+
+</mapper>
+
+
+
+
+

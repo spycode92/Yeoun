@@ -43,4 +43,12 @@ public class WarehouseLocation {
 	@Column(nullable = false)
 	private String rackCol; // 컬럼
 
+    public String getLocationName() {
+        return String.format("%s-%s-%s-%s", 
+            zone != null ? zone : "", 
+            rack != null ? rack : "", 
+            rackRow != null ? rackRow : "", 
+            rackCol != null ? rackCol : ""
+        ).replaceAll("-+", "-").replaceAll("-$", ""); // 연속된 하이픈 제거 및 끝 하이픈 제거
+    }
 }

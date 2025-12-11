@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.masterData.entity.ProductMst;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -28,10 +30,10 @@ public class OrderItem {
     @Comment("수주 마스터 정보의 수주 식별자 (FK)")
     private String orderId;
 
-    // 3) 제품 ID (FK → PRODUCT_MST.PRODUCT_ID)
-    @Column(name = "PRODUCT_ID", length = 30, nullable = false)
+    // 3) 제품 ID (FK → PRODUCT_MST.PRD_ID)
+    @Column(name = "PRD_ID", length = 30, nullable = false)
     @Comment("주문한 상품의 ID (PRODUCT 테이블 참조)")
-    private String productId;
+    private String prdId;
 
     // 4) 주문수량
     @Column(name = "ORDER_QTY", precision = 18, scale = 2, nullable = false)
@@ -67,7 +69,18 @@ public class OrderItem {
     @Column(name = "UPDATED_AT")
     @Comment("데이터 수정 일시")
     private LocalDateTime updatedAt;
+    
+    
+    @ManyToOne
+    @JoinColumn(name="ORDER_ID", insertable=false, updatable=false)
+    private Orders order;
 
+    @ManyToOne
+    @JoinColumn(name="PRD_ID", insertable=false, updatable=false)
+    private ProductMst product;
+
+    
+ 
     // =============================
     // 기본값 자동 처리
     // =============================

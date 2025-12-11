@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.order.mapper.OrderMapper">
+
+	<resultMap id="EmpListMap" type="com.yeoun.emp.dto.EmpListDTO">
+	    <result property="empId" column="emp_id"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="posName" column="pos_name"/>
+	</resultMap>
+
+	<select id="selectOrderList"
+			parameterType="com.yeoun.order.dto.WorkOrderSearchDTO"
+			resultType="com.yeoun.order.dto.WorkOrderListDTO">
+		select
+			distinct
+			w.order_id,
+			pp.plan_id,
+			ppi.prd_id,
+			m.prd_name,
+			w.plan_qty,
+			w.plan_start_date as start_date,
+			w.plan_end_date as end_date,
+			w.status,
+			w.outbound_yn,
+			w.created_date,
+			w.remark
+		from work_order w
+		join production_plan pp
+			on w.plan_id = pp.plan_id
+		join production_plan_item ppi
+			on w.plan_id = ppi.plan_id
+		join product_mst m
+			on w.prd_id = m.prd_id
+		<where>
+			<!-- 키워드(품명 or 작업지시번호) -->
+			<if test="keyword != null and keyword != ''">
+				AND (
+				m.prd_name like '%' || #{keyword} || '%'
+				OR w.order_id like '%' || #{keyword} || '%'
+				OR ppi.prd_id like '%' || #{keyword} || '%'
+				)
+			</if>
+
+			<!-- 상태 검색 -->
+			<if test="status != null and status != '' and status != 'ALL'">
+				AND w.status = #{status}
+			</if>
+
+			<!-- 시작일자 FROM -->
+			<if test="startDateFrom != null and startDateFrom != ''">
+				AND TO_CHAR(w.plan_start_date, 'YYYY-MM-DD') = #{startDateFrom}
+			</if>
+		</where>
+		order by w.order_id desc
+	</select>
+	
+	<select id="selectWorkers" resultMap="EmpListMap">
+		select
+			e.emp_id,
+			e.emp_name,
+			d.dept_name,
+			p.pos_name
+		from emp e
+		join dept d
+			on e.dept_id = d.dept_id
+		join position p
+			on e.pos_code = p.pos_code
+		where d.dept_id = 'DEP003'
+			and p.pos_code = 'POS001'
+	</select>
+	
+	<select id="selectMaterials" resultType="com.yeoun.order.dto.MaterialAvailabilityDTO">
+		WITH BOM AS (
+		    SELECT 
+		        PRD_ID,
+		        MAT_ID,
+		        SUM(MAT_QTY) AS BASE_QTY
+		    FROM BOM_MST
+		    WHERE PRD_ID = #{prdId}
+		    GROUP BY PRD_ID, MAT_ID
+		),
+		INV AS (
+		    SELECT
+		        ITEM_ID,
+		        SUM(IV_AMOUNT) AS STOCK_QTY
+		    FROM INVENTORY
+		    GROUP BY ITEM_ID
+		)
+		SELECT 
+		    b.PRD_ID,
+		    p.PRD_NAME,
+		    b.MAT_ID,
+		    m.MAT_NAME,
+		    b.BASE_QTY * #{planQty} AS REQUIRED_QTY,
+		    i.STOCK_QTY
+		FROM BOM b
+		LEFT JOIN MATERIAL_MST m
+			ON b.MAT_ID = m.MAT_ID
+		LEFT JOIN PRODUCT_MST p
+			ON p.PRD_ID = b.PRD_ID
+		LEFT JOIN INV i
+		       ON b.MAT_ID = i.ITEM_ID
+		ORDER BY b.MAT_ID
+	</select>
+	
+</mapper>

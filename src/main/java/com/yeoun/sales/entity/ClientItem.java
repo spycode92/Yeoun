@@ -41,7 +41,7 @@ public class ClientItem {
     // 5) 리드타임(일)
     @Column(name = "LEAD_DAYS", precision = 10, scale = 0, nullable = false)
     @Comment("발주 후 공급까지 걸리는 소요일수")
-    private Integer leadDays;
+    private BigDecimal leadDays;
 
     // 6) 공급 단위
     @Column(name = "UNIT", length = 20, nullable = false)

@@ -11,6 +11,7 @@ import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.WarehouseLocation;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +20,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class InventoryDTO {
 	private Long ivId; // 재고Id 
@@ -68,6 +68,24 @@ public class InventoryDTO {
 	private String status; // 상태
 	
 	// --------------------------------------------------------------------------------
+	@Builder
+	public InventoryDTO(Long ivId, String lotNo, String locationId, String itemId, Long ivAmount,
+			LocalDateTime expirationDate, LocalDateTime manufactureDate, LocalDateTime ibDate, Long expectObAmount,
+			String ivStatus, String itemType) {
+		this.ivId = ivId;
+		this.lotNo = lotNo;
+		this.locationId = locationId;
+		this.itemId = itemId;
+		this.ivAmount = ivAmount;
+		this.expirationDate = expirationDate;
+		this.manufactureDate = manufactureDate;
+		this.ibDate = ibDate;
+		this.expectObAmount = expectObAmount;
+		this.ivStatus = ivStatus;
+		this.itemType = itemType;
+	}
+	
+	// --------------------------------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
 	
 	public Inventory toEntity() {
@@ -109,4 +127,6 @@ public class InventoryDTO {
 		
 		return inventoryDTO;
 	}
+	
+	
 }

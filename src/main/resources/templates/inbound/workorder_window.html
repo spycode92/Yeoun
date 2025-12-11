@@ -1,0 +1,749 @@
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr"
+	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
+	data-template="vertical-menu-template-free"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+ <style>
+  body {
+    background: #f4f3fb;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    color: #2f2b43;
+  }
+
+  .title {
+    font-size: 1.8em;
+    margin-bottom: 1.8rem;
+    color: #697a8d;
+    font-weight: 500;
+  }
+
+  .order-card {
+    border-radius: 12px;
+    border: 1px solid #e2e1f3;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(80, 72, 180, 0.08);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+  }
+
+  .order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 1.6em;
+    font-weight: 600;
+    color: #41388f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .yeoun-badge-outline {
+    border-radius: 999px;
+    border: 1px solid rgba(111, 92, 236, 0.4);
+    color: #6f5cec;
+    padding: 2px 10px;
+    font-size: 15px;
+    background: rgba(111, 92, 236, 0.04);
+  }
+
+  .status-badge {
+    width: 90px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 20px;
+  }
+
+  .status-create     { background: #e7eef7; color: #3a5a8a; }
+  .status-release    { background: #f0eaff; color: #6a4cc3; }
+  .status-progress   { background: #e6f5ec; color: #15803d; }
+  .status-complete   { background: #e8f1ff; color: #1d4ed8; }
+  .status-cancel     { background: #fdecec; color: #c0392b; }
+
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #514d7a;
+    margin-bottom: 4px;
+  }
+
+  .form-control,
+  .form-select {
+    font-size: 13px;
+    border-radius: 8px;
+    border-color: #d9d8f2;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #6f5cec;
+    box-shadow: 0 0 0 0.15rem rgba(111, 92, 236, 0.2);
+  }
+
+  .form-text {
+    font-size: 11px;
+    color: #9a96c0;
+  }
+
+  .btn-yeoun-primary {
+    font-size: 15px;               /* 버튼 글자 키움 */
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #6f5cec, #9479ff);
+    color: white;
+  }
+  
+  .btn-yeoun-primary:hover {
+  	background: linear-gradient(135deg, #b8b3ff, #d9d4ff);
+  	color: #5c4ac7 !important;
+  }
+
+  .btn-yeoun-outline {
+    border-radius: 999px;
+    border: 1px solid #c9c6f3;
+    background: #fff;
+    color: #655dc0;
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  .badge-priority {
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 3px 8px;
+    background: #fdf4e2;
+    color: #d97907;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .search-row .form-control,
+  .search-row .form-select {
+    font-size: 12px;
+    height: 32px;
+    padding: 4px 10px;
+  }
+
+  .search-row .btn {
+    height: 32px;
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  /** modal **/
+
+  /* 메인 카드형 모달 */
+  .yeoun-modal {
+    border-radius: 18px;
+    border: none;
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(90, 75, 180, 0.15);
+  }
+
+  /* 헤더 */
+  .yeoun-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #eeeafc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title-wrap i {
+    color: #6a5acd;
+    font-size: 20px;
+    margin-right: 6px;
+  }
+
+  .modal-title {
+    font-weight: 600;
+    color: #3b336d;
+  }
+  
+  /* 작업자 배치 */
+  .worker-flow-container {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: stretch;
+	  gap: 14px;
+	  padding: 16px;
+	  background: #faf9ff;
+	  border: 1px solid #e2defc;
+	  border-radius: 14px;
+	  box-shadow: 0 8px 18px rgba(110, 94, 230, 0.08);
+	}
+	
+	.flow-item {
+	  flex: 1;
+	  min-width: 160px;
+	  background: #ffffff;
+	  border-radius: 12px;
+	  border: 1px solid #dedbf7;
+	  padding: 14px 12px;
+	  text-align: center;
+	  box-shadow: 0 5px 12px rgba(150, 140, 240, 0.10);
+	}
+	
+	.flow-title {
+	  font-size: 15px;
+	  font-weight: 700;
+	  color: #5a51c8;
+	  margin-bottom: 3px;
+	}
+	
+	.flow-desc {
+	  font-size: 12px;
+	  color: #7e78aa;
+	  margin-bottom: 10px;
+	}
+	
+	.flow-select {
+	  width: 100%;
+	  padding: 8px 10px;
+	  border-radius: 8px;
+	  border: 1px solid #d1cdf6;
+	  background: #fafaff;
+	  font-size: 13px;
+	  color: #4b4470;
+	}
+	
+	.flow-select:focus {
+	  border-color: #7b6fff;
+	  box-shadow: 0 0 0 0.15rem rgba(130, 115, 255, 0.25);
+	}
+
+  
+
+  /* 바디 */
+  .yeoun-modal-body {
+    padding: 24px 28px;
+  }
+
+  /* 탭 */
+  .yeoun-tabs .nav-link {
+    border: none;
+    color: #867ccc;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .yeoun-tabs .nav-link.active {
+    color: #4b3fbf;
+    background: #f3f1ff;
+    font-weight: 600;
+  }
+
+  /* 상세 */
+	.wo-detail {
+	    display: flex;
+	    flex-direction: column;
+	    gap: 20px;
+	    padding: 10px 5px;
+	}
+	
+	/* 공통 텍스트 */
+	.wo-detail label {
+	    font-size: 13px;
+	    font-weight: 600;
+	    color: #776fb5;
+	    margin-bottom: 4px;
+	}
+	
+	.wo-detail .value {
+	    font-size: 15px;
+	    padding: 6px 0;
+	    color: #3f3b67;
+	}
+	
+	.value.strong {
+	    font-size: 18px;
+	    font-weight: 700;
+	    color: #5c53c4;
+	}
+	
+	/* ===== Header ===== */
+	.wo-header {
+	    display: grid;
+	    grid-template-columns: 1.3fr 1fr 0.7fr;
+	    gap: 20px;
+	    padding-bottom: 12px;
+	    border-bottom: 1px solid #eceaff;
+	}
+	
+	/* ===== 일반 행 ===== */
+	.wo-row {
+	    display: flex;
+	    gap: 40px;
+	}
+	
+	.wo-col {
+	    flex: 1;
+	}
+	
+	/* ===== 공정 섹션 전체 ===== */
+	.wo-process-group {
+	    position: relative;
+	}
+	
+	/* 선 + 점 컨테이너 */
+	.process-line {
+	    position: relative;
+	    margin: 8px 0 18px 0;
+	    height: 16px;
+	}
+	
+	/* 가로 선 */
+	.process-line::before {
+	    content: "";
+	    position: absolute;
+	    top: 8px; /* 텍스트 아래 정확히 */
+	    left: 0;
+	    right: 0;
+	    height: 2px;
+	    background: #dcd6ff;
+	}
+	
+	/* 점 스타일 */
+	.process-line .dot {
+	    width: 10px;
+	    height: 10px;
+	    background: #b3a6ff;
+	    border-radius: 50%;
+	    position: absolute;
+	    top: 3px;
+	}
+	
+	/* 점 5개 균등 배치 */
+	.process-line .dot:nth-child(1) { left: 7.5%; }
+	.process-line .dot:nth-child(2) { left: 24%; }
+	.process-line .dot:nth-child(3) { left: 41%; }
+	.process-line .dot:nth-child(4) { left: 58%; }
+	.process-line .dot:nth-child(5) { left: 74.5%; }
+	.process-line .dot:nth-child(6) { left: 92%; }
+	
+	.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    transition: all .25s ease;
+	}
+	
+	/* 상태별 색 */
+	
+	.dot.done {
+	    background: #6c5ce7; /* 완료 */
+	}
+	
+	.dot.current {
+	    background: #a29bfe; /* 현재 */
+	}
+	
+	.dot.future {
+	    background: #e5e2ff; /* 미도달 */
+	}
+	
+	/* 상태별 선색 */
+	.process-line::before {
+	    content: "";
+	    position: absolute;
+	    top: 8px;
+	    left: 0;
+	    right: 0;
+	    height: 2px;
+	    background: #e5e2ff; /* default: 미래 */
+	    transition: all .25s ease;
+	}
+	
+	.process-line.done::before {
+	    background: #6c5ce7;
+	}
+	
+	.process-line.partial::before {
+	    background: linear-gradient(
+	        to right,
+	        #6c5ce7 0% var(--progress),
+	        #e5e2ff var(--progress) 100%
+	    );
+	}
+
+	/* 박스들을 가로로 균등 배치 */
+	.process-boxes {
+	    display: grid;
+	    grid-template-columns: repeat(6, 1fr);
+	    gap: 14px;
+	    margin-top: 16px;
+	}
+	
+	/* 박스 디자인 */
+	.proc {
+	    background: #f7f5ff;
+	    border: 1px solid #e6e2ff;
+	    border-radius: 12px;
+	    padding: 16px 10px;
+	    display: flex;
+	    flex-direction: column;
+	    align-items: center;
+	    justify-content: center;	
+	    min-height: 85px;
+	}
+	
+	/* 공정 제목 */
+	.proc-title {
+	    font-size: 12px;
+	    font-weight: 600;
+	    color: #6c63b7;
+	    margin-bottom: 6px;
+	    text-align: center;
+	}
+	
+	/* 작업자 이름 */
+	.proc-value {
+	    font-size: 15px;
+	    color: #3f3b67;
+	    font-weight: 500;
+	    text-align: center;
+	}
+
+	
+	/* ===== 상태 ===== */
+	.wo-status .state {
+	    font-weight: 700;
+	    color: #5a54dd;
+	}
+  
+  /* 테이블 */
+  .yeoun-table thead {
+    background: #f5f3ff;
+    color: #5b53a1;
+  }
+
+  .yeoun-table td {
+    font-size: 13px;
+  }
+
+  /* 푸터 */
+  .yeoun-modal-footer {
+    border-top: 1px solid #eeeafc;
+    padding: 16px 24px;
+    text-align: right;
+  }
+
+  /* 입력폼 스타일 보완 */
+  #workCreateForm .form-label {
+    color: #6a63b9;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  #workCreateForm .form-control,
+  #workCreateForm .form-select {
+    background: #faf9ff;
+    border-color: #dcd6fe;
+  }
+
+  #workCreateForm .form-control:focus,
+  #workCreateForm .form-select:focus {
+    border-color: #6a5acd;
+    box-shadow: 0 0 0 0.15rem rgba(106, 92, 205, 0.2);
+  }
+
+  /* info-value는 read-only 표현 */
+  .info-value {
+    background: #faf9ff;
+    border: 1px solid #e3dfff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #4a436d;
+  }
+
+  .status-tag {
+    font-weight: 600;
+    color: #6a5acd;
+  }
+
+  /* 테이블 */
+  .yeoun-table thead {
+    background: #f5f3ff;
+    color: #5b53a1;
+  }
+  
+  /* 재고 */
+  .stock-panel {
+    width: 300px;
+    background: #faf9ff;
+    border-left: 1px solid #ddd;
+    padding: 16px;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    border-radius: 8px;
+	}
+	.stock-item {
+	    padding: 12px;
+	    margin-bottom: 10px;
+	    background: white;
+	    border-radius: 8px;
+	    border: 1px solid #eee;
+	}
+	.stock-item.low {
+	    border-color: #ff6b6b;
+	    background: #fff5f5;
+	}
+	.stock-item.ok {
+	    border-color: #63c76a;
+	    background: #f3fff5;
+	}
+</style>
+
+<title>작업지시서</title>
+<meta name="description" content="" />
+<!-- FontAweosome -->
+<!-- <script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script> -->
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+	rel="stylesheet" />
+
+<!-- Icons. Uncomment required icon fonts -->
+<link rel="stylesheet" th:href="@{/assets/vendor/fonts/boxicons.css}" />
+
+<!-- Core CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/core.css}"
+      class="template-customizer-core-css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/theme-default.css}"
+      class="template-customizer-theme-css" />
+<link rel="stylesheet" th:href="@{/assets/css/demo.css}" />
+
+<!-- Vendors CSS -->
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css}" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/apex-charts/apex-charts.css}" />
+
+<link rel="stylesheet" th:href="@{/css/common.css}"/>
+
+<!-- Socket -->
+<link rel="stylesheet" th:href="@{/css/messenger/header.css}">
+
+<!-- Page CSS -->
+
+<!-- Toast Grid CSS-->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
+
+<!-- Helpers -->
+<script th:src="@{/assets/vendor/js/helpers.js}"></script>
+<script th:src="@{/assets/vendor/js/bootstrap.js}"></script>
+
+
+<!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+<!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+<script th:src="@{/assets/js/config.js}"></script>
+</head>
+<body>
+<input type="hidden" th:value="${id}" id="workId">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+  <!-- =============================== 상세 모달 ================================= -->
+<!-- BODY -->
+<div class="yeoun-modal-body">
+
+	<div class ="wo-detail">
+
+	    <!-- ===== 1. 헤더 라인 ===== -->
+	    <div class="wo-header">
+	        <div class="wo-no">
+	            <label>작업지시번호</label>
+	            <div class="value strong" id="detailOrderId"></div>
+	        </div>
+	        <div class="wo-item">
+	            <label>품목명</label>
+	            <div class="value" id="detailPrdName"></div>
+	        </div>
+	        <div class="wo-qty">
+	            <label>계획 수량</label>
+	            <div class="value" id="detailPlanQty"></div>
+	        </div>
+	    </div>
+	    
+	    <!-- ===== 2. 생산일자/시간 ===== -->
+	    <div class="wo-row">
+	        <div class="wo-col">
+	            <label>생산 일자</label>
+	            <div class="value" id="detailPlanDate"></div>
+	        </div>
+	        <div class="wo-col">
+	            <label>생산 시간</label>
+	            <div class="value" id="detailPlanTime"></div>
+	        </div>
+	    </div>
+	    
+	    <!-- ===== 3. 라인 / 공정 ===== -->
+	    <div class="wo-row">
+	        <div class="wo-col">
+	            <label>할당 라인</label>
+	            <div class="value" id="detailLineName"></div>
+	        </div>
+	        <div class="wo-col">
+	            <label>진행 공정</label>
+	            <div class="value" id="detailRouteId"></div>
+	        </div>
+	    </div>
+	    
+	    <!-- ===== 4. 공정별 작업자 ===== -->
+	    <div class="wo-process-group">
+	        <label>담당 작업자</label>
+	        
+            <div class="process-line">
+		        <div class="dot"></div>
+		        <div class="dot"></div>
+		        <div class="dot"></div>
+		        <div class="dot"></div>
+		        <div class="dot"></div>
+		        <div class="dot"></div>
+		    </div>
+	
+	        <div class="process-boxes">
+	            <div class="proc">
+	                <span class="proc-title">블렌딩</span>
+	                <span class="proc-value" id="workerBld"></span>
+	            </div>
+	            <div class="proc">
+	                <span class="proc-title">여과</span>
+	                <span class="proc-value" id="workerFlt"></span>
+	            </div>
+	            <div class="proc">
+	                <span class="proc-title">충전</span>
+	                <span class="proc-value" id="workerFil"></span>
+	            </div>
+	            <div class="proc">
+	                <span class="proc-title">조립 + 캠핑</span>
+	                <span class="proc-value" id="workerCap"></span>
+	            </div>
+	            <div class="proc">
+	            	<span class="proc-title">QC</span>
+	            	<span class="proc-value">품질 검사팀</span>
+	            </div>
+	            <div class="proc">
+	                <span class="proc-title">라벨링 + 포장</span>
+	                <span class="proc-value" id="workerLbl"></span>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <!-- ===== 5. 상태 ===== -->
+	    <div class="wo-status">
+	        <label>상태</label>
+	        <div class="value state" id="detailStatus"></div>
+	    </div>
+	    
+	</div>
+
+</div>
+
+  
+	<script>
+	// 공정 진행선 UI (원래 updateProcessUI 사용하던 로직 그대로)
+	function updateProcessUI(workInfoList) {
+	  const dots = document.querySelectorAll('.process-line .dot');
+	  const processLine = document.querySelector('.process-line');
+
+	  dots.forEach(dot => dot.className = 'dot');
+
+	  workInfoList.forEach((step, i) => {
+	    const dot = dots[i];
+	    if (!dot) return;
+
+	    switch (step.status) {
+	      case 'DONE':       dot.classList.add('done');    break;
+	      case 'INPROGRESS': dot.classList.add('current'); break;
+	      default:           dot.classList.add('future');  break;
+	    }
+	  });
+
+	  const completedCount  = workInfoList.filter(s => s.status === 'COMPLETED').length;
+	  const totalCount      = workInfoList.length;
+	  const progressPercent = totalCount === 0 ? 0 : (completedCount / totalCount) * 100;
+
+	  processLine.style.setProperty('--progress', progressPercent);
+	}
+
+	// 여기서 workId를 받아서 데이터 채우기
+	async function getWorkOrderDetailData(workId) {
+	  try {
+	    const res  = await fetch(`/order/detail/${workId}`);
+	    if (!res.ok) throw new Error('HTTP ' + res.status);
+	    const data = await res.json();
+
+	    // 1) 상단 기본 정보
+	    document.getElementById('detailOrderId').innerText  = data.orderId;
+	    document.getElementById('detailPrdName').innerText  = data.prdName;
+	    document.getElementById('detailStatus').innerText   = data.status;
+	    document.getElementById('detailPlanQty').innerText  = data.planQty;
+	    document.getElementById('detailPlanDate').innerText = data.planDate;
+	    document.getElementById('detailPlanTime').innerText = data.planTime;
+	    document.getElementById('detailLineName').innerText = data.lineName;
+	    document.getElementById('detailRouteId').innerText  = data.routeId;
+
+	    // 2) 공정별 작업자
+	    data.infos.forEach(i => {
+	      switch (i.processId) {
+	        case 'PRC-BLD': document.getElementById('workerBld').innerText = i.workerName; break;
+	        case 'PRC-FLT': document.getElementById('workerFlt').innerText = i.workerName; break;
+	        case 'PRC-FIL': document.getElementById('workerFil').innerText = i.workerName; break;
+	        case 'PRC-CAP': document.getElementById('workerCap').innerText = i.workerName; break;
+	        case 'PRC-LBL': document.getElementById('workerLbl').innerText = i.workerName; break;
+	      }
+	    });
+
+	    // 3) 공정 진행 UI
+	    updateProcessUI(data.infos);
+	  } catch (e) {
+	    console.error('getWorkOrderDetailData error:', e);
+	  }
+	}
+
+	// 페이지 로드 시 hidden workId로 호출
+	document.addEventListener('DOMContentLoaded', function() {
+	  const workIdInput = document.getElementById('workId');
+	  const workId = workIdInput ? workIdInput.value : null;
+
+	  console.log('새창 workId:', workId);
+	  if (workId) {
+	    getWorkOrderDetailData(workId);
+	  }
+	});
+	</script>
+	
+</div>
+</body>
+</html>

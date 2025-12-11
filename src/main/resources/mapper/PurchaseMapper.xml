@@ -20,6 +20,7 @@
 	        <result property="supplyAvaliable" column="SUPPLY_AVAILABLE"/>
 	        <result property="minOrderQty" column="MIN_ORDER_QTY"/>
 	        <result property="orderUnit" column="ORDER_UNIT"/>
+	        <result property="supplyAmount" column="SUPPLY_AMOUNT"/>
 		</collection>
 	</resultMap>
 	
@@ -53,6 +54,66 @@
 			c.CLIENT_TYPE = 'SUPPLIER'
 		ORDER BY
 			C.CLIENT_ID ASC, I.ITEM_ID ASC
+	</select>
+	
+	<!-- 발주 상세 -->
+	<resultMap type="com.yeoun.inventory.dto.MaterialOrderDTO" id="MaterialOrdertMap">
+		<id property="orderId" column="ORDER_ID"/>
+		<result property="clientId" column="CLIENT_ID"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
+		<result property="status"  column="STATUS"/>
+		<result property="dueDate"  column="DUE_DATE" />
+		<result property="totalAmount"  column="TOTAL_AMOUNT"/>
+		
+		<collection property="items" ofType="com.yeoun.inventory.dto.MaterialOrderItemDTO">
+			<id property="orderItemId" column="ORDER_ITEM_ID"/>
+	        <result property="itemId" column="ITEM_ID"/>
+	        <result property="orderAmount"    column="ORDER_AMOUNT"/>
+	        <result property="unitPrice"  column="UNIT_PRICE"/>
+	        <result property="supplyAmount"   column="SUPPLY_AMOUNT"/>
+	        <result property="VAT"  column="VAT"/>
+	        <result property="totalPrice" column="TOTAL_PRICE"/>
+	        <result property="matName" column="MAT_NAME"/>
+		</collection>
+	</resultMap>
+	
+	
+	<select id="findPurchaseOrder" resultMap="MaterialOrdertMap">
+		SELECT
+			m.ORDER_ID
+			, m.CLIENT_ID
+			, m.STATUS
+			, m.DUE_DATE
+			, m.TOTAL_AMOUNT
+			, mi.ORDER_ITEM_ID
+			, mi.ITEM_ID
+			, mi.ORDER_AMOUNT
+			, mi.UNIT_PRICE
+			, mi.SUPPLY_AMOUNT
+			, mi.VAT
+			, mi.TOTAL_PRICE
+			, c.CLIENT_NAME
+			, mat.MAT_NAME
+		FROM
+			MATERIAL_ORDER m
+		LEFT JOIN
+			MATERIAL_ORDER_ITEM mi
+		ON
+			m.ORDER_ID = mi.ORDER_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			m.CLIENT_ID = c.CLIENT_ID
+		LEFT JOIN
+			CLIENT_ITEM ci
+		ON
+			mi.ITEM_ID = ci.ITEM_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			ci.MATERIAL_ID = mat.MAT_ID
+		WHERE
+			m.ORDER_ID = #{id}
 	</select>
 
 </mapper>

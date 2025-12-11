@@ -28,7 +28,7 @@
 				<div class="d-flex justify-content-start">
 	        	    <div class="mb-6 mb-0" style="width: 180px;">
 	        	    	<select class="form-select" onchange="draftValFn(this)">
-	        	    		<option value="기안서" selected>기안서</option>
+	        	    		<option value="" selected disabled hidden>기안서</option>
 	        	    		 <option th:each="item, iterStat : ${formTypes}" 
 								 		th:value="${item.formName}" 
 								 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
@@ -89,23 +89,23 @@
             </ul>
             <div class="tab-content" style="height: 700px;">
               <div class="tab-pane fade show active"  id="nav-approval-tab" role="tabpanel">
-                <!--<h2>결재사항</h2>-->
+                <h2>결재사항</h2>
 			  	<div id="approvalGrid" ></div>
               </div>
               <div class="tab-pane fade" id="navs-all-tab" role="tabpanel">
-                <!--<h2>전체결재</h2>-->
+                <h2>전체결재</h2>
 			  	<div id="allApprovalGrid"></div>
               </div>
               <div class="tab-pane fade" id="navs-my-tab" role="tabpanel">
-                <!--<h2>내 결재목록</h2>-->
+                <h2>내 결재목록</h2>
 			  	<div id="myApprovalGrid"></div>
               </div>
 			  <div class="tab-pane fade" id="navs-waiting-tab" role="tabpanel">
-                <!--<h2>결재대기</h2>-->
+                <h2>결재대기</h2>
 				<div id="waitingApprovalGrid" ></div>
               </div>
 			  <div class="tab-pane fade" id="navs-done-tab" role="tabpanel">
-                <!--<h2>결재완료</h2>-->
+                <h2>결재완료</h2>
 				<div id="doneApprovalGrid"></div>
               </div>
             </div>
@@ -122,7 +122,7 @@
 		      </div>
 		      <div class="modal-body">
 		        <h5 class="d-flex">
-					<label>문서 날짜 </label>
+					<label class="p-1" style="width: 200px;">문서 날짜 </label>
 					<p id="today-date"></p>
 				</h5>
 		        <h5 class="d-flex">
@@ -133,10 +133,10 @@
 					<label class="p-1" style="width: 200px;">양식 종류 </label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select id="form-menu" class="form-select" onchange="draftValFn(this)">
-		            		<option selected>기안서</option>
+		            		<option value="" selected disabled hidden>기안서</option>
 		            		<option th:each="item, iterStat : ${formTypes}" 
 							 		th:value="${item.formName}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+							 		th:text="${item.formName}"
 									th:data-formname="${item.formName}"
 									name="draft">		
 							</option>
@@ -204,7 +204,7 @@
 		            		<option value="" selected>직급</option>
 							<option th:each="item, iterStat : ${positionList}" 
 							 		th:value="${item.posCode}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.posName}">
+							 		th:text="${item.posName}">
 							 </option>
 		            	</select>
 	            	</div>
@@ -216,7 +216,7 @@
 		            		<option value="" selected>부서</option>
 							<option th:each="item, iterStat : ${deptList}" 
 							 		th:value="${item.deptId}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.deptName} + '(' + ${item.deptId} + ')'">
+							 		th:text="${item.deptName} + '(' + ${item.deptId} + ')'">
 							 </option>
 		            	</select>
 	            	</div>
@@ -225,7 +225,7 @@
 					<label class="p-1"  style="width: 200px;">지출종류 </label><!-- 지출결의서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select id="expnd-type" name="expndType" class="form-select" >
-		            		<option selected>지출종류</option>
+		            		<option value="" selected disabled hidden>지출종류 선택</option>
 		            		<option name="expense" value="고정지출">고정지출</option>
 							<option name="expense" value="변동지출">변동지출</option>
 							<option name="expense" value="비정기지출">비정기지출</option>
@@ -240,7 +240,7 @@
 					<label>결재권한자 </label> 
 		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
-					<label>* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
+					<label id="approverInfo">* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
      				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
 					
 					<!-- 결재권한자 버튼 생성 영역 -->
@@ -295,7 +295,7 @@
 		      	<hr>
 		      	<button type="button" id="printBtn" class="btn btn-primary">인쇄</button>
 		        <button type="submit" id="saveBtn" class="btn btn-primary" >등록</button>
-		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+		        <button type="button" id="modalCloseBtn" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>
 	    </div>

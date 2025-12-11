@@ -28,11 +28,7 @@
 				<div class="row g-2">
                     <div class="col mb-3">
                         <label for="moveZone" class="form-label">Zone</label>
-                        <select id="moveZone" class="form-select">
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                        </select>
+                        <select id="moveZone" class="form-select"></select>
                     </div>
                     <div class="col mb-3">
                         <label for="moveRack" class="form-label">Rack</label>
@@ -46,6 +42,7 @@
                         <label for="moveColumn" class="form-label">Column</label>
                         <select id="moveColumn" class="form-select"></select>
                     </div>
+                    <input type="hidden" id="locationIdMove">
                 </div>
                 <div class="mb-3">
                     <label for="moveQty" class="form-label">이동 수량</label>
@@ -54,7 +51,7 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">이동</button>
+                <button type="button" class="btn btn-primary" id="moveBtnMove">이동</button>
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
             </div>
         </div>

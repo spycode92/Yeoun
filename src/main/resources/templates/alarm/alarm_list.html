@@ -1,0 +1,31 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+		<h3>알림 목록</h3>
+		<div class="d-flex justify-content-between">
+			<div class="row flex-nowrap">
+				<div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
+					<input type="date" name="srhStrDate" class="form-control" id="startDate">
+				</div>
+                ~
+                <div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
+	                <input type="date" name="srhEndDate" class="form-control" id="endDate">
+                </div>
+                <div class="mb-6 col-lg-6 col-xl-4 col-12 mb-0">
+	             	<button type="button" class="btn btn-primary" id="searchbtn">조회</button>
+                </div>
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="table-responsive text-nowrap">
+				<div id="alarmGrid"></div>
+			</div>
+		</div>
+	</div>
+	<th:block layout:fragment="myScript">
+		<script src="/js/alarm/alarmList.js"></script>
+	</th:block>
+</body>
+</th:block>

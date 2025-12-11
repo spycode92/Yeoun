@@ -181,30 +181,7 @@ public class MessengerController {
 
 		return ResponseEntity.ok().build();
 	}
-	
-	// ==========================================================================
-	// 메시지 읽음 처리
-//	@PatchMapping("/chat/{roomId}")
-//	public ResponseEntity<?> updateReadMessage(Authentication authentication,
-//											@PathVariable("roomId") Long roomId,
-//											@RequestBody ReadUpdateRequest readUpdateRequest){
-//	
-//	String empId = authentication.getName();
-//	messengerService.updateLastRead(empId, roomId, readUpdateRequest.getLastReadId());
-//	
-//	return ResponseEntity.ok().build();
-//	
-//	}
-	
-	// ==========================================================================
-	// 채팅방 퇴장 처리
-//	@DeleteMapping("/room/{roomId}/member")
-//	public ResponseEntity<?> exitRoom (Authentication authentication, @PathVariable("roomId") Long roomId){
-//		messengerService.exitRoom(roomId, authentication.getName());
-//		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> deleteMapping 진입...............");
-//		return ResponseEntity.noContent().build();
-//	}
-	
+
 	// ==========================================================================
 	// 채팅방 검색 기능
 	@GetMapping("/rooms/search")

@@ -3,16 +3,21 @@
 let inventoryGrid; // 그리드 객체 변수
 let inventoryData = []; // 그리드로 그려지는 데이터 저장
 let locationInfo = [];
+
+function showSpinner() {
+	document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideSpinner() {
+	document.getElementById('loading-overlay').style.display = 'none';
+}
+
 // 문서 로딩 후 시작
 document.addEventListener('DOMContentLoaded', async function () {
+	
 	// 창고정보 저장
 	locationInfo = await getLocationInfo();
-	console.log("@@@@@@@@@@@@@@@@@@", locationInfo);
-	const zones = getUniqueValues(locationInfo, 'zone');
-	const racks  = getUniqueValues(locationInfo, 'rack'); 
-	const rows   = getUniqueValues(locationInfo, 'rackRow');
-	const cols   = getUniqueValues(locationInfo, 'rackCol');
-	console.log(zones); 
+	inputLocationInfo(locationInfo);
+
 	initGrid();
 	//최초로딩
 	const firstSearchData = getSearchData();
@@ -23,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	inventoryGrid.sort('ibDate', true);
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = firstData;	
+	hideSpinner();
 });
 
 // 검색 데이터 설정(검색, 상세검색 입력값으로 requestBody생성)
@@ -58,7 +64,7 @@ async function getSearchData() {
 // 검색데이터에 기반하여 재고 데이터 정보 가져오기
 async function fetchInventoryData(searchData) {
 	const response = 
-		await fetch('/api/inventorys', {
+		await fetch('/api/inventories', {
 			method: 'POST',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -80,28 +86,79 @@ const btnSearch = document.getElementById('btnSearch');
 btnSearch.addEventListener('click', async () => {
 	event.preventDefault(); // 폼제출 막기
 	
+	showSpinner();
+	
 	const searchData = await getSearchData();
 	const gridData = await fetchInventoryData(searchData)
 	// 받아온 데이터로 그리드 생성
 	inventoryGrid.resetData(gridData);
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = gridData;	
+	
+	hideSpinner();
+
 });
 
 // 그리드 설정
 function initGrid() {
 	const inventoryGridEl = document.getElementById('inventoryGrid');
 	const Grid = tui.Grid;
+	
+	// 1. 그리드 한글 언어셋 설정 (필터 및 각종 텍스트 한글화)
+	Grid.setLanguage('ko', {
+	    display: {
+	        noData: '데이터가 없습니다.',
+	        loadingData: '데이터를 불러오는 중입니다.',
+	        resizeHandleGuide: '마우스 드래그를 통해 너비를 조정할 수 있습니다.',
+	    },
+	    net: {
+	        confirmCreate: '생성하시겠습니까?',
+	        confirmUpdate: '수정하시겠습니까?',
+	        confirmDelete: '삭제하시겠습니까?',
+	        confirmModify: '저장하시겠습니까?',
+	        noDataToCreate: '생성할 데이터가 없습니다.',
+	        noDataToUpdate: '수정할 데이터가 없습니다.',
+	        noDataToDelete: '삭제할 데이터가 없습니다.',
+	        noDataToModify: '수정할 데이터가 없습니다.',
+	        failResponse: '데이터 요청 중에 에러가 발생하였습니다.'
+	    },
+	    filter: {
+	        // 문자열 필터 옵션
+	        contains: '포함',
+	        eq: '일치',
+	        ne: '불일치',
+	        start: '시작 문자',
+	        end: '끝 문자',
+	        
+	        // 날짜/숫자 필터 옵션
+	        after: '이후',
+	        afterEq: '이후 (포함)',
+	        before: '이전',
+	        beforeEq: '이전 (포함)',
+
+	        // 버튼 및 기타
+	        apply: '적용',
+	        clear: '초기화',
+	        selectAll: '전체 선택'
+	    }
+	});
+	
+	
 	inventoryGrid = new Grid({
 		el: inventoryGridEl,
 		bodyHeight: 'auto',
-		rowHeaders:['rowNum'],	
+//		rowHeaders:['rowNum'],
+		pageOptions: {
+		    useClient: true,  // 클라이언트 사이드 페이징
+		    perPage: 20       // 페이지당 20개 행
+		},	
 		columns: [
-		  { header: 'LOT 번호',  name: 'lotNo',    width: 180 },
-		  { header: '상품명',    name: 'prodName', width: 180 },
+		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 220 },
+		  { header: '상품명',    name: 'prodName', minWidth: 180 },
 		  { header: '재고량',    name: 'ivAmount', width: 80, align: 'right' },
+		  { header: '출고예정',    name: 'expectObAmount', width: 80, align: 'right' },
 		  {
-		    header: '위치', name: 'location', width: 140,
+		    header: '위치', name: 'location', minWidth: 80,
 		    formatter: ({ row }) => {
 		      const z  = row.zone  || '';
 		      const r  = row.rack  || '';
@@ -111,17 +168,26 @@ function initGrid() {
 		      return [z, r, rr, rc].filter(v => v).join('-'); // 예: "A-01-B-01"
 		    }
 		  },
-		  { header: 'Zone',      name: 'zone',     width: 60, hidden: true },
-		  { header: 'Rack',      name: 'rack',     width: 60, hidden: true },
-		  { header: 'Row',       name: 'rackRow',  width: 60, hidden: true },
-		  { header: 'Col',       name: 'rackCol',  width: 60, hidden: true },
-		  { header: '입고일',    name: 'ibDate',   width: 120, 
+		  { header: 'Zone',      name: 'zone',     minWidth: 60, hidden: true },
+		  { header: 'Rack',      name: 'rack',     minWidth: 60, hidden: true },
+		  { header: 'Row',       name: 'rackRow',  minWidth: 60, hidden: true },
+		  { header: 'Col',       name: 'rackCol',  minWidth: 60, hidden: true },
+		  { header: '입고일',    name: 'ibDate',   minWidth: 120, 
 			formatter: ({ value }) => value ? value.substring(0, 16) : ''
 		  },
-		  { header: '유통기한',  name: 'expirationDate', width: 120, 
-			formatter: ({ value }) => value ? value.substring(0, 16) : '없음'
+		  { header: '유통기한',  name: 'expirationDate', minWidth: 120, 
+			formatter: ({ value }) => value ? value.substring(0, 10) : '없음'
 		  },
-		  { header: '상태',      name: 'ivStatus', width: 80 },
+		  { header: '상태',      name: 'ivStatus', width: 80, 
+			formatter: ({ value }) => {
+				switch(value) {
+					case 'NORMAL'          : return '정상';
+					case 'EXPIRED'         : return '만료';
+					case 'DISPOSAL_WAIT': return '임박';
+					default:     return value ?? '';
+			    }
+			}
+		  },
 		  {
 		  	header: '상세',      name: "btn", width: 100, align: "center",
 		  	formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
@@ -154,7 +220,7 @@ function initGrid() {
 // 창고 ZONE, RACK, ROW, COL 가져오기
 async function getLocationInfo() {
 	const response = 
-		await fetch('/api/inventorys/locations', {
+		await fetch('/api/inventories/locations', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -173,39 +239,28 @@ async function getLocationInfo() {
 function getUniqueValues(list, key) {
     return [...new Set(list.map(item => item[key]))]; 
 }
+// 셀렉트박스 채우기 함수
+function fillSelect(selectEl, values) {
+	selectEl.length = 1; // 첫번째 option만 남김
+	
+	values.forEach(v => {
+		const opt = document.createElement('option');
+		opt.value = v;
+		opt.textContent = v;
+		selectEl.appendChild(opt);
+	})
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//창고 정보 셀렉트박스에 집어넣기
+function inputLocationInfo(locationInfo) {
+	const zones = getUniqueValues(locationInfo, 'zone');
+	const racks  = getUniqueValues(locationInfo, 'rack');
+	const zoneSelect = document.getElementById('searchZone')
+	const rackSelect = document.getElementById('searchRack')
+	
+	fillSelect(zoneSelect, zones);
+	fillSelect(rackSelect, racks);
+}
 
 // 상세검색버튼
 document.getElementById('btnToggleAdvanced').addEventListener('click', function () {

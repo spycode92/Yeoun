@@ -2,6 +2,7 @@ package com.yeoun.order.entity;
 
 import java.time.LocalDateTime;
 
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -17,20 +18,25 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "WORK_ORDER")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class WorkOrder {
 
 	// 작업 지시번호 ID
 	// WO-YYYYMMDD-0000 (시퀀스)
 	@Id @Column(nullable = false, length = 16)
 	private String orderId;
+	
+	// 생산계획 ID
+	@Column			// ================================> 생산계획 엔티티랑 연결
+	private String planId;
 	
 	// 제품 ID
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -41,17 +47,27 @@ public class WorkOrder {
     @Column(nullable = false)
     private Integer planQty;
     
-    // Lot번호
-//    @Column(nullable = false)
-//    private String lotNo;				=================> 컬럼 삭제
-    
-    // 시작예정일시
+    // 예정시작일시
     @Column(nullable = false)
-    private LocalDateTime startDate;
+    private LocalDateTime planStartDate;
     
-    // 완료예정일시
+    // 실제시작일시
+    @Column
+    private LocalDateTime actStartDate;
+    
+    // 예정완료일시
     @Column(nullable = false)
-    private LocalDateTime endDate;
+    private LocalDateTime planEndDate;
+    
+    // 실제완료일시
+    @Column
+    private LocalDateTime actEndDate;
+    
+	// 공정 ID
+	@Column				// ================================> 라우트 엔티티랑 연결
+	private String routeId;
+	
+	//private String processId;
     
     // 수행 라인
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -76,9 +92,19 @@ public class WorkOrder {
     @Column
     private LocalDateTime updatedDate;
     
+    // 출고여부
+    @Column(nullable = false, columnDefinition = "CHAR(1) DEFAULT 'N'")
+    @Builder.Default
+    private String outboundYn = "N";
+    
     // 비고(특이사항 및 메모)
     @Column
     private String remark;
 	
+    // ======================================
+    // 출고 상태 업데이트
+    public void updateOutboundYn(String outboundYn) {
+    	this.outboundYn = outboundYn;
+    }
 	
 }

@@ -1,5 +1,7 @@
 package com.yeoun.inventory.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,5 +17,8 @@ public interface MaterialOrderRepository extends JpaRepository<MaterialOrder, St
 			WHERE m.orderId LIKE :pattern
 			""")
 	String findMaxOrderId(@Param("pattern") String pattern);
+
+	// 발주 조회
+	Optional<MaterialOrder> findByOrderId(String materialId);
 
 }

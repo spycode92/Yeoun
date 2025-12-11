@@ -197,3 +197,89 @@ body {
 .tui-grid-border-line-bottom {
   border-color: #d9dee3 !important;
 }
+
+/* --------------------------------------------------*/
+/* 페이지 밷지 css*/
+.refresh-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;  /* 양 끝 정렬 */
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 16px;
+    min-width: 260px;                /* 너비 조금 확보 */
+}
+
+/* 텍스트: 글자 크게 + 수평 가운데 느낌 */
+.refresh-badge .badge-text {
+    flex: 1;                         /* 남은 공간 다 차지 */
+    text-align: center;              /* 가운데 정렬 */
+    font-size: 14px;                 /* 글자 키우기 */
+    font-weight: 600;
+}
+
+/* 오른쪽 버튼 영역 묶기 (선택사항: HTML에 wrapper 추가 안 했다면 생략 가능) */
+.refresh-badge .badge-refresh-btn,
+.refresh-badge .badge-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: #ffffff;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* 새로고침 버튼 색 */
+.refresh-badge .badge-refresh-btn {
+    color: rgb(242, 179, 185);
+}
+
+/* 닫기 버튼은 투명 배경 + 흰색 아이콘 */
+.refresh-badge .badge-close-btn {
+    background: transparent;
+    color: #ffffff;
+    padding: 0 4px;
+}
+
+.refresh-badge .badge-refresh-btn i,
+.refresh-badge .badge-close-btn i {
+    font-size: 16px;
+}
+
+.refresh-badge .badge-refresh-btn:hover {
+    background: #ffe6ea;
+}
+
+.refresh-badge .badge-close-btn:hover {
+    opacity: 0.8;
+}
+/* --------------------------------------------------*/
+/* 알림 밷지 설정*/
+.bell-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+#badge_bell {
+  position: absolute;
+  right: -2px;    /* 아이콘 모서리에 맞게 값 조정 */
+  bottom: -2px;
+  color: red;
+  font-size: 10px;
+  line-height: 1;
+  display: none;
+  pointer-events: none;
+}
+
+.alarm-new-badge {
+  display: inline !important;
+  color: red !important;
+  font-weight: 700 !important;
+  border: 1px solid black !important;
+  padding: 0 4px;
+}
+
+/* --------------------------------------------------*/

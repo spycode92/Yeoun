@@ -3,6 +3,7 @@ package com.yeoun.qc.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -10,7 +11,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +22,12 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "QC_RESULT")
+@SequenceGenerator(
+        name = "QC_RESULT_SEQ_GENERATOR",
+        sequenceName = "QC_RESULT_SEQ",   
+        initialValue = 1,
+        allocationSize = 1
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,9 +35,9 @@ import lombok.Setter;
 public class QcResult {
 	
 	// QC 결과 ID
-	@Id
-	@Column(name = "QC_RESULT_ID", length = 20)
-	private String qcResultId;
+	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "QC_RESULT_SEQ_GENERATOR")
+	@Column(name = "QC_RESULT_ID")
+	private Long qcResultId;
 	
 	// 작업지시번호
 	@Column(name = "ORDER_ID", length = 16, nullable = false)
@@ -38,11 +48,11 @@ public class QcResult {
 	private String lotNo;
 	
 	// 검사일자
-	@Column(name = "INSPECTION_DATE", nullable = false)
+	@Column(name = "INSPECTION_DATE")
 	private LocalDate inspectionDate;
 	 
 	// 검사자
-	@Column(name = "INSPECTOR_ID", length = 7, nullable = false)
+	@Column(name = "INSPECTOR_ID", length = 7)
 	private String inspectorId;
 	
 	// 검사수량

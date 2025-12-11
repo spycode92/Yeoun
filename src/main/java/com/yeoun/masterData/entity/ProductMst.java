@@ -1,5 +1,6 @@
 package com.yeoun.masterData.entity;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -20,13 +21,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
-public class ProductMst {
+public class ProductMst implements Serializable{
+	
 		@Id
 		@Column(name="PRD_ID", length = 50)
 		private String prdId; //제품id
 		
+		@Column(name="ITEM_NAME", length = 50)
+		private String itemName;//품목명
+		
 		@Column(name="PRD_NAME", length = 100)
-		private String prdName; //제품명
+		private String prdName; //제품명	
 		
 		@Column(name="PRD_CAT", length = 50)
 		private String prdCat; //제품유형
@@ -41,7 +46,7 @@ public class ProductMst {
 		private String prdStatus; //상태
 
 		@Column(name="EFFECTIVE_DATE")
-		private Long effectiveDate; //유효일자
+		private Integer effectiveDate; //유효일자
 		
 		@Column(name = "UNIT_PRICE", precision = 18, scale = 2)
 		private BigDecimal unitPrice;
@@ -61,7 +66,6 @@ public class ProductMst {
 		
 		@Column(name="UPDATED_DATE")
 		private LocalDate updatedDate; //수정일시
-		
 		
 
 	}

@@ -32,6 +32,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     	// 클라이언트가 "/pub/xxx" 형태로 전송한 메세지를 @MessagingMapping 어노테이션으로 라우팅(전달)
         registry.setApplicationDestinationPrefixes("/app");
         // 메세지 브로커(서버측)가 "/sub/xxx" 형태로 발행한 메세지를 구독자(xxx)에게 전달하기 위한 토픽 주소를 브로커로 지정
-        registry.enableSimpleBroker("/topic", "/queue");
+        registry.enableSimpleBroker("/topic", "/queue", "/alarm");
     }
 }

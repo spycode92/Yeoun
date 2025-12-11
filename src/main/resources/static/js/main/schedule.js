@@ -785,7 +785,7 @@ async function initNoticeGrid(data) {
 	    ]
 	});
 	// 그리드 데이터 추가
-	console.log(data);
+//	console.log(data);
 	noticeGrid.resetData(data);
 //	console.log(noticeGrid.gridEl, "노티스그리드");
 	const rows = noticeGrid.getData();
@@ -889,7 +889,7 @@ async function initApprovalGrid(data) {
 			return;
 		}
 		selectedApprovalId = approvalId;
-		console.log("rowData : ", rowData);
+//		console.log("rowData : ", rowData);
 		
 //		alert("선택된 approvalId : " + approvalId);
 //		const modalEl = document.getElementById('show-notice');
@@ -933,7 +933,7 @@ async function initApprovalGrid(data) {
 		  document.getElementById('toDeptForm').style.display = 'block';
 		  document.getElementById('to-dept-id').value = rowData.toDeptId;
 		}
-		console.log(rowData.empId);
+//		console.log(rowData.empId);
 		document.getElementById('Drafting').innerHTML = rowData.formType;
 //		console.log(rowData.approvaTitle);
 		document.getElementById('today-date').innerText = toDateStr(rowData.createdDate) ;//결재 작성날짜 = 결재시작일

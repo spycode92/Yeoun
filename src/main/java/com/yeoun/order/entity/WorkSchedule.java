@@ -2,6 +2,7 @@ package com.yeoun.order.entity;
 
 import java.time.LocalDateTime;
 
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.masterData.entity.ProdLine;
@@ -17,14 +18,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "WORK_SCHEDULE")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class WorkSchedule {
 	
 	// 스케줄 고유 시퀀스

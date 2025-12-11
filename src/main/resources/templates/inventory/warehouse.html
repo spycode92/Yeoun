@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- 1. 스타일 정의 (fragment로 묶음) -->
+<div th:fragment="warehouseStyles">
+    <style>
+        /* 그리드 셀 스타일 */
+        .grid-cell {
+            width: 45px;
+            height: 45px;
+            background-color: #fff;
+            border: 1px solid #d9dee3;
+            border-radius: 0.375rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #697a8d;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .grid-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+            border-color: #696cff;
+            color: #696cff;
+        }
+        .grid-cell.has-stock {
+            background-color: #e7e7ff;
+            border-color: #696cff;
+            color: #696cff;
+        }
+    </style>
+</div>
+
+<!-- 2. 본문 내용 (Konva 컨테이너 및 모달들) -->
+<div th:fragment="warehouseContent">
+    <div class="card mb-4">
+        <h5 class="card-header">창고</h5>
+        <div class="">
+            <!-- Konva 캔버스가 그려질 컨테이너 -->
+            <div id="container" style="width: 100%; min-height: 100px;"></div>
+        </div>
+    </div>
+
+    <!-- 1. Rack 상세 보기 모달 -->
+    <div class="modal fade" id="rackDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="text-center w-100">
+                         <span id="rackInfoBadge" class="badge bg-label-primary p-2 fs-6"></span> 
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="border rounded p-3 bg-light">
+                        <div id="rackGridContainer" class="d-flex flex-wrap justify-content-center gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 재고 상세 조회 모달 -->
+    <div class="modal fade" id="stockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="stockModalTitle">위치 상세 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label text-muted">위치 ID</label>
+                            <input type="text" class="form-control" id="modalLocationId" readonly>
+                        </div>
+                        <div class="col">
+                            <label class="form-label text-muted">구역 정보</label>
+                            <input type="text" class="form-control" id="modalZoneRack" readonly>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center align-middle" id="stockTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>상품코드</th>
+                                    <th>품목명</th>
+                                    <th>현재수량</th>
+                                    <th>상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. 스크립트 (Konva 로드 및 JS 파일) -->
+<div th:fragment="warehouseScripts">
+    <script src="https://unpkg.com/konva@9.3.3/konva.min.js"></script>
+    <script th:src="@{/js/inventory/warehouse.js}"></script>
+    <!-- inventoryMove.js는 이미 대시보드에 포함되어 있을 수 있으니 확인 후 추가 -->
+</div>
+</html>

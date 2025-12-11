@@ -6,13 +6,36 @@
     <title>재고 관리 - 재고 리스트</title>
     <!-- Inventory Specific CSS -->
     <link rel="stylesheet" th:href="@{/css/inventory/inventory.css}" />
+    <style type="text/css">
+       	#loading-overlay{
+    		display: none;
+    	}
+	    .spinner-border {
+		  display: inline-block;
+		  width: 2rem;
+		  height: 2rem;
+		  vertical-align: -0.125em;
+		  border: 0.25em solid currentColor;
+		  border-right-color: transparent;
+		  border-radius: 50%;
+		  animation: spinner-border 0.75s linear infinite;
+		}
+		
+		@keyframes spinner-border {
+		  to { transform: rotate(360deg); }
+		}
+		
+		.spinner-border.text-primary {
+		  color: #0d6efd !important;
+		}
+	</style>
 </head>
 
 <th:block layout:fragment="content">
 
     <div class="container-xxl flex-grow-1 container-p-y">
         <h3 class="fw-bold py-3 mb-4">재고 목록</h3>
-
+		<!-- 스피너 -->
         <!-- Search Filter -->
         <div class="card mb-4">
             <div class="card-body">
@@ -46,26 +69,21 @@
                                 <label class="form-label" for="searchCategory">카테고리</label>
                                 <select class="form-select" id="searchCategory">
                                     <option value="">전체</option>
+                                    <option value="FG">상품</option>
                                     <option value="RAW">원자재</option>
-                                    <option value="PRODUCT">완제품</option>
+                                    <option value="SUB">부자재</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label" for="searchZone">Zone</label>
                                 <select class="form-select" id="searchZone">
                                     <option value="">전체</option>
-                                    <option value="A">A존</option>
-                                    <option value="B">B존</option>
-                                    <option value="C">C존</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label" for="searchRack">Rack</label>
                                 <select class="form-select" id="searchRack">
                                     <option value="">전체</option>
-                                    <option value="01">01</option>
-                                    <option value="02">02</option>
-                                    <option value="03">03</option>
                                 </select>
                             </div>
                         </div>
@@ -107,6 +125,17 @@
                 </div>
             </div>
             <div class="card-body">
+       	   		<div id="loading-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; 
+				    background:rgba(255,255,255,0.6); 
+				    z-index:99; text-align:center; display:flex; 
+				    align-items:center; justify-content:center;">
+					<div style="margin-top:30vh;">
+						<div class="spinner-border text-primary" role="status">
+						</div>
+						<br>
+						<span class="visually">데이터 불러오는 중...</span>
+					</div>
+				</div>
                 <div id="inventoryGrid"></div>
             </div>
         </div>

@@ -1,0 +1,186 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 메시지 -->
+    <div id="msgHolder" th:if="${msg}" th:data-msg="${msg}"></div>
+
+   <h2 class="mb-3">
+    협력사 상세 정보 - 
+    <span th:text="${client.clientName}" style="color:#4a63e7;"></span>
+</h2>
+
+
+    <!-- 돌아가기 -->
+    <a class="btn btn-outline-secondary mb-3" th:href="@{/sales/client(type='SUPPLIER')}">
+        ← 목록으로
+    </a>
+
+    <!-- ===========================================================
+         탭
+    ============================================================ -->
+    <ul class="nav nav-tabs mb-3" id="supplierTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#basicTab">기본 정보</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#settleTab">정산 정보</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#itemTab">취급 품목</a>
+        </li>
+    </ul>
+
+    <!-- ===========================================================
+         탭 콘텐츠
+    ============================================================ -->
+    <div class="tab-content">
+
+
+        <!-- =============== ① 기본 정보 =============== -->
+        <div id="basicTab" class="tab-pane fade show active">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">기본 정보</h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label">협력사명</label>
+                            <input class="form-control" th:value="${client.clientName}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">사업자등록번호</label>
+                            <input class="form-control" th:value="${client.businessNo}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">대표자명</label>
+                            <input class="form-control" th:value="${client.ceoName}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">전화번호</label>
+                            <input class="form-control" th:value="${client.managerTel}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">이메일</label>
+                            <input class="form-control" th:value="${client.managerEmail}" readonly>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label">주소</label>
+                            <input class="form-control"
+                                   th:value="${client.addr} + ' ' + ${client.addrDetail}" readonly>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- =============== ② 정산 정보 =============== -->
+        <div id="settleTab" class="tab-pane fade">
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="card-title mb-3">정산 정보</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">은행명</label>
+                            <input class="form-control" th:value="${client.bankName}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">계좌번호</label>
+                            <input class="form-control" th:value="${client.accountNumber}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">예금주</label>
+                            <input class="form-control" th:value="${client.accountName}" readonly>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+<!-- =====================================================
+     ③ 취급 품목 (AG-GRID + 내부 추가 폼)
+===================================================== -->
+<div id="itemTab" class="tab-pane fade">
+
+
+    <div class="d-flex justify-content-between mb-3">
+        <h5>취급 품목 정보</h5>
+       <a th:href="@{/sales/client/{id}/items/create(id=${client.clientId})}" 
+        class="btn btn-primary">+ 품목 추가</a>
+
+    </div>
+
+    <!-- ▶ 기존 AG GRID -->
+    <div class="card">
+        <div class="card-body">
+            <div id="supplierItemGrid" class="ag-theme-quartz" style="height: 500px;"></div>
+        </div>
+    </div>
+
+</div>
+
+        
+   </div>
+   </div>
+        
+
+<!-- ===========================================================
+     JS 데이터 전달
+=========================================================== -->
+<script th:inline="javascript">
+    window.clientId = /*[[${client.clientId}]]*/ '';
+    window.initialItemList = /*[[${items}]]*/ [];
+</script>
+
+<!-- AG Grid -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css"/>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+<!-- 상세 JS  -->
+<script src="/js/sales/supplierDetail.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const url = new URL(window.location.href);
+    const tab = url.searchParams.get("tab");
+
+    if (tab === "item") {
+        // 기본 active 제거
+        document.querySelector("#supplierTabs .nav-link.active")
+            ?.classList.remove("active");
+
+        document.querySelector("#basicTab").classList.remove("show", "active");
+
+        // 아이템탭 활성화
+        document.querySelector("a[href='#itemTab']").classList.add("active");
+        document.querySelector("#itemTab").classList.add("show", "active");
+    }
+});
+</script>
+
+
+</th:block>
+</th:block>

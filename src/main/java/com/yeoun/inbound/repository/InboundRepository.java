@@ -1,5 +1,7 @@
 package com.yeoun.inbound.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +17,7 @@ public interface InboundRepository extends JpaRepository<Inbound, String> {
 			WHERE i.inboundId LIKE :pattern
 			""")
 	String findMaxOrderId(@Param("pattern") String pattern);
+
+	// 입고 조회
+	Optional<Inbound> findByinboundId(String inboundId);
 }

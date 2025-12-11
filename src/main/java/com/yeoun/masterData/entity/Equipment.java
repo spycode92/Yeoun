@@ -20,8 +20,11 @@ import lombok.Setter;
 @EntityListeners(AuditingEntityListener.class)
 public class Equipment {
 	
-	@Id @Column(nullable = false, length = 6)
+	@Id @Column(nullable = false)
 	private String equipId;
+	
+	@Column(nullable = false)
+	private String koName;
 	
 	@Column(nullable = false)
 	private String equipName;

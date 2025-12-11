@@ -41,7 +41,7 @@ public class QcResultDetail {
     private String measureValue;
 	
 	// 판정
-	@Column(name = "RESULT", length = 10, nullable = false)
+	@Column(name = "RESULT", length = 10)
     private String result;
 	
 	// 비고

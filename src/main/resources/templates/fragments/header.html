@@ -26,15 +26,20 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3"> 
-	              	<i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
-	              	<span id="badge_bell"></span>
-	                <ul class="dropdown-menu">
-					  <li><a class="dropdown-item" href="#">bell</a></li>
-					  <li><a class="dropdown-item" href="#">알림</a></li>
-					  <li><a class="dropdown-item" href="#">공지사항</a></li>
-					  <li><hr class="dropdown-divider"></li>
-					  <li><a class="dropdown-item" href="#">집중</a></li>
-					</ul>
+              		<div class="bell-wrapper">
+		              	<i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
+		              	<span id="badge_bell" >●</span>
+		                <ul class="dropdown-menu" >
+						  <li><a class="dropdown-item" href="#">bell</a></li>
+						  <li><a class="dropdown-item alarm-list" href="/alarm">
+						  	알림
+						  	<span class="alarm-new-badge">NEW</span>
+						  </a></li>
+						  <li><a class="dropdown-item" href="#">공지사항</a></li>
+						  <li><hr class="dropdown-divider"></li>
+						  <li><a class="dropdown-item" href="#">집중</a></li>
+						</ul>
+              		</div>
                 </li>
               	<li class="nav-item lh-1 me-3">
               		<i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>

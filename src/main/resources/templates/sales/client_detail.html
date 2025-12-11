@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+<style>
+    /* 전체 카드 */
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-header {
+        background: #1f4e79;
+        color: white;
+        font-size: 16px;
+        padding: 14px 20px;
+        border-radius: 10px 10px 0 0;
+        font-weight: 600;
+    }
+
+    /* 행 전체 박스(table row 역할) */
+    .info-row {
+        display: grid;
+        grid-template-columns: 180px 1fr;  /* 왼쪽 라벨 / 오른쪽 값 */
+        padding: 0;
+        border-bottom: 1px solid #e5e7eb;
+        min-height: 45px;
+        align-items: center;
+    }
+
+    /* 왼쪽 라벨(th 역할) */
+    .info-label {
+        background: #f6f7fb;
+        font-weight: 600;
+        color: #333;
+        padding: 12px 14px;
+        border-right: 1px solid #e2e4e7;
+        border-bottom: 1px solid #e2e4e7;
+    }
+
+    /* 오른쪽 값(td 역할) */
+    .info-value {
+        padding: 12px 14px;
+        border-bottom: 1px solid #e2e4e7;
+        color: #333;
+        background: white;
+    }
+
+    /* 제목 */
+    .section-title {
+        display: none; /* 기존 텍스트 제목 숨기기 (표 디자인과 충돌) */
+    }
+
+    /* view/edit 모드 숨김 처리 */
+    .edit-mode.d-none, .view-mode.d-none {
+        display: none !important;
+    }
+
+    /* input/select 폼 */
+    .info-value input,
+    .info-value select {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+        background: #fff;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h3 class="mb-4 fw-bold">거래처 상세정보</h3>
+
+    <div class="row g-4">
+
+        <!-- ===============================
+              LEFT CARD — 기본 정보
+        =============================== -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>기본 정보</strong>
+                   
+                </div>
+
+                <div class="card-body">
+
+                    <input type="hidden" id="clientId" th:value="${client.clientId}"/>
+
+                    <div class="info-row">
+				    <div class="info-label">거래처명</div>
+				    <div class="info-value">
+				        <span class="view-mode" th:text="${client.clientName}"></span>
+				        <input class="form-control edit-mode d-none" id="clientName" 
+				               th:value="${client.clientName}" disabled>
+				    </div>
+				</div>
+
+
+                    <div class="info-row">
+                        <div class="info-label">유형</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.clientType=='CUSTOMER'?'거래처':'협력사'}"></span>
+                            <select class="form-select edit-mode d-none" id="clientType" disabled>
+                                <option value="CUSTOMER" th:selected="${client.clientType=='CUSTOMER'}">거래처</option>
+                                <option value="SUPPLIER" th:selected="${client.clientType=='SUPPLIER'}">협력사</option>
+                            </select>
+                        </div>
+                    </div>
+
+                   <div class="info-row">
+			    <div class="info-label">사업자번호</div>
+			    <div class="info-value">
+			        <span class="view-mode" th:text="${client.businessNo}"></span>
+			        <input class="form-control edit-mode d-none" id="businessNo" 
+			               th:value="${client.businessNo}" disabled>
+			    </div>
+			</div>
+
+
+                    <div class="info-row">
+                        <div class="info-label">대표자</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.ceoName}"></span>
+                            <input class="form-control edit-mode d-none" id="ceoName" th:value="${client.ceoName}">
+                        </div>
+                    </div>
+
+                    <!-- 계좌 정보 -->
+                    <div class="info-row">
+                        <div class="info-label">은행명</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.bankName}"></span>
+                            <input class="form-control edit-mode d-none" id="bankName" th:value="${client.bankName}">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">계좌번호</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.accountNumber}"></span>
+                            <input class="form-control edit-mode d-none" id="accountNumber" th:value="${client.accountNumber}">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">예금주</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.accountName}"></span>
+                            <input class="form-control edit-mode d-none" id="accountName" th:value="${client.accountName}">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">상태</div>
+                        <div class="info-value">
+                            <span class="view-mode badge bg-info"
+                                  th:text="${client.statusCode=='ACTIVE'?'활성':'비활성'}"></span>
+
+                            <select class="form-select edit-mode d-none" id="statusCode">
+                                <option value="ACTIVE" th:selected="${client.statusCode=='ACTIVE'}">활성</option>
+                                <option value="INACTIVE" th:selected="${client.statusCode=='INACTIVE'}">비활성</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ===============================
+              RIGHT CARD — 주소 + 담당자 정보
+        =============================== -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <strong>주소 및 담당자 정보</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="info-row">
+                        <div class="info-label">담당자명</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.managerName}"></span>
+                            <input class="form-control edit-mode d-none" id="managerName" th:value="${client.managerName}">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">부서</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.managerDept}"></span>
+                            <input class="form-control edit-mode d-none" id="managerDept" th:value="${client.managerDept}">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">연락처</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.managerTel}"></span>
+                            <input class="form-control edit-mode d-none" id="managerTel" th:value="${client.managerTel}">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">이메일</div>
+                        <div class="info-value">
+                            <span class="view-mode" th:text="${client.managerEmail}"></span>
+                            <input class="form-control edit-mode d-none" id="managerEmail" th:value="${client.managerEmail}">
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+    <div class="info-label">우편번호</div>
+    <div class="info-value">
+        <span class="view-mode" th:text="${client.postCode}"></span>
+        <input class="form-control edit-mode d-none" id="postCode" th:value="${client.postCode}">
+    </div>
+</div>
+                    
+
+                    <div class="info-row">                      
+                        <div class="info-label">주소</div>
+                        <div class="info-value">
+                            <span class="view-mode">
+                                <span th:text="${client.addr}"></span>
+                                <span th:text="${client.addrDetail}"></span>
+                            </span>
+
+                            <div class="edit-mode d-none">
+                                <div class="input-group mb-2">
+                                    <input class="form-control" id="addr" th:value="${client.addr}">
+                                    <button type="button" class="btn btn-outline-primary" onclick="searchAddress()">검색</button>
+                                </div>
+                                <input class="form-control" id="addrDetail" th:value="${client.addrDetail}">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+ <div class="text-end mt-3">
+                        <button id="btnEdit" class="btn btn-primary" onclick="enableEdit()">수정</button>
+                        <button id="btnSave" class="btn btn-success d-none" onclick="saveClient()">저장</button>
+                        <button id="btnCancel" class="btn btn-secondary d-none" onclick="cancelEdit()">취소</button>
+                    
+    
+
+   
+        <a href="/sales/client?type=CUSTOMER" class="btn btn-outline-secondary">목록으로</a>
+        </div>
+    </div>
+    </div>
+
+</div>
+
+
+
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="/js/sales/client_detail.js"></script>
+
+</th:block>
+</html>

@@ -17,7 +17,7 @@
             </li>
             <!-- 공지사항 -->
             <li class="menu-item" id="notice">
-                <a href="/notices" class="menu-link">
+                <a href="/notice" class="menu-link">
                     <i class="fa-solid fa-bullhorn"></i>
                     <div data-i18n="Analytics">공지사항</div>
                 </a>
@@ -143,8 +143,13 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item">
-                        <a th:href="@{/masterData/product_bom}" class="menu-link" target="_blank">
-                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">제품/BOM 정보관리</div>
+                        <a th:href="@{/masterData/product}" class="menu-link" target="_blank">
+                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">완제품/원재료</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a th:href="@{/masterData/bom_stock}" class="menu-link" target="_blank">
+                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">BOM정보/안전재고</div>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -155,6 +160,11 @@
                     <li class="menu-item">
                         <a th:href="@{/masterData/process_mst}" class="menu-link" target="_blank">
                             <div data-i18n="Process Route/Process Code Management" class="menu-link-sub">공정라우트/공정코드관리</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a th:href="@{/equipment/master}" class="menu-link" target="_blank">
+                            <div data-i18n="Equipment/Line" class="menu-link-sub">설비/라인관리</div>
                         </a>
                     </li>
                 </ul>
@@ -191,11 +201,15 @@
                     </li>
                     
                     <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/inventory/inbound/list}" class="menu-link">
+                        <a th:href="@{/inventory/inbound}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">입고관리</div>
                         </a>
                     </li>
-
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/inventory/outbound/list}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">출고관리</div>
+                        </a>
+                    </li>
                 </ul>
             </li>
               
@@ -217,7 +231,7 @@
 	                </li>
                 
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                    <a th:href="@{/sales/shipments}" class="menu-link">
+	                    <a th:href="@{/sales/shipment}" class="menu-link">
 	                        <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
 	                    </a>
 	                </li>
@@ -230,8 +244,8 @@
                 </a>               
                 
                 <ul class="menu-sub">
-                <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/plan/list}" class="menu-link">
+               		<li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/production/plan}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">생산계획</div>
                         </a>
                     </li>
@@ -242,14 +256,28 @@
                     </li>
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a th:href="@{/order/schedule}" class="menu-link">
-                            <div data-i18n="Menu3" class="menu-link-sub">작업자 스케줄</div>
+                            <div data-i18n="Menu3" class="menu-link-sub">작업자메뉴</div>
                         </a>
                     </li>
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/order/line}" class="menu-link">
-                            <div data-i18n="Menu4" class="menu-link-sub">라인 운영 현황</div>
-                        </a>
-                    </li>
+                </ul>
+            </li>
+            
+            <!-- 설비 관리 -->
+            <li class="menu-item">
+            	<a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Equipment management">설비관리</div>
+                </a>
+                <ul class="menu-sub">
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                   <a th:href="@{/equipment/list}" class="menu-link">
+	                       <div data-i18n="Menu1" class="menu-link-sub">설비현황</div>
+	                   </a>
+	                </li>
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                   <a th:href="@{/equipment/line}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">라인현황</div>
+	                   </a>
+	                </li>
                 </ul>
             </li>
             
@@ -259,6 +287,11 @@
                     <div data-i18n="Process management">공정관리</div>
                 </a>
                 <ul class="menu-sub">
+               		<li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/production/dashboard}" class="menu-link">
+                            <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
+                        </a>
+                    </li>
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
 	                     <a th:href="@{/process/status}" class="menu-link">
 	                        <div data-i18n="Menu1" class="menu-link-sub">공정 현황</div>

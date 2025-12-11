@@ -1,0 +1,89 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+	
+	<body>
+		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+			<button class="btn btn-outline-primary mb-3" onclick="history.back()">← 목록으로</button>
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<h2>출고 상세 정보</h2>
+				<th:block th:if="${outboundOrderDTO.status == 'WAITING'}">
+					<button class="btn btn-primary" id="completePrdOutboundBtn">출고 완료</button>
+				</th:block>
+			</div>
+			<div class="card p-4 mb-5">
+				<div class="card-body">
+					 <div class="row row-cols-3 g-4">
+					 	<input type="hidden" id="outboundId" th:value="${outboundOrderDTO.outboundId}"/>
+					    <input type="hidden" id="shipmentId" th:value="${outboundOrderDTO.shipmentId}"/>
+						<div class="col">
+						    <div class="text-secondary mb-1">출하지시서</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.shipmentId}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">요청자</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.createdName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">담당자</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.processEmpName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">출고예정일</div>
+						    <div class="fw-semibold" th:text="${#temporals.format(outboundOrderDTO.startDate, 'yyyy-MM-dd')}"></div>
+						</div>
+						<div class="col">
+							<div class="text-secondary mb-1">상태</div>
+							<div>
+							    <span th:if="${outboundOrderDTO.status == 'WAITING'}" class="badge bg-warning text-dark">출고대기</span>
+							    <span th:if="${outboundOrderDTO.status == 'COMPLETED'}" class="badge bg-success">출고완료</span>
+							</div>
+						</div>
+					 </div>
+				</div>
+			</div>
+			<div>
+			<div class="card mb-5">
+				<div class="card-header">
+					<h5 class="mb-0">출고 품목 목록</h5>
+				</div>
+				<div class="card-body p-0">
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover mb-0 text-center">
+							<thead class="table-light">
+								<tr class="text-center">
+									<th>제품코드</th>
+									<th>제품명</th>
+									<th>필요수량</th>
+									<th>출고수량</th>
+									<th>창고위치</th>
+									<th>LOT번호</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="item, iterStat : ${outboundOrderDTO.items}">
+									<td th:text="${item.prdId}" class="prdId"></td>
+									<td th:text="${item.prdName}"></td>
+									<td th:text="${item.shipmentQty}"></td>
+									<td th:text="${item.orderqQty}" th:attr="data-index=${iterStat.index}" class="outboundQty"></td>
+									<td th:text="${item.locationId}" class="locationId" th:attr="data-index=${iterStat.index}"></td>
+									<td th:text="${item.lotNo}" class="lotNo"></td>
+									<input type="hidden" class="ivId" th:value="${item.ivId}">
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				
+				</div>
+			</div>
+			</div>
+		</div>
+		<th:block layout:fragment="myScript">
+			<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
+			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/outbound/productGrid.js"></script>
+			<script src="/js/outbound/productItem.js"></script>
+		</th:block>
+	</body>
+</th:block>

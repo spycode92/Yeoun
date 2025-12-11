@@ -4,129 +4,350 @@
 
 <head>
     <title>재고 관리 - 대시보드</title>
-    <!-- Inventory Specific CSS -->
     <link rel="stylesheet" th:href="@{/css/inventory/inventory.css}" />
+    <style type="text/css">
+	    .spinner-border {
+		  display: inline-block;
+		  width: 2rem;
+		  height: 2rem;
+		  vertical-align: -0.125em;
+		  border: 0.25em solid currentColor;
+		  border-right-color: transparent;
+		  border-radius: 50%;
+		  animation: spinner-border 0.75s linear infinite;
+		}
+		
+		@keyframes spinner-border {
+		  to { transform: rotate(360deg); }
+		}
+		
+		.spinner-border.text-primary {
+		  color: #0d6efd !important;
+		}
+    </style>
+     <th:block th:replace="~{inventory/warehouse :: warehouseStyles}"></th:block>
 </head>
 
 <th:block layout:fragment="content">
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">재고 관리 /</span> 대시보드</h4>
-
+		<!-- 스피너 -->
+		<div id="loading-overlay" style="display:none; 
+		    position:absolute; top:0; left:0; width:100%; height:100%; 
+		    background:rgba(255,255,255,0.6); 
+		    z-index:99; text-align:center; display:flex; 
+		    align-items:center; justify-content:center;">
+			<div style="margin-top:30vh;">
+				<div class="spinner-border text-primary" role="status">
+				</div>
+				<br>
+				<span class="visually">데이터 불러오는 중...</span>
+			</div>
+		</div>
         <!-- Expiry Alert -->
-        <div class="alert alert-danger d-flex align-items-center" role="alert" id="expiryAlert">
-            <i class='bx bx-error me-2'></i>
-            <div>
-                <strong>유통기한 임박!</strong> 7일 이내 만료되는 품목이 <span class="fw-bold">3</span>건 있습니다.
-            </div>
-        </div>
+<!--         <div class="alert alert-danger d-flex align-items-center" role="alert" id="expiryAlert"> -->
+<!--             <i class='bx bx-error me-2'></i> -->
+<!--             <div> -->
+<!--                 <strong>유통기한 임박!</strong> 7일 이내 만료되는 품목이 <span class="fw-bold">3</span>건 있습니다. -->
+<!--             </div> -->
+<!--         </div> -->
 
         <div class="row">
-            <!-- Summary Cards -->
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <!-- 통계카드 -->
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
                         <span class="d-block mb-1">금일 입고 예정</span>
-                        <h3 class="card-title text-nowrap mb-2">12</h3>
-                        <small class="text-success fw-semibold"><i class='bx bx-up-arrow-alt'></i> 처리: 8</small>
+                        <h3 class="card-title text-nowrap mb-2" id="todayInboundTotal"></h3>
+                        <small class="text-success fw-semibold" id="todayInboundComplete"></small>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
                         <span class="d-block mb-1">금일 출고 지시</span>
-                        <h3 class="card-title text-nowrap mb-2">5</h3>
-                        <small class="text-danger fw-semibold"><i class='bx bx-down-arrow-alt'></i> 처리: 2</small>
+                        <h3 class="card-title text-nowrap mb-2" id="todayOutboundTotal"></h3>
+                        <small class="text-danger fw-semibold" id="todayOutboundComplete"></small>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
-                        <span class="d-block mb-1">안전재고 미달</span>
-                        <h3 class="card-title text-nowrap mb-2">2</h3>
-                        <small class="text-warning fw-semibold">발주 필요</small>
+                        <span class="d-block mb-1">발주 필요</span>
+                        <h3 class="card-title text-nowrap mb-2" id="orderCnt"></h3>
+                        <small id="orderStatus"></small>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
-                        <span class="d-block mb-1">악성 재고 (>1년)</span>
-                        <h3 class="card-title text-nowrap mb-2">15</h3>
-                        <small class="text-muted">확인 요망</small>
+                        <span class="d-block mb-1">임박 재고(<30일)</span>
+                        <h3 class="card-title text-nowrap mb-2" id="expireCnt"></h3>
+                        <small class="text-danger" id="disposalCnt"></small>
                     </div>
                 </div>
             </div>
         </div>
+        <th:block>
+        	 <th:block th:replace="~{inventory/warehouse :: warehouseContent}"></th:block>
+        </th:block>
+		<!-- 출고등록하지않은 작업지시서리스트 -->
+        <div class="card mb-4" id="outboundNOrderCard">
+            <h5 class="card-header">미 등록 출고 리스트</h5>
+            <div id="outboundNOrderGrid" class="mb-3"></div>
+            <div id="outboundShipmentGrid" ></div>
+        </div>
 
-        <div class="row">
-            <!-- Warehouse Usage Chart -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="card-title m-0 me-2">창고 사용률</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="warehouseUsageChart"></div>
-                    </div>
+
+        <!-- 재고 입고/출고/폐기 차트 -->
+        <div class="mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+              <div class="btn-group btn-group-sm" role="group" aria-label="기간 선택">
+                  <button id="btnMonth" type="button" class="btn btn-outline-primary chart-type active">월</button>
+                  <button id="btnWeek"  type="button" class="btn btn-outline-primary chart-type">주</button>
+                  <button id="btnDay"   type="button" class="btn btn-outline-primary chart-type">일</button>
+              </div>
+                    <h5 class="card-title m-0 text-center flex-grow-1">재고 현황 추적</h5>
                 </div>
-            </div>
-
-            <!-- In/Out Trends Chart -->
-            <div class="col-md-6 col-lg-8 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="card-title m-0 me-2">입출고 추이 (주간)</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="trendChart"></div>
-                    </div>
+                <div class="card-body">
+                    <div id="trendChart"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Bad Stock List -->
-        <div class="card">
-            <h5 class="card-header">장기 미출고 재고 (악성 재고)</h5>
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>상품명</th>
-                            <th>LOT 번호</th>
-                            <th>입고일</th>
-                            <th>경과일</th>
-                            <th>위치</th>
-                            <th>수량</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        <tr>
-                            <td><strong>풀향 300ml</strong></td>
-                            <td>LOT-20230101-001</td>
-                            <td>2023-01-01</td>
-                            <td><span class="badge bg-label-danger">600일</span></td>
-                            <td>WH1-A-01</td>
-                            <td>500ea</td>
-                        </tr>
-                        <tr>
-                            <td><strong>고체향수</strong></td>
-                            <td>LOT-20230515-002</td>
-                            <td>2023-05-15</td>
-                            <td><span class="badge bg-label-warning">450일</span></td>
-                            <td>WH2-B-05</td>
-                            <td>200ea</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- 안전재고 미달 리스트 -->
+        <div class="card mb-4" id="safetyStockCard">
+            <h5 class="card-header">발주 필요 재고 리스트</h5>
+            <div id="safetyStockGrid" ></div>
         </div>
+		<!-- 유통기한 관리 리스트 -->
+		<div class="card mb-4" id="expireDisposalCard">
+		    <h5 class="card-header">유통기한 임박/폐기 재고 리스트</h5>
+		    <div id="expireDisposalGrid"></div>
+		</div>
     </div>
+
+	<!-- 모달창 삽입 -->
+	<th:block th:insert="~{inventory/modal/inventoryDetailModal}"></th:block>
+	<th:block th:insert="~{inventory/modal/moveStockModal}"></th:block>
+	<th:block th:insert="~{inventory/modal/adjustQtyModal}"></th:block>
+	<th:block th:insert="~{inventory/modal/disposalModal}"></th:block>
+	
+	<!-- 발주 모달 -->
+	<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
+		<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalCenterTitle">발주등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div id="purchaseForm">
+						<div class="row mb-6">
+							<div class="col mb-0">
+								<label class="form-label">거래처</label>
+								<div class="position-relative" >
+								    <input type="text" class="form-control" id="clientSearch" placeholder="거래처 검색">
+								    <ul class="list-group position-absolute w-100 shadow-sm mt-1 d-none" id="clientResult"></ul>
+								</div>
+								
+								<input type="hidden" name="clientId" id="clientId">
+							</div>
+							<div class="col mb-0">
+								<label class="form-label">담당자</label>
+								<input class="form-control" type="text" id="managerName" name="managerName" readonly/>
+							</div>
+						</div>
+						<div class="row mb-6">
+							<div class="col mb-0">
+								<label class="form-label">발주품목</label>
+								<select class="form-select" name="materialOrderItem" id="itemSelect" disabled></select>
+							</div>
+							<div class="col mb-0">
+								<label class="form-label">예상도착일</label>
+								<input class="form-control" type="date" id="dueDate" name="dueDate"/>
+							</div>
+						</div>
+						<hr>
+						<table class="table" id="orderTable">
+							<thead>
+								<tr>
+									<th>품목명</th>
+									<th>최소수량</th>
+									<th>단위</th>
+									<th>주문수량</th>
+									<th>단가</th>
+									<th>공급가액</th>
+									<th>부가세</th>
+									<th>합계</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+						<div class="modal-footer mt-3 p-0">
+							<button type="button" class="btn btn-primary" onclick="submitOrder()">등록</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!--작업지시서 출고등록 모달 -->
+	<div class="modal fade" id="matObModal" tabindex="-1"
+		style="display: none;" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered"
+			role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalCenterTitle">출고등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div id="outboundForm">
+						<!-- 작업지시서 / 담당자 -->
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<label class="form-label fw-bold">작업지시서</label> 
+								<select
+									class="form-select" id="matObWorkOrderSelect">
+									<option value="">작업지시서를 선택하세요</option>
+								</select>
+								<input type="hidden" id="matObWorkId"/>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label fw-bold">담당자</label> 
+								<input class="form-control" type="text" id="matObManagerName" readonly>
+								<input type="hidden" id="matObManagerId"/>
+							</div>
+						</div>
+						<!-- 생산 제품 선택 -->
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<label class="form-label fw-bold">생산 제품</label>
+								<input class="form-control" type="text" id="matObProductName" readonly>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">예상도착일</label>
+								<input class="form-control" type="date" id="matObDueDate" name="dueDate"/>
+							</div>
+						</div>
+						<!-- 출고 등록 품목 -->
+						<h6 class="fw-bold mb-3">출고 등록 품목</h6>
+						<div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+							<table class="table table-bordered align-middle mb-0" id="matObBomTable">
+								<colgroup>
+									<col style="width: 15%;">
+								 	<col style="width: 25%;">
+						            <col style="width: 10%;">
+						            <col style="width: 15%;">
+						            <col style="width: 15%;">
+						            <col style="width: 20%;">
+								</colgroup>
+								<thead class="table-light text-center sticky-top">
+									<tr>
+										<th>원재료코드</th>
+										<th>원재료명</th>
+										<th>단위</th>
+										<th>필요수량</th>
+										<th>재고수량</th>
+										<th>출고수량</th>
+									</tr>
+								</thead>
+								<tbody id="matObBomTbody" class="text-center"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer mt-3 p-0">
+					<button type="button" class="btn btn-primary"
+						onclick="submitOutbound()">등록</button>
+				</div>
+			</div>
+		</div>
+	</div>
+			
+	<!-- 출하지시서 출고등록 모달 -->
+	<div class="modal fade" id="prdObModal" tabindex="-1"
+		style="display: none;" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered"
+			role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalCenterTitle">출고등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div id="outboundForm">
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<label class="form-label fw-bold">출하지시서</label> 
+								<select
+									class="form-select" id="shipmentSelect">
+									<option value="">출하지시서를 선택하세요</option>
+								</select>
+								<input type="hidden" id="shipmentId"/>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label fw-bold">담당자</label> 
+								<input class="form-control" type="text" id="processByName" readonly>
+								<input type="hidden" class="processByEmpId"/>
+							</div>
+						</div>
+<!-- 								생산 제품 선택 -->
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<label class="form-label fw-bold">거래처</label>
+								<input class="form-control" type="text" id="shopClientName" readonly>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">예상도착일</label>
+								<input class="form-control" type="date" id="expectDate" name="dueDate"/>
+							</div>
+						</div>
+<!-- 								출고 등록 품목 -->
+						<h6 class="fw-bold mb-3">출고 등록 품목</h6>
+						<div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+							<table class="table table-bordered align-middle mb-0" id="shipTable">
+								<thead class="table-light text-center sticky-top">
+									<tr>
+										<th>품목코드</th>
+										<th>품목명</th>
+										<th>납품수량</th>
+										<th>재고수량</th>
+										<th>출고수량</th>
+									</tr>
+								</thead>
+								<tbody id="shipTbody" class="text-center"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer mt-3 p-0">
+					<button type="button" class="btn btn-primary"
+						onclick="submitPrdOutbound()">등록</button>
+				</div>
+			</div>
+		</div>
+	</div>
+			
 </th:block>
 
 <th:block layout:fragment="myScript">
     <script th:src="@{/js/inventory/inventoryDashboard.js}"></script>
+	<script src="/js/purchase/purchase_regist.js"></script>
+	<script src="/js/inventory/inventoryDashboardOutboundMat.js"></script>
+	<script src="/js/inventory/util.js"></script>
+	<th:block th:replace="~{inventory/warehouse :: warehouseScripts}"></th:block>
+	<script src="/js/inventory/inventoryDashboardOutboundPrd.js"></script>
+
 </th:block>
 
 </html>
