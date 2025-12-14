@@ -3,6 +3,7 @@ package com.yeoun.masterData.entity;
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -43,13 +44,14 @@ public class MaterialMst {
 	private String createdId; //생성자 id
 	
 	@CreatedDate
-	@Column(name="CREATED_DATE")
+	@Column(name="CREATED_DATE", updatable = false)
 	private LocalDate createdDate; //생성일시
 	
 	@Column(name="UPDATED_ID", length = 7)
 	private String updatedId; //수정자 id
 	
 	@Column(name="UPDATED_DATE")
+	@LastModifiedDate
 	private LocalDate updatedDate; //수정일시
 
 }

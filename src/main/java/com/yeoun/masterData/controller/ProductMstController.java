@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.masterData.dto.ProductMstDTO;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.service.ProductMstService;
 
@@ -46,7 +47,8 @@ public class ProductMstController {
 
 	@ResponseBody
   	@PostMapping("/product/save")
-	public String productSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
+	public String productSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+			,@RequestBody Map<String, List<ProductMstDTO>> param) {
   		log.info("param------------->{}",param);
 		return productMstService.saveProductMst(loginDTO.getEmpId(),param);
   	}

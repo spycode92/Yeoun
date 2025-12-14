@@ -23,8 +23,8 @@ const CODE_MAP = {
     'BOX': '박스',
 	
 	//향수 유형
-	'LIQUID': '고체향수', 
-	'SOLID': '액체향수',
+	'LIQUID': '액체향수', 
+	'SOLID': '고체향수',
 	
 	//안전재고 - 정책방식
 	'FIXED_QTY':'고정 계산방식',

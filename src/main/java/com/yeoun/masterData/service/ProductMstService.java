@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.masterData.dto.ProductMstDTO;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.ProductMstRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,58 +40,66 @@ public class ProductMstService {
 	//2. 완제품 그리드 저장
 	// 프론트엔드에서 보낼 것으로 예상되는 구조:
 	// { createdRows: [{prdId:..., itemName:...}, ...], updatedRows: [...], deletedRows: [...] }
-	public String saveProductMst(String empId, Map<String,Object> param) {
+	@Transactional
+	public String saveProductMst(String empId, Map<String, List<ProductMstDTO>> param) {
 		log.info("productMstSaveList------------->{}",param);
 		try {
-			// createdRows
-			Object createdObj = param.get("createdRows");
-			if (createdObj instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
-				for (Map<String,Object> row : created) {
-					ProductMst p = mapToProduct(row);
-					p.setCreatedId(empId);
-					productMstRepository.save(p);
+			// 기존 완제품 품번(prdId와 동일한 prdId를 생성하려고하면 실패처리 추가 필요)
+			// createdRows 객체로 생성
+			List<ProductMstDTO> createdRows = param.get("createdRows");
+			// 새로생성한 prd가있을때
+			if (createdRows != null && !createdRows.isEmpty()) {
+				// 새로생성한 prdMst row를 반복실행
+				for (ProductMstDTO row : createdRows) {
+					// 새로 입력한 prdId가 존재하지 않을때 새로생성
+					ProductMst existP = productMstRepository.findById(row.getPrdId())
+							.orElseGet(() -> {
+						// 입력받은 DTO를 엔티티로 변형
+						ProductMst p = row.toEntity();
+						// 작성자 empId 등록
+						p.setCreatedId(empId);
+						
+						return productMstRepository.save(p);
+					});
 				}
 			}
 
 			// updatedRows
-			Object updatedObj = param.get("updatedRows");
-			if (updatedObj instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
-				java.util.List<String> missingIds = new ArrayList<>();
-				for (Map<String,Object> row : updated) {
-					Object idObj = row.get("prdId");
-					String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
-	
-					ProductMst target = null;
-					if (!prdId.isEmpty()) {
-						Optional<ProductMst> opt = productMstRepository.findById(prdId);
-						if (opt.isPresent()) target = opt.get();
-					}
-	
-					if (target != null) {
-						// 기존 레코드 업데이트
-						ProductMst p = mapToProduct(row);
-						p.setCreatedId(row.get("createdId").toString());
-						p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
-						p.setUpdatedId(empId);
-						p.setUpdatedDate(LocalDate.now());
-						productMstRepository.save(p);
-					} else {
-						// 존재하지 않는 prdId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
-						if (!prdId.isEmpty()) {
-							missingIds.add(prdId);
-							continue;
-						}
-						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
-						ProductMst p = mapToProduct(row);
-						p.setCreatedId(empId);
-						productMstRepository.save(p);
-					}
+			List<ProductMstDTO> updatedRows = param.get("updatedRows");
+			// 수정 된 prdMst 가 존재할때
+			if (updatedRows != null && !updatedRows.isEmpty()) {
+				
+				// 업데이트 로우정보 반복 
+				for (ProductMstDTO row : updatedRows) {
+					String prdId = row.getPrdId();
+					// prdId로 수정할 엔티티 설정
+					ProductMst target = productMstRepository.findById(prdId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 상품입니다."));
+					// 엔티티 내용 수정
+			        target.setPrdName(row.getPrdName());
+			        target.setPrdCat(row.getPrdCat());
+			        target.setPrdUnit(row.getPrdUnit());
+			        target.setPrdStatus(row.getPrdStatus());
+			        target.setUnitPrice(row.getUnitPrice());
+			        target.setPrdSpec(row.getPrdSpec());
+			        target.setUpdatedId(empId);
+			        target.setUpdatedDate(LocalDate.now());
+			        target.setEffectiveDate(row.getEffectiveDate());
+				}
 			}
-			 	
+			
+			// deletedRows
+			List<ProductMstDTO> deletedRows = param.get("deletedRows");
+			// 삭제 된 prdMst 가 존재할때
+			if (deletedRows != null && !deletedRows.isEmpty()) {
+				
+				// 업데이트 로우정보 반복 
+				for (ProductMstDTO row : deletedRows) {
+					String prdId = row.getPrdId();
+					// 삭제요청 된 엔티티가 존재하면 삭제
+				    if (productMstRepository.existsById(prdId)) {
+				        productMstRepository.deleteById(prdId);
+				    }
+				}
 			}
 
 			return "success";
@@ -99,26 +109,8 @@ public class ProductMstService {
 		}
 	}
 
+	// -------------------------------------------------------------------------
 
-	// 유틸: Map 데이터를 ProductMst 엔티티로 변환
-	private ProductMst mapToProduct(Map<String,Object> row) {
-		ProductMst p = new ProductMst();
-		if (row == null) return p;
-		if (row.get("prdId") != null) p.setPrdId(String.valueOf(row.get("prdId")));
-		if (row.get("itemName") != null) p.setItemName(String.valueOf(row.get("itemName")));
-		if (row.get("prdName") != null) p.setPrdName(String.valueOf(row.get("prdName")));
-		if (row.get("prdCat") != null) p.setPrdCat(String.valueOf(row.get("prdCat")));
-		if (row.get("prdUnit") != null) p.setPrdUnit(String.valueOf(row.get("prdUnit")));
-		if (row.get("prdStatus") != null) p.setPrdStatus(String.valueOf(row.get("prdStatus")));
-		if (row.get("prdSpec") != null) p.setPrdSpec(String.valueOf(row.get("prdSpec")));
-		if (row.get("unitPrice") != null) {
-			try { p.setUnitPrice(new java.math.BigDecimal(String.valueOf(row.get("unitPrice")))); } catch(Exception e) {}
-		}
-		if (row.get("effectiveDate") != null) {
-			try { p.setEffectiveDate(Integer.valueOf(String.valueOf(row.get("effectiveDate")))); } catch(Exception e) {}
-		}
-		return p;
-	}
 	//3. 완제품 그리드 삭제
 	/**
 	 * 주어진 키 목록에 해당하는 제품을 삭제합니다.

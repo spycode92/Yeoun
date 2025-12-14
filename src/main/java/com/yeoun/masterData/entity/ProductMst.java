@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -12,7 +13,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
@@ -20,7 +24,10 @@ import lombok.Setter;
 @Table(name = "PRODUCT_MST")
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class) 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class ProductMst implements Serializable{
 	
 		@Id
@@ -46,7 +53,7 @@ public class ProductMst implements Serializable{
 		private String prdStatus; //상태
 
 		@Column(name="EFFECTIVE_DATE")
-		private Integer effectiveDate; //유효일자
+		private Long effectiveDate; //유효일자
 		
 		@Column(name = "UNIT_PRICE", precision = 18, scale = 2)
 		private BigDecimal unitPrice;
@@ -65,6 +72,7 @@ public class ProductMst implements Serializable{
 		private String updatedId; //수정자 id
 		
 		@Column(name="UPDATED_DATE")
+		@LastModifiedDate
 		private LocalDate updatedDate; //수정일시
 		
 

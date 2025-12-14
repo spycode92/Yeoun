@@ -2,7 +2,9 @@ package com.yeoun.masterData.dto;
 
 import java.time.LocalDate;
 
+import org.modelmapper.ModelMapper;
 
+import com.yeoun.masterData.entity.MaterialMst;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -43,5 +45,16 @@ public class MaterialMstDTO {
 	private String updateId; //수정자 id
 	
 	private LocalDate updateDate; //수정일시
+	
+	private static final ModelMapper modelMapper = new ModelMapper();
+	
+	public static MaterialMstDTO fromEntity(MaterialMst entity) {
+		if(entity == null) return null;
+		return modelMapper.map(entity, MaterialMstDTO.class);
+	}
+	
+	public MaterialMst toEntity() {
+		return modelMapper.map(this, MaterialMst.class);
+	}
 
 }

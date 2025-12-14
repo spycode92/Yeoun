@@ -10,11 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import com.yeoun.masterData.dto.MaterialMstDTO;
 import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.MaterialMstRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -32,59 +33,65 @@ public class MaterialMstService {
 	}
 
 	//2. 원재료 그리드 저장
-	public String saveMaterialMst(String empId, Map<String, Object> param) {
+	@Transactional
+	public String saveMaterialMst(String empId, Map<String, List<MaterialMstDTO>> param) {
 		log.info("materialMstSaveList------------->{}",param);
 		try {
 			// createdRows
-			Object createdObj = param.get("createdRows");
-			if (createdObj instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
-				for (Map<String,Object> row : created) {
-					MaterialMst m = mapToMaterial(row);
-					m.setCreatedId(empId);
-					materialMstRepository.save(m);
+			List<MaterialMstDTO> created = param.get("createdRows");
+			// 새로 추가한 원재료 정보가 있을 때
+			if (created != null && !created.isEmpty()) {
+				// 리스트 반복
+				for (MaterialMstDTO row : created) {
+					// db에 존재하지않나 한번더 확인
+					MaterialMst existM = materialMstRepository.findById(row.getMatId()) 
+							.orElseGet(() -> { // 존재하지 않는다면
+								// 새로 저장할 원자재 객체 생성후
+								MaterialMst newMst = row.toEntity();
+								
+								newMst.setCreatedId(empId);
+								// 저장
+								materialMstRepository.save(newMst);
+								
+								return materialMstRepository.save(newMst);
+							});
 				}
 			}
 			
 			log.info("param.get(\"updatedRows\")------------------->{}",param.get("updatedRows"));
 			// updatedRows
-			Object updatedObj = param.get("updatedRows");
-			if (updatedObj instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
-				List<String> missingIds = new ArrayList<>();
-				for (Map<String,Object> row : updated) {
-					Object idObj = row.get("matId");
-					String matId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+			List<MaterialMstDTO> updated = param.get("updatedRows");
+			
+			if (updated != null && !updated.isEmpty()) {
+				// 업데이트 로우 정보 반복
+				for (MaterialMstDTO row : updated) {
+					// 수정할 원자재id 
+					String matId = row.getMatId();
 	
-					MaterialMst target = null;
-					if (!matId.isEmpty()) {
-						Optional<MaterialMst> opt = materialMstRepository.findById(matId);
-						if (opt.isPresent()) target = opt.get();
-					}
-	
-					if (target != null) {
-						// 기존 레코드 업데이트
-						MaterialMst m = mapToMaterial(row);
-						m.setCreatedId(row.get("createdId").toString());
-						m.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
-						m.setUpdatedId(empId);
-						m.setUpdatedDate(LocalDate.now());
-						materialMstRepository.save(m);
-					} else {
-						// 존재하지 않는 prdId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
-						if (!matId.isEmpty()) {
-							missingIds.add(matId);
-							continue;
-						}
-						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
-						MaterialMst m = mapToMaterial(row);
-						m.setCreatedId(empId);
-						materialMstRepository.save(m);
-					}
+					MaterialMst target = materialMstRepository.findById(matId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 원자재입니다."));
+					
+					// 엔티티 내용 수정
+					target.setMatName(row.getMatName());
+					target.setMatType(row.getMatType());
+					target.setMatUnit(row.getMatUnit());
+					target.setEffectiveDate(row.getEffectiveDate());
+					target.setMatDesc(row.getMatDesc());
+					target.setUpdatedId(empId);
 				}
 			 	
+			}
+			
+			// deletedRows
+			List<MaterialMstDTO> deleted = param.get("deletedRows");
+			// 삭제된 원자재가 존재할때
+			if(deleted != null && !deleted.isEmpty()) {
+				for (MaterialMstDTO row : deleted) {
+					String matId = row.getMatId();
+					// 삭제요청된 엔티티가 존재하면 삭제
+					if(materialMstRepository.existsById(matId)) {
+						materialMstRepository.deleteById(matId);
+					}
+				}
 			}
 
 
@@ -95,6 +102,8 @@ public class MaterialMstService {
 		}
 	}
 
+	
+	// ---------------------------------------------------------------
 	// 유틸: Map 데이터를 ProductMst 엔티티로 변환
 	private MaterialMst mapToMaterial(Map<String,Object> row) {
 		MaterialMst m = new MaterialMst();

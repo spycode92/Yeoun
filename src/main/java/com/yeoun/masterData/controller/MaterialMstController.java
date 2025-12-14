@@ -3,6 +3,7 @@ package com.yeoun.masterData.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.masterData.dto.MaterialMstDTO;
+import com.yeoun.masterData.dto.ProductMstDTO;
 import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.service.MaterialMstService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +38,8 @@ public class MaterialMstController {
 	//원재료 저장
     @ResponseBody
    	@PostMapping("/save")
-   	public org.springframework.http.ResponseEntity<java.util.Map<String,Object>> materialSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
+   	public ResponseEntity<Map<String,Object>> materialSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+   			,@RequestBody Map<String, List<MaterialMstDTO>> param) {
     	log.info("param------------->{}",param);
     	java.util.Map<String,Object> resp = new java.util.HashMap<>();
     	try {

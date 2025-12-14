@@ -3,8 +3,12 @@ package com.yeoun.masterData.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.modelmapper.ModelMapper;
+
+import com.yeoun.masterData.entity.ProductMst;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,9 +38,9 @@ public class ProductMstDTO {
 	private String prdStatus; //상태활성/비활성/단종/시즌한정/품절 ACTIVE,INACTIVE,DISCONTINUED,SEASONAL,OUT_OF_STOCK
 	
 	@NotBlank(message = "유효일자는 필수 입력값입니다.")
-	private String effectiveDate; //유효일자
+	private Long effectiveDate; //유효일자
 	
-	@NotBlank(message = "가격은 필수 입력값입니다.")
+	@NotNull(message = "가격은 필수 입력값입니다.")
 	private BigDecimal unitPrice;
 	
 	private String prdSpec; //제품상세설명
@@ -49,5 +53,15 @@ public class ProductMstDTO {
 	
 	private LocalDate updateDate; //수정일시
 	
+    private static final ModelMapper modelMapper = new ModelMapper();
+
+    public static ProductMstDTO fromEntity(ProductMst entity) {
+        if (entity == null) return null;
+        return modelMapper.map(entity, ProductMstDTO.class);
+    }
+
+    public ProductMst toEntity() {
+        return modelMapper.map(this, ProductMst.class);
+    }
 	
 }
