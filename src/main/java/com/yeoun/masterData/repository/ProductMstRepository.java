@@ -1,5 +1,6 @@
 package com.yeoun.masterData.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,7 @@ public interface ProductMstRepository extends JpaRepository<ProductMst, String> 
 
 	// 제품ID로 조회
 	Optional<ProductMst> findByPrdId(String prdId);
+
+	List<ProductMst> findAllByOrderByPrdStatusAscUpdatedDateDescCreatedDateDesc();
 
 }

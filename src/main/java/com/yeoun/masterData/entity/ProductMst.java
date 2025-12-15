@@ -65,7 +65,7 @@ public class ProductMst implements Serializable{
 		private String createdId; //생성자 id
 		
 		@CreatedDate
-		@Column(name="CREATED_DATE")
+		@Column(name="CREATED_DATE", updatable = false)
 		private LocalDate createdDate; //생성일시
 		
 		@Column(name="UPDATED_ID")

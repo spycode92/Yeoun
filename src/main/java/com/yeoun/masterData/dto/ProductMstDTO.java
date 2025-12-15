@@ -53,6 +53,8 @@ public class ProductMstDTO {
 	
 	private LocalDate updateDate; //수정일시
 	
+	private String itemName; // 추가상품 타입
+	
     private static final ModelMapper modelMapper = new ModelMapper();
 
     public static ProductMstDTO fromEntity(ProductMst entity) {

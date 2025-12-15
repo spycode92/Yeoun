@@ -53,5 +53,8 @@ public class MaterialMst {
 	@Column(name="UPDATED_DATE")
 	@LastModifiedDate
 	private LocalDate updatedDate; //수정일시
+	
+	@Column(name="USE_YN")
+	private String useYn;
 
 }

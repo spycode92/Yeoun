@@ -34,7 +34,7 @@ public class ProductMstService {
 	@Transactional(readOnly = true)
 	public List<ProductMst> findAll() {
 		log.info("productMstRepository.findAll() 조회된개수 - {}",productMstRepository.findAll());
-		return productMstRepository.findAll();
+		return productMstRepository.findAllByOrderByPrdStatusAscUpdatedDateDescCreatedDateDesc();
 	}
 
 	//2. 완제품 그리드 저장
@@ -58,6 +58,9 @@ public class ProductMstService {
 						ProductMst p = row.toEntity();
 						// 작성자 empId 등록
 						p.setCreatedId(empId);
+						
+						// createdDate 저장 후 아래 return에서 null이 저장되어 update불가로 변경
+						productMstRepository.save(p);
 						
 						return productMstRepository.save(p);
 					});

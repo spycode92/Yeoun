@@ -46,6 +46,8 @@ public class MaterialMstDTO {
 	
 	private LocalDate updateDate; //수정일시
 	
+	private String useYn; // 사용여부
+	
 	private static final ModelMapper modelMapper = new ModelMapper();
 	
 	public static MaterialMstDTO fromEntity(MaterialMst entity) {

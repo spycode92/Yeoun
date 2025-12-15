@@ -77,6 +77,7 @@ public class MaterialMstService {
 					target.setEffectiveDate(row.getEffectiveDate());
 					target.setMatDesc(row.getMatDesc());
 					target.setUpdatedId(empId);
+					target.setUseYn(row.getUseYn());
 				}
 			 	
 			}

@@ -1,6 +1,7 @@
 // 전역변수 설정
 let activeType = 'PROD' // 현재 그리드 타입 설정
 let mainGrid = null;
+let newRowKeys = []; 
 
 
 // 문서시작
@@ -295,12 +296,33 @@ function setMatColumns() {
 //        { header: '생성자ID', name: 'createdId', align: 'center', renderer: { type: StatusModifiedRenderer } },
         { header: '생성일자', name: 'createdDate', align: 'center', renderer: { type: StatusModifiedRenderer } },
 //        { header: '수정자ID', name: 'updatedId', align: 'center', renderer: { type: StatusModifiedRenderer } },
-        { header: '수정일시', name: 'updatedDate', align: 'center', renderer: { type: StatusModifiedRenderer } }
+        { header: '수정일시', name: 'updatedDate', align: 'center', renderer: { type: StatusModifiedRenderer } },
+        {
+            header: '활성',
+            name: 'useYn',
+            align: 'center',
+			validation: { 
+			    required: true,  // 필수 입력
+			},
+            filter: 'select',
+            renderer: { type: StatusModifiedRenderer },
+            editor: {
+                type: 'select',
+                options: {
+                    listItems: [
+                        { text: '활성', value: 'Y' },
+                        { text: '비활성', value: 'N' },
+                    ]
+                }
+            }
+        }
     ]);
 }
 
 // 활성중인 그리드 로드
 async function loadActiveGrid() {
+	newRowKeys = [];
+	
     if (activeType === 'PROD') {
         setProdColumns();
         await getProdMstData().then(data => {
@@ -313,6 +335,7 @@ async function loadActiveGrid() {
     } else {
         setMatColumns();
         await getMatMstData().then(data => {
+			console.log("matData : ", data);
 			mainGrid.resetData(data || [])
 			// 기존행 PK 전부 잠금
 			mainGrid.getData().forEach(row => {
@@ -397,29 +420,33 @@ function initButtons() {
     deleteBtn.addEventListener('click', onDeleteRows);
 }
 
+// Pk 수정가능상태 업데이트
+function updatePkEditableState() {
+	const pkColumn = activeType === 'PROD' ? 'prdId' : 'matId'
+	const rows = mainGrid.getData();
+	
+	// newRowKey에 해당하는 row는 수정가능, 아닌키는 수정불가능
+	rows.forEach(row => {
+		if(newRowKeys.includes(row.rowKey)) {
+			mainGrid.enableCell(row.rowKey, pkColumn);
+		} else {
+			mainGrid.disableCell(row.rowKey, pkColumn)
+		}
+	});
+}
+
 // 추가 버튼을 눌러 그리드 행추가
 function onAddRow() {
     // 맨 위에 빈 행 추가 (focus 옵션으로 커서도 이동)
     mainGrid.prependRow({}, { focus: true });
 	
-	const pkColumn = activeType === 'PROD' ? 'prdId' : 'matId';
-	
 	// 방금 추가된 행의 rowKey 구하기
 	const newRow = mainGrid.getRowAt(0);   // [web:12]
 	if (!newRow) return;
 	
-	const newRowKey = newRow.rowKey;
+	newRowKeys.push(newRow.rowKey);
 	
-	// 전체 행의 PK 셀 비활성
-	const rows = mainGrid.getData();
-	rows.forEach(row => {
-	    if (row.rowKey !== newRowKey) {
-	        mainGrid.disableCell(row.rowKey, pkColumn);
-	    }
-	});
-
-	// 새로 추가한 행의 PK만 활성
-	mainGrid.enableCell(newRowKey, pkColumn);
+	updatePkEditableState();
 }
 
 // 선택한 그리드 행 삭제
@@ -430,22 +457,55 @@ function onDeleteRows() {
         return;
     }
 
-    if (!confirm('선택한 행을 삭제하시겠습니까?')) {
-        return;
-    }
-
+	if (!confirm('선택한 행을 삭제/비활성화 하시겠습니까?')) {
+	    return;
+	}
+	
+	const pkColumn = activeType === 'PROD' ? 'prdId' : 'matId';
+	let deleteCount = 0;
+	let inactiveCount = 0;
+	
     // UI에서만 삭제 (DB 반영은 저장 시에 한 번에 처리)
     checkedRowKeys
         .sort((a, b) => b - a)  // 아래 행부터 지우면 안전 [web:11]
         .forEach(rowKey => {
-            mainGrid.removeRow(rowKey); // 또는 mainGrid.removeRow(rowKey, true); [web:5]
-        });
+            const row = mainGrid.getRow(rowKey);
+			if (!row) return;
+
+			// newRowKeys에 포함된 rowKey 완전 삭제
+			if (newRowKeys.includes(rowKey)) {
+				mainGrid.removeRow(rowKey);
+				deleteCount++;
+			
+				// 배열에서 해당 rowKey 제거
+				newRowKeys = newRowKeys.filter(k => k !== rowKey);
+				return;
+			}
+			
+			// 그외
+			if (activeType === 'PROD') {
+				// 완제품: 상태 컬럼을 INACTIVE로
+				mainGrid.setValue(rowKey, 'prdStatus', 'INACTIVE');
+			} else {
+				// 원재료: useYn을 N으로
+				mainGrid.setValue(rowKey, 'useYn', 'N');
+			}
+		
+			inactiveCount++;
+	});
+		
+	alert(`${deleteCount}건 삭제, ${inactiveCount}건 비활성화 처리되었습니다.`);
+	// pk 수정가능상태설정
+	updatePkEditableState();
 }
 
 // 변경사항 저장(추가, 수정, 삭제)
 function onSaveRows() {
-	// 그리드 내장 validation
+	// 편집중인셀 커밋
+	mainGrid.finishEditing();
+	// 유효성검사시행
 	const invalidRows = mainGrid.validate();
+	
 	if (invalidRows.length > 0) {
 //	    alert(`${invalidRows.length}개 행의 유효성 검사를 수정해주세요.`);
 	    alert(`수정및 추가된 행에서 잘못된 입력값이 발견되었습니다.`);
