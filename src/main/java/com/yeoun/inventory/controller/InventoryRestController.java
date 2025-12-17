@@ -26,6 +26,7 @@ import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
+import com.yeoun.inventory.dto.InventoryHistorySearchDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.dto.WarehouseLocationCreateRequest;
@@ -107,10 +108,10 @@ public class InventoryRestController {
 	
 	//-----------------------------------------------------------------------------
 	// 재고이력 정보
-	@GetMapping("/historys")
-	public ResponseEntity<List<InventoryHistoryDTO>> historys() {
+	@PostMapping("/historys")
+	public ResponseEntity<List<InventoryHistoryDTO>> historys(@RequestBody InventoryHistorySearchDTO condition) {
 		
-		List<InventoryHistoryDTO> historyDTOList = inventoryService.getInventoryHistorys();
+		List<InventoryHistoryDTO> historyDTOList = inventoryService.getInventoryHistorys(condition);
 		
 		return ResponseEntity.ok(historyDTOList);
 	}

@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	showNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch('/notice/' + selectedNoticeId, {
 			method: 'PATCH'
 			, headers: {
 				[csrfHeader]: csrfToken
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		alert("정말 삭제하시겠습니까?");
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch('/notice/' + selectedNoticeId, {
 			method: 'DELETE'
 			, headers: {
 				[csrfHeader]: csrfToken
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	createNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices', {
+		fetch('/notice', {
 			method: 'POST'
 			, headers: {
 				[csrfHeader]: csrfToken

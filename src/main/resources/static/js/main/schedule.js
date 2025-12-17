@@ -127,14 +127,14 @@ async function print(type, text) {
 //	console.log(window.count, "@@@@@@@@@@@@");
 	if(this.count < 3){
 //	console.log(this.count, "this.count:!!!!!!!!!!!!")
-	this.count++;
-	approverDiv.innerHTML +='<div class="btn btn-success approvers"'
-  						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-//  						+'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-//  						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-  						+'<p style="float:right;margin-right: 8px;">&times;</p>'
-  						+'<p style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-						+'</div>';
+		this.count++;
+		approverDiv.innerHTML +='<div class="btn btn-success approvers"'
+	  						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+	//  						+'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
+	//  						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+	  						+'<p style="float:right;margin-right: 8px;">&times;</p>'
+	  						+'<p style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+							+'</div>';
 	}
 
 } 

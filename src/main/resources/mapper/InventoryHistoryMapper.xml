@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yeoun.inventory.mapper.InventoryHistoryMapper">
+
+    <select id="searchInventoryHistory"
+            resultType="com.yeoun.inventory.dto.InventoryHistoryDTO">
+        SELECT
+            h.IV_HISTORY_ID         AS ivHistoryId,
+            h.LOT_NO                AS lotNo,
+            h.ITEM_NAME             AS itemName,
+            h.PREV_LOCATION_ID      AS prevLocationId,
+			NVL(pl.ZONE, '') || '-' ||
+	        NVL(pl.RACK, '') || '-' ||
+	        NVL(pl.RACK_ROW, '') || '-' ||
+	        NVL(pl.RACK_COL, '')    AS prevLocationName,
+            h.CURRENT_LOCATION_ID   AS currentLocationId,
+	        NVL(cl.ZONE, '') || '-' ||
+	        NVL(cl.RACK, '') || '-' ||
+	        NVL(cl.RACK_ROW, '') || '-' ||
+	        NVL(cl.RACK_COL, '')    AS currentLocationName,
+            h.EMP_ID                AS empId,
+            e.EMP_NAME              AS empName,
+            h.WORK_TYPE             AS workType,
+            h.MOVE_AMOUNT           AS moveAmount,
+            h.PREV_AMOUNT           AS prevAmount,
+            h.CURRENT_AMOUNT        AS currentAmount,
+            h.REASON                AS reason,
+            h.CREATED_DATE          AS createdDate
+        FROM INVENTORY_HISTORY h
+        LEFT JOIN WAREHOUSE_LOCATION pl 
+               ON h.PREV_LOCATION_ID = pl.LOCATION_ID
+        LEFT JOIN WAREHOUSE_LOCATION cl 
+               ON h.CURRENT_LOCATION_ID = cl.LOCATION_ID
+        LEFT JOIN EMP e
+        	   ON h.emp_Id = e.emp_Id
+        WHERE 1 = 1
+
+        <!-- 날짜 범위 -->
+        <if test="startDateTime != null">
+            AND h.CREATED_DATE &gt;= #{startDateTime}
+        </if>
+        <if test="endDateTime != null">
+            AND h.CREATED_DATE &lt;= #{endDateTime}
+        </if>
+
+        <!-- 작업유형 -->
+        <if test="workType != null and workType != ''">
+            AND h.WORK_TYPE = #{workType}
+        </if>
+
+        <!-- 검색어: LOT, 재고이름, 위치명, 작업자ID -->
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+            	
+		        LOWER(h.LOT_NO) LIKE #{searchKeyword}
+		        OR LOWER(h.ITEM_NAME) LIKE #{searchKeyword}
+		        OR LOWER(
+		            NVL(pl.ZONE, '') || '-' ||
+		            NVL(pl.RACK, '') || '-' ||
+		            NVL(pl.RACK_ROW, '') || '-' ||
+		            NVL(pl.RACK_COL, '')
+		        ) LIKE #{searchKeyword}
+		        OR LOWER(
+		            NVL(cl.ZONE, '') || '-' ||
+		            NVL(cl.RACK, '') || '-' ||
+		            NVL(cl.RACK_ROW, '') || '-' ||
+		            NVL(cl.RACK_COL, '')
+		        ) LIKE #{searchKeyword}
+		        OR LOWER(h.EMP_ID) LIKE #{searchKeyword}
+		        OR LOWER(e.EMP_NAME) LIKE #{searchKeyword}
+            )
+        </if>
+
+        ORDER BY h.CREATED_DATE DESC
+    </select>
+    
+</mapper>
+
+
+
+
+

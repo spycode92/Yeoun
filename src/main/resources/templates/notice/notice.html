@@ -17,9 +17,9 @@
 				<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
 				<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
 				
-				<form class="d-flex" style="max-width: 300px;">
-					<input class="form-control me-2" type="search" placeholder="제목&내용 입력" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
-					<button class="btn btn-outline-primary" type="submit">검색</button>
+				<form class="d-flex">
+					<input class="form-control" type="search" placeholder="제목&내용 입력" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}" style="min-width: 100px;">
+					<button class="btn btn-outline-primary " type="submit" style="min-width: 70px; margin-left: 10px;">검색</button>
 				</form>
 				
 				<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice" sec:authorize="hasRole('ROLE_NOTICE_WRITER')">글쓰기</button>

@@ -13,69 +13,88 @@ function hideSpinner() {
 document.addEventListener('DOMContentLoaded', async function () {
 	
 	showSpinner();
+	// 기본 날짜 세팅
+	const startDateInput = document.getElementById('startDate');
+	const endDateInput = document.getElementById('endDate');
+	
+	const today = new Date();
+	const weekAgo = new Date();
+	weekAgo.setDate(today.getDate() - 7);
+
+	const formatDate = (d) => {
+		const y = d.getFullYear();
+		const m = String(d.getMonth() + 1).padStart(2, '0');
+		const da = String(d.getDate()).padStart(2, '0');
+		return `${y}-${m}-${da}`;
+	};
+
+	startDateInput.value = formatDate(weekAgo);
+	endDateInput.value = formatDate(today);
+	
 	initGrid();
 
-	//최초로딩
-	const inventoryHistoryData = await fetchInventoryHistoryData();
+	try {
+		// 3) 최초 로딩: 현재 화면 검색조건으로 서버 조회
+		inventoryHistoryData = await fetchInventoryHistoryData();
+		inventoryHistoryGrid.resetData(inventoryHistoryData);
+		inventoryHistoryGrid.sort('createdDate', false);
+	} catch (e) {
+		console.error(e);
+		alert('재고내역 조회 중 오류가 발생했습니다.');
+	} finally {
+		hideSpinner();
+	}
 	
-	// 받아온 데이터로 그리드 생성
-	inventoryHistoryGrid.resetData(inventoryHistoryData);
-	inventoryHistoryGrid.sort('createdDate', false);
 	// 검색버튼 이벤트함수
 	const btnSearch = document.getElementById('btnSearchHistory');
 
-	btnSearch.addEventListener('click', async () => {
+	btnSearch.addEventListener('click', async (event) => {
 		event.preventDefault(); // 폼제출 막기
 		
-		// 검색에 필요한 정보들
-		const startDate = document.getElementById('startDate').value;
-		const endDate = document.getElementById('endDate').value;
-		const searchType = document.getElementById('searchHistoryType').value;
-		const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
-
-		// 날짜 범위 처리
-		const start = startDate ? new Date(startDate) : null;
-		const end = endDate ? new Date(endDate) : null;
-
-		if (start) start.setHours(0, 0, 0, 0);              // 그대로 Date 유지
-		if (end) end.setHours(23, 59, 59, 999);             // 그대로 Date 유지
-
-		const filteredData = inventoryHistoryData.filter(item => {
-		    // createdDate는 항상 Date로
-		    const createdDate = item.createdDate ? new Date(item.createdDate) : null;
-
-		    // 기간 필터 (start <= createdDate <= end)
-		    if (start && (!createdDate || createdDate < start)) return false;
-		    if (end && (!createdDate || createdDate > end)) return false;
-
-		    // 유형 필터
-		    if (searchType && item.workType !== searchType) return false;
-
-		    // 키워드 필터
-		    if (keyword) {
-		        const itemName = item.itemName ? item.itemName.toLowerCase() : '';
-		        const lotNo = item.lotNo ? item.lotNo.toLowerCase() : '';
-		        if (!itemName.includes(keyword) && !lotNo.includes(keyword)) return false;
-		    }
-
-		    return true;
-		});
-		// 필터된 데이터로 그리드 새로 고침
-		inventoryHistoryGrid.resetData(filteredData);
-		inventoryHistoryGrid.sort('createdDate', false);
+		showSpinner();
+		
+		try {
+		  inventoryHistoryData = await fetchInventoryHistoryData();
+		  inventoryHistoryGrid.resetData(inventoryHistoryData);
+		  inventoryHistoryGrid.sort('createdDate', false);
+		} catch (e) {
+		  console.error(e);
+		  alert('재고내역 검색 중 오류가 발생했습니다.');
+		} finally {
+		  hideSpinner();
+		}
 	});
 	hideSpinner();
 });
 
+
+// 검색조건 생성 함수
+function buildSearchData() {
+	const startDate = document.getElementById('startDate').value;          // "yyyy-MM-dd"
+	const endDate   = document.getElementById('endDate').value;
+  	const workType  = document.getElementById('searchHistoryType').value;  // 기존 select
+	const keyword   = document.getElementById('searchKeyword').value.trim();
+
+	return {
+		startDate: startDate || null,       // 서버 DTO: LocalDate startDate
+		endDate: endDate || null,           // 서버 DTO: LocalDate endDate
+		workType: workType || null,         // 서버 DTO: String workType
+		searchKeyword: keyword || null      // 서버 DTO: String searchKeyword
+	};
+}
+
 // 재고내역 데이터 정보 가져오기
 async function fetchInventoryHistoryData() {
+	const searchData = buildSearchData();
+	
 	const response = 
 		await fetch('/api/inventories/historys', {
-			method: 'GET',
+			method: 'POST',
 			headers: {
 				[csrfHeader]: csrfToken,
 				'Content-Type': 'application/json'
 			},
+			body: JSON.stringify(searchData)	
 		});
 //	console.log(response);
 	if (!response.ok) {
@@ -163,6 +182,9 @@ function initGrid() {
                     };
                     return types[value] || value || '-';
                 }
+            },
+            { 
+                header: '작업자', name: 'empName', minWidth: 140, filter: 'select'
             },
             { 
                 header: '이전위치', name: 'prevLocationName', width: 100, align: 'center',

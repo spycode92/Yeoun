@@ -21,6 +21,7 @@ public class InventoryHistoryDTO {
     private Long ivHistoryId;        // 이력 ID
     private String lotNo;            // LOT 번호
     private String itemName;           // 재고이름
+    
 
     private String prevLocationId;   // 이전 위치
     private String prevLocationName;
@@ -28,6 +29,7 @@ public class InventoryHistoryDTO {
     private String currentLocationName;
 
     private String empId;            // 작업자
+    private String empName;          // 작업자 이름
     private String workType;         // 작업 종류 (입고, 이동, 출고, 폐기, 증가, 감소)
     
     private Long moveAmount;         // 이동 수량
