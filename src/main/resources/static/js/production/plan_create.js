@@ -210,6 +210,7 @@ function saveSelectedOrdersFromModal() {
     modal.hide();
 
     alert("✔ 선택된 수주가 반영되었습니다.");
+	createProductionPlan();
 }
 
 

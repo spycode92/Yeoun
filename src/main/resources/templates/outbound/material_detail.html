@@ -4,6 +4,19 @@
 	
 	<body>
 		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+			<!-- 스피너 -->
+		   	<div id="loading-overlay" style="display:none; 
+			    position:absolute; top:0; left:0; width:100%; height:100%; 
+			    background:rgba(255,255,255,0.6); 
+			    z-index:99; text-align:center; display:flex; 
+			    align-items:center; justify-content:center;">
+				<div style="margin-top:30vh;">
+					<div class="spinner-border text-primary" role="status">
+					</div>
+					<br>
+					<span class="visually">데이터 불러오는 중...</span>
+				</div>
+			</div>
 			<button class="btn btn-outline-primary mb-3" onclick="history.back()">← 목록으로</button>
 			<div class="d-flex justify-content-between align-items-center mb-4">
 				<h2>출고 상세 정보</h2>
@@ -17,8 +30,8 @@
 					 	<input type="hidden" id="outboundId" th:value="${outboundOrderDTO.outboundId}"/>
 					 	<input type="hidden" id="workOrderId" th:value="${outboundOrderDTO.workOrderId}"/>
 						<div class="col">
-						    <div class="text-secondary mb-1">작업지시서</div>
-						    <div class="fw-semibold" th:text="${outboundOrderDTO.workOrderId}"></div>
+						    <div class="text-secondary mb-1">출고번호</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.outboundId}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">요청자</div>
@@ -29,6 +42,15 @@
 						    <div class="fw-semibold" th:text="${outboundOrderDTO.processEmpName}"></div>
 						</div>
 						<div class="col">
+						    <div class="text-secondary mb-1">작업지시서</div>
+						    <div class="d-flex">
+						    	<div class="fw-semibold" style="margin-right:3px !important;" th:text="${outboundOrderDTO.workOrderId}"></div>
+	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+									th:attr="data-prod-id=${outboundOrderDTO.workOrderId}"
+									onclick="openDetailOrderWindow(this.dataset.prodId)"></i>
+						    </div>
+						</div>
+						<div class="col">
 						    <div class="text-secondary mb-1">출고예정일</div>
 						    <div class="fw-semibold" th:text="${#temporals.format(outboundOrderDTO.startDate, 'yyyy-MM-dd')}"></div>
 						</div>
@@ -37,6 +59,7 @@
 							<div>
 							    <span th:if="${outboundOrderDTO.status == 'WAITING'}" class="badge bg-warning text-dark">출고대기</span>
 							    <span th:if="${outboundOrderDTO.status == 'COMPLETED'}" class="badge bg-success">출고완료</span>
+							    <span th:if="${outboundOrderDTO.status == 'CANCELED'}" class="badge bg-warning ">출고취소</span>
 							</div>
 						</div>
 					 </div>
@@ -45,7 +68,7 @@
 			<div>
 			<div class="card mb-5">
 				<div class="card-header">
-					<h5 class="mb-0">입고 품목 목록</h5>
+					<h5 class="mb-0">출고 품목 목록</h5>
 				</div>
 				<div class="card-body p-0">
 					<div class="table-responsive">
@@ -83,6 +106,7 @@
 			<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
 			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/inventory/util.js"></script>
 			<script src="/js/outbound/materialGrid.js"></script>
 			<script src="/js/outbound/materialItem.js"></script>
 		</th:block>

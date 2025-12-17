@@ -1,9 +1,40 @@
+/* =========================================================
+   상태 그룹 정의
+========================================================= */
+const STATUS_GROUP_MAP = {
+    RESERVED_GROUP: ["RESERVED", "PENDING"]
+};
+
+
 let gridApi = null;
 
 /* =========================================================
    1) 페이지 로드 후 GRID 초기화 + 목록 조회
 ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
+	
+	/* ================================
+	     📅 날짜 조건 제어 (추가)
+	  ================================ */
+	  const startDateInput = document.getElementById("startDate");
+	  const endDateInput   = document.getElementById("endDate");
+
+	  if (startDateInput && endDateInput) {
+	      startDateInput.addEventListener("change", () => {
+	          const startDate = startDateInput.value;
+
+	          if (startDate) {
+	              // 종료일은 시작일 이후만 선택 가능
+	              endDateInput.min = startDate;
+
+	              // 이미 선택된 종료일이 시작일보다 빠르면 초기화
+	              if (endDateInput.value && endDateInput.value < startDate) {
+	                  endDateInput.value = "";
+	              }
+	          }
+	      });
+	  }
+
 
     initGrid();
     loadShipmentList("ALL");
@@ -13,13 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
         loadShipmentList(getSelectedStatus());
     });
 
-    // 초기화 버튼
-    document.getElementById("btnReset")?.addEventListener("click", () => {
-        document.getElementById("startDate").value = "";
-        document.getElementById("endDate").value = "";
-        document.getElementById("keyword").value = "";
-        loadShipmentList("ALL");
-    });
+	// 초기화 버튼
+	   document.getElementById("btnReset")?.addEventListener("click", () => {
+	       startDateInput.value = "";
+	       endDateInput.value = "";
+	       endDateInput.min = ""; // ⭐ 중요
+	       document.getElementById("keyword").value = "";
+	       loadShipmentList("ALL");
+	   });
 
     // 탭 클릭 이벤트
     document.querySelectorAll("#shipmentTabs .nav-link")?.forEach(tab => {
@@ -31,8 +63,13 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector("#shipmentTabs .active")?.classList.remove("active");
             target.classList.add("active");
 
-            const status = target.dataset.status;
-            loadShipmentList(status);
+			const statusKey = target.dataset.status;
+
+			// 그룹이면 배열, 아니면 단일값
+			const statusList = STATUS_GROUP_MAP[statusKey] ?? statusKey;
+
+			loadShipmentList(statusList);
+
         });
     });
 
@@ -72,57 +109,68 @@ function initGrid() {
            ⭐ 예약 버튼 컬럼 - 수주번호별 첫 행에만 표시
            ⭐ reservableGroup 필드를 서버에서 받아서 사용
         ========================================================= */
-        {
-            headerName: "예약",
-            width: 110,
-            cellRenderer: params => {
-                if (!params.data) return "";
+		{
+		    headerName: "예약",
+		    width: 120,
+		    cellRenderer: params => {
 
-                const orderId = params.data.orderId;
-                const status = params.data.status;
-                
-                // ⭐ 예약/출하완료 탭에서는 아무것도 표시 안 함
-                if (status === "RESERVED" || status === "SHIPPED") {
-                    return "";
-                }
-                
-                // ⭐ 현재 화면에 표시되는 row만 가져오기
-                const visibleRows = [];
-                params.api.forEachNodeAfterFilterAndSort(node => {
-                    if (node.data) visibleRows.push(node.data);
-                });
+		        if (!params.data) return "";
 
-                // 같은 수주(orderId) 묶기
-                const sameOrderRows = visibleRows.filter(r => r.orderId === orderId);
-                
-                // 같은 수주가 없으면 빈 칸
-                if (sameOrderRows.length === 0) return "";
-                
-                // 현재 행이 첫 번째 행인지 확인
-                const firstRow = sameOrderRows[0];
-                const isFirstRow = (
-                    params.data.prdName === firstRow.prdName &&
-                    params.data.orderQty === firstRow.orderQty &&
-                    params.data.clientName === firstRow.clientName
-                );
+		        const { orderId, status, reservableGroup } = params.data;
 
-                // 첫 번째 행이 아니면 빈 칸
-                if (!isFirstRow) return "";
+		        /* ===============================
+		           1️⃣ 예약취소 버튼 (RESERVED)
+		        =============================== */
+		        if (status === "RESERVED" || status === "PENDING")  {
+		            return `
+		                <button class="btn btn-sm btn-outline-secondary"
+		                        onclick="cancelShipment('${orderId}')">
+		                    예약취소
+		                </button>
+		            `;
+		        }
 
-                // ⭐ 대기/부족 상태에서만 버튼 또는 "예약불가" 표시
-                if (params.data.reservableGroup === true) {
-                    return `
-                        <button class="btn btn-sm btn-primary"
-                                onclick="reserveShipment('${orderId}')">
-                            예약
-                        </button>
-                    `;
-                } else {
-                    // 예약 불가능한 경우 (대기/부족 탭에서만)
-                    return `<span class="text-muted">예약불가</span>`;
-                }
-            }
-        },
+		        /* ===============================
+		           2️⃣ PENDING / SHIPPED → 아무것도 표시 안 함
+		        =============================== */
+		        if (status === "SHIPPED") {
+		            return "";
+		        }
+
+		        /* ===============================
+		           3️⃣ WAITING / LACK → 예약 / 예약불가
+		        =============================== */
+
+		        // 현재 화면 row 기준
+		        const visibleRows = [];
+		        params.api.forEachNodeAfterFilterAndSort(node => {
+		            if (node.data) visibleRows.push(node.data);
+		        });
+
+		        const sameOrderRows = visibleRows.filter(r => r.orderId === orderId);
+		        if (sameOrderRows.length === 0) return "";
+
+		        const firstRow = sameOrderRows[0];
+		        const isFirstRow =
+		            params.data.prdName === firstRow.prdName &&
+		            params.data.orderQty === firstRow.orderQty &&
+		            params.data.clientName === firstRow.clientName;
+
+		        if (!isFirstRow) return "";
+
+		        if (reservableGroup === true) {
+		            return `
+		                <button class="btn btn-sm btn-outline-danger"
+		                        onclick="reserveShipment('${orderId}')">
+		                    예약
+		                </button>
+		            `;
+		        }
+
+		        return `<span class="text-muted">예약불가</span>`;
+		    }
+		},
+
 
 		{
 		    headerName: "상세",
@@ -170,6 +218,8 @@ function renderStatusBadge(status) {
             return `<span class="badge bg-danger">부족</span>`;
         case "SHIPPED":
             return `<span class="badge bg-success">출하완료</span>`;
+		case "PENDING":
+			return `<span class="badge bg-primary">출고준비</span>`;
         default:
             return `<span class="badge bg-secondary">대기</span>`;
     }
@@ -268,4 +318,37 @@ function reserveShipment(orderId) {
 ========================================================= */
 function openDetail(orderId) {
     alert("상세 페이지 준비 중: " + orderId);
+}
+
+/* =========================================================
+   8) 예약 취소
+========================================================= */
+
+function cancelShipment(orderId) {
+
+    if (!confirm("출하 예약을 취소하시겠습니까?")) return;
+
+    const csrfToken  = document.querySelector('meta[name="_csrf_token"]')?.content || "";
+    const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]')?.content || "";
+
+    const headers = {};
+    if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+    fetch(`/sales/shipment/cancel?orderId=${orderId}`, {
+        method: "POST",
+        headers
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("✔ 예약이 취소되었습니다.");
+            loadShipmentList(getSelectedStatus());
+        } else {
+            alert("❌ 취소 실패: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("예약취소 오류", err);
+        alert("예약취소 중 오류 발생");
+    });
 }

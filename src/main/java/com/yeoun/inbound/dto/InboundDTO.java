@@ -23,15 +23,17 @@ public class InboundDTO {
 	private String materialId; // 발주 고유번호
 	private String prodId; // 작업지시서 고유번호
 	private List<InboundItemDTO> items;
+	private String inboundType;
 	
 	public InboundDTO(String inboundId, LocalDateTime expectArrivalDate, String inboundStatus, String materialId,
-			String prodId, List<InboundItemDTO> items) {
+			String prodId, List<InboundItemDTO> items, String inboundType) {
 		this.inboundId = inboundId;
 		this.expectArrivalDate = expectArrivalDate;
 		this.inboundStatus = inboundStatus;
 		this.materialId = materialId;
 		this.prodId = prodId;
 		this.items = items;
+		this.inboundType = inboundType;
 	}
 	
 	// ----------------------------------------
@@ -45,6 +47,7 @@ public class InboundDTO {
 				.inboundStatus(inboundStatus)
 				.materialId(materialId)
 				.prodId(prodId)
+				.inboundType(inboundType)
 				.build();
 	}
 	

@@ -1,0 +1,169 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+	
+	<body>
+		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+			<!-- 스피너 -->
+			<div id="loading-overlay" style="display:none; 
+			    position:absolute; top:0; left:0; width:100%; height:100%; 
+			    background:rgba(255,255,255,0.6); 
+			    z-index:99; text-align:center; display:flex; 
+			    align-items:center; justify-content:center;">
+				<div style="margin-top:30vh;">
+					<div class="spinner-border text-primary" role="status">
+					</div>
+					<br>
+					<span class="visually">데이터 불러오는 중...</span>
+				</div>
+			</div>
+			<button class="btn btn-outline-primary mb-3" onclick="history.back()">← 목록으로</button>
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<h2>입고 상세 정보</h2>
+				<button th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}" class="btn btn-primary" 
+					id="completeInboundBtn" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
+					입고 완료
+				</button>
+			</div>
+			<div class="card p-4 mb-5">
+				<div class="card-body">
+					 <div class="row row-cols-3 g-4">
+						<div class="col">
+						    <div class="text-secondary mb-1">입고번호</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.inboundId}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">입고담당자</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.materialEmpName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">입고일자</div>
+						    <div class="fw-semibold" th:text="${#temporals.format(receiptDTO.expectArrivalDate, 'yyyy-MM-dd')}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">작업지시서</div>
+						    <div class="d-flex">
+						    	<div class="fw-semibold" style="margin-right:3px !important;" th:text="${receiptDTO.prodId}"></div>
+	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+									th:attr="data-prod-id=${receiptDTO.prodId}"
+									onclick="openDetailOrderWindow(this.dataset.prodId)"></i>
+						    </div>
+						</div>
+						<div class="col">
+							<div class="text-secondary mb-1">상태</div>
+							<div>
+							    <span th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}" class="badge bg-warning text-dark">대기</span>
+							    <span th:if="${receiptDTO.inboundStatus == 'COMPLETED'}" class="badge bg-success">입고완료</span>
+							</div>
+						</div>
+					 </div>
+				</div>
+			</div>
+			<div>
+			<div class="card mb-5">
+				<div class="card-header">
+					<h5 class="mb-0">입고 품목 목록</h5>
+				</div>
+				<div class="card-body p-0">
+					<div class="table-responsive">
+						<input type="hidden" id="inboundStatus" th:value="${receiptDTO.inboundStatus}">
+						<input type="hidden" id="inboundId" th:value="${receiptDTO.inboundId}">
+						<table class="table table-bordered table-hover mb-0 text-center">
+							<th:block th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}">
+								<thead class="table-light">
+									<tr class="text-center">
+										<th>입고 상품</th>
+										<th>요청 수량</th>
+										<th>단위</th>
+										<th style="width: 9em;">입고 수량</th>
+										<th style="width: 9em;">불량 수량</th>
+										<th>구역</th>
+										<th>선반</th>
+										<th>행</th>
+										<th>열</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="item, iterStat  : ${receiptDTO.items}">
+										<td th:text="${item.itemName}" th:attr="data-name=${item.itemName}"></td>
+										<td style="width: 13em;">
+											<span class="requestAmount convert-qty" 
+												  th:attr="data-index=${iterStat.index}"
+												  th:data-unit="${item.unit}" 
+							            		  th:data-qty="${item.requestAmount}"
+							            		  th:text="${item.requestAmount}"></span>
+										</td>
+										<td class="unit" th:attr="data-index=${iterStat.index}" style="width: 9em;">EA</td>
+										<td style="width: 13em;">
+											<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
+										</td>
+										<td>
+											<span class="disposeAmount" th:attr="data-index=${iterStat.index}" th:text="${item.disposeAmount}"></span>
+											<input type="hidden" th:value="${item.itemType}" class="itemType" />
+											<input type="hidden" th:value="${item.itemId}" class="itemId" />
+											<input type="hidden" th:value="${item.inboundItemId}" class="inboundItemId" />
+											<input type="hidden" th:value="${item.lotNo}" class="prodLotNo">
+										</td>
+										<td style="width: 9em;">
+											<select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+										<td style="width: 9em;">
+											<select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+										<td style="width: 9em;">
+											<select class="moveRow form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+										<td style="width: 9em;">
+											<select class="moveColumn form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+									</tr>
+								</tbody>
+							 </th:block>
+							 <th:block th:unless="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}">
+							 	<thead class="table-light">
+									<tr class="text-center">
+										<th>입고 상품</th>
+										<th>요청 수량</th>
+										<th>단위</th>
+										<th style="width: 9em;">입고 수량</th>
+										<th style="width: 9em;">불량 수량</th>
+										<th>창고위치</th>
+										<th>LOT번호</th>
+									</tr>
+								</thead>
+							 	<tbody class="">
+									 <tr th:each="item, iterStat  : ${receiptDTO.items}">
+							            <td th:text="${item.itemName}"></td>
+							            <td class="convert-qty" 
+							            	th:data-unit="${item.unit}" 
+							            	th:data-qty="${item.requestAmount}"></td>
+							            <td>EA</td>
+							            <td class="convert-qty"
+							            	th:data-unit="${item.unit}" 
+							            	th:data-qty="${item.inboundAmount}">
+							            </td>
+							            <td class="convert-qty" 
+							            	th:data-unit="${item.unit}"
+							            	th:data-qty="${item.disposeAmount}"></td>
+							            <td th:text="${item.locationId}" class="locationId" th:attr="data-index=${iterStat.index}"></td>
+							            <td th:text="${item.lotNo}"></td>
+							        </tr>
+							 	</tbody>
+							 </th:block>
+						</table>
+					</div>
+				
+				</div>
+			</div>
+			</div>
+		</div>
+		<th:block layout:fragment="myScript">
+			<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
+			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/inventory/util.js"></script>
+			<script src="/js/inbound/materialGrid.js"></script>
+			<script src="/js/inbound/materialItem.js"></script>
+		</th:block>
+	</body>
+</th:block>

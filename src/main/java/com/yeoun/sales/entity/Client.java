@@ -40,6 +40,16 @@ public class Client {
     @Column(name = "CEO_NAME", length = 50)
     @Comment("거래처 대표자명")
     private String ceoName;
+    
+    // 업태
+    @Column(name = "BIZ_TYPE")
+    @Comment("업태")
+    private String bizType;   
+
+    // 업종
+    @Column(name = "BIZ_ITEM")
+    @Comment("업종")
+    private String bizItem;   
 
     // 6) 담당자명
     @Column(name = "MANAGER_NAME", length = 50)

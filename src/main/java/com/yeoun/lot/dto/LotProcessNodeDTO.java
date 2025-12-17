@@ -12,5 +12,6 @@ public class LotProcessNodeDTO {
 	private String processId;	// 공정 Id
 	private String processName;	// 공정명
 	private String status;		// LOT 기준 공정 상태
+	private String orderId;		// 작업지시번호
 
 }

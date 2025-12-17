@@ -16,6 +16,7 @@ public class MaterialAvailabilityDTO {
 	private String prdName;			// 제품명
 	private String matId;			// 자재Id
 	private String matName;			// 자재명
+	private String matType;			// 자재타입
 	private Double requiredQty;		// 필요수량
 	private Double stockQty;		// 재고량
 

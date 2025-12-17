@@ -62,6 +62,11 @@
                             <div data-i18n="Menu2" class="menu-link-sub">출/퇴근 현황</div>
                         </a>
                     </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a href="/attendance/outwork" class="menu-link">
+                            <div data-i18n="Menu2" class="menu-link-sub">외근 현황</div>
+                        </a>
+                    </li>
                     <!-- 로그인한 사람 누구나 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/leave/my" class="menu-link">
@@ -143,70 +148,69 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item">
-                        <a th:href="@{/masterData/product}" class="menu-link" target="_blank">
+                        <a th:href="@{/masterData/product}" class="menu-link">
                             <div data-i18n="Product/BOM Information Management" class="menu-link-sub">완제품/원재료</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/masterData/bom_stock}" class="menu-link" target="_blank">
+                        <a th:href="@{/masterData/bom_stock}" class="menu-link">
                             <div data-i18n="Product/BOM Information Management" class="menu-link-sub">BOM정보/안전재고</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/masterData/qc_item}" class="menu-link" target="_blank">
-                            <div data-i18n="Quality Item Management" class="menu-link-sub">품질항목관리</div>
+                        <a th:href="@{/masterData/qc_item}" class="menu-link">
+                            <div data-i18n="Quality Item Management" class="menu-link-sub">품질항목기준</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/masterData/process_mst}" class="menu-link" target="_blank">
+                        <a th:href="@{/masterData/process_mst}" class="menu-link">
                             <div data-i18n="Process Route/Process Code Management" class="menu-link-sub">공정라우트/공정코드관리</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/equipment/master}" class="menu-link" target="_blank">
+                        <a th:href="@{/equipment/master}" class="menu-link">
                             <div data-i18n="Equipment/Line" class="menu-link-sub">설비/라인관리</div>
                         </a>
                     </li>
                 </ul>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <a href="javascript:void(0);" class="menu-link menu-toggle" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                     <div data-i18n="Salary management">재고관리</div>
                 </a>
                 <ul class="menu-sub">
                     <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN')">
                         <a th:href="@{/inventory/dashboard}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                         <a th:href="@{/inventory/list}" class="menu-link">
                             <div data-i18n="Menu2" class="menu-link-sub">재고조회</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                         <a th:href="@{/inventory/history}" class="menu-link">
                             <div data-i18n="Menu3" class="menu-link-sub">재고이력</div>
                         </a>
                     </li>
 
-                    <!-- 사원 누구나: 본인 급여명세서 조회 -->
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
                         <a th:href="@{/inventory/stock-take}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">재고 실사</div>
                         </a>
                     </li>
                     
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
                         <a th:href="@{/inventory/inbound}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">입고관리</div>
                         </a>
                     </li>
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/inventory/outbound/list}" class="menu-link">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
+                        <a th:href="@{/inventory/outbound}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">출고관리</div>
                         </a>
                     </li>
@@ -274,8 +278,8 @@
 	                   </a>
 	                </li>
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                   <a th:href="@{/equipment/line}" class="menu-link">
-	                       <div data-i18n="Menu2" class="menu-link-sub">라인현황</div>
+	                   <a th:href="@{/equipment/history}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">설비이력</div>
 	                   </a>
 	                </li>
                 </ul>
@@ -326,6 +330,12 @@
 	                </li>
                 
 	            </ul>
+            </li>
+            <!-- 품질 관리 -->
+            <li class="menu-item">
+                <a href="/dispose" class="menu-link">
+                    <div data-i18n="DisposeList">폐기 목록</div>
+                </a>
             </li>
 
             <li class="menu-item">

@@ -145,19 +145,9 @@ function showNewAlarm() {
 // 종클릭시 나오는 드랍다운에 new 표시
 function showNewAlarmAtDropdown() {
 	const alarmNewBadge = document.querySelector(".alarm-new-badge");
-	console.log("alarmNewBadge:", alarmNewBadge);
-	alarmNewBadge.style.display = "block";
-	
-	if(!alarmNewBadge.dataset.bound) {
-		const bell = document.getElementById("bell");
-        if (bell) {
-            bell.addEventListener("click", () => {
-                alarmNewBadge.style.display = "none";
-            });
-        }
-        alarmNewBadge.dataset.bound = "true";
-	}
+	alarmNewBadge.style.display = "inline";
 }
+
 
 // 읽지않은 알림 데이터 가져오기
 async function getAlarmReadStatus() {

@@ -24,13 +24,31 @@ import lombok.extern.log4j.Log4j2;
 public class SafetyStockService {
 	
 	private final SafetyStockRepository safetyStockRepository;
+
+	//---------------------------------------------
+	//안전재고 품목종류 드롭다운
+	public List<Map<String, Object>> getMatTypeList() {
+		return safetyStockRepository.findByMatTypeList();
+	}
+	//안전재고 단위 드롭다운
+	public List<Map<String, Object>> getMatUnitList() {
+		return safetyStockRepository.findByMatUnitList();
+	}
+	//안전재고 정책방식 드롭다운
+	public List<Map<String, Object>> getSafetyStockPolicyList() {
+		return safetyStockRepository.findBySafetyStockPolicyList();
+	}
+	//안전재고 상태 드롭다운
+	public List<Map<String, Object>> getSafetyStockStatusList() {
+		return safetyStockRepository.findByPrdStatusList();
+	}
 	
 	//1. 안전재고 그리드 조회
-		@Transactional(readOnly = true)
-		public List<SafetyStock> findAll() {
-			log.info("safetyStockRepository.findAll() 조회된개수 - {}",safetyStockRepository.findAll());
-			return safetyStockRepository.findAll();
-		}
+	@Transactional(readOnly = true)
+	public List<SafetyStock> findByItemlList(String itemId, String itemName) {
+		log.info("safetyStockRepository.findByItemlList() 조회된개수 - {}",safetyStockRepository.findByItemlList(itemId, itemName));
+		return safetyStockRepository.findByItemlList(itemId, itemName);
+	}
 
 	//2. 안전재고 그리드 저장
 	public String saveSafetyStock(String empId, Map<String,Object> param) {

@@ -4,10 +4,26 @@
 	
 	<body>
 		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+			<!-- 스피너 -->
+			<div id="loading-overlay" style="display:none; 
+			    position:absolute; top:0; left:0; width:100%; height:100%; 
+			    background:rgba(255,255,255,0.6); 
+			    z-index:99; text-align:center; display:flex; 
+			    align-items:center; justify-content:center;">
+				<div style="margin-top:30vh;">
+					<div class="spinner-border text-primary" role="status">
+					</div>
+					<br>
+					<span class="visually">데이터 불러오는 중...</span>
+				</div>
+			</div>
 			<button class="btn btn-outline-primary mb-3" onclick="history.back()">← 목록으로</button>
 			<div class="d-flex justify-content-between align-items-center mb-4">
 				<h2>입고 상세 정보</h2>
-				<button class="btn btn-primary" id="completeInboundBtn">입고 완료</button>
+				<button th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}" class="btn btn-primary completeInboundBtn"
+					id="completeInboundBtn" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
+					입고 완료
+				</button>
 			</div>
 			<div class="card p-4 mb-5">
 				<div class="card-body">
@@ -18,8 +34,8 @@
 						</div>
 
 						<div class="col" th:if="${receiptDTO.materialId != null}">
-						    <div class="text-secondary mb-1">담당자</div>
-						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
+						    <div class="text-secondary mb-1">입고 담당자</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.materialEmpName}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">납기일자</div>
@@ -74,21 +90,27 @@
 									<tr class="text-center">
 										<th>입고 상품</th>
 										<th>요청 수량</th>
+										<th>단위</th>
 										<th style="width: 9em;">입고 수량</th>
 										<th style="width: 9em;">불량 수량</th>
-										<th>ZONE</th>
-										<th>RACK</th>
-										<th>ROW</th>
-										<th>COLUMN</th>
+										<th>구역</th>
+										<th>선반</th>
+										<th>행</th>
+										<th>열</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr th:each="item, iterStat  : ${receiptDTO.items}">
 										<td th:text="${item.itemName}" th:attr="data-name=${item.itemName}"></td>
-										<td>
-											<span class="requestAmount" th:text="${item.requestAmount}" th:attr="data-index=${iterStat.index}"></span>
+										<td style="width: 13em;">
+											<span class="requestAmount convert-qty" 
+												  th:attr="data-index=${iterStat.index}"
+												  th:data-unit="${item.unit}" 
+							            		  th:data-qty="${item.requestAmount}"
+							            		  th:text="${item.requestAmount}"></span>
 										</td>
-										<td>
+										<td th:text="${item.unit} ?: 'EA'" class="unit" th:attr="data-index=${iterStat.index}" style="width: 9em;"></td>
+										<td style="width: 13em;">
 											<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
 										</td>
 										<td>
@@ -98,10 +120,18 @@
 											<input type="hidden" th:value="${item.inboundItemId}" class="inboundItemId" />
 											<input type="hidden" th:value="${item.lotNo}" class="prodLotNo">
 										</td>
-										<td><select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select></td>
-										<td><select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select></td>
-										<td><select class="moveRow form-select" th:attr="data-index=${iterStat.index}"></select></td>
-										<td><select class="moveColumn form-select" th:attr="data-index=${iterStat.index}"></select></td>
+										<td style="width: 9em;">
+											<select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+										<td style="width: 9em;">
+											<select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+										<td style="width: 9em;">
+											<select class="moveRow form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
+										<td style="width: 9em;">
+											<select class="moveColumn form-select" th:attr="data-index=${iterStat.index}"></select>
+										</td>
 									</tr>
 								</tbody>
 							 </th:block>
@@ -110,6 +140,7 @@
 									<tr class="text-center">
 										<th>입고 상품</th>
 										<th>요청 수량</th>
+										<th>단위</th>
 										<th style="width: 9em;">입고 수량</th>
 										<th style="width: 9em;">불량 수량</th>
 										<th>창고위치</th>
@@ -119,9 +150,17 @@
 							 	<tbody class="">
 									 <tr th:each="item, iterStat  : ${receiptDTO.items}">
 							            <td th:text="${item.itemName}"></td>
-							            <td th:text="${item.requestAmount}"></td>
-							            <td th:text="${item.inboundAmount}"></td>
-							            <td th:text="${item.disposeAmount}"></td>
+							            <td class="convert-qty" 
+							            	th:data-unit="${item.unit}" 
+							            	th:data-qty="${item.requestAmount}"></td>
+							            <td th:text="${item.unit} ?: 'EA'"></td>
+							            <td class="convert-qty"
+							            	th:data-unit="${item.unit}" 
+							            	th:data-qty="${item.inboundAmount}">
+							            </td>
+							            <td class="convert-qty" 
+							            	th:data-unit="${item.unit}"
+							            	th:data-qty="${item.disposeAmount}"></td>
 							            <td th:text="${item.locationId}" class="locationId" th:attr="data-index=${iterStat.index}"></td>
 							            <td th:text="${item.lotNo}"></td>
 							        </tr>
@@ -138,6 +177,7 @@
 			<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
 			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/inventory/util.js"></script>
 			<script src="/js/inbound/materialGrid.js"></script>
 			<script src="/js/inbound/materialItem.js"></script>
 		</th:block>

@@ -91,10 +91,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 	const cardEl = document.getElementById('outboundNOrderCard');
 	if(islistOn) {
 		cardEl.style.display = 'block';
-		console.log(islistOn,"!!!!!!!!!!!!!!");
+//		console.log(islistOn,"!!!!!!!!!!!!!!");
 	} else {
 		cardEl.style.display = 'none';
-		console.log(islistOn,"@@@@@@@@@@@");
+//		console.log(islistOn,"@@@@@@@@@@@");
 	}
 
 		
@@ -475,6 +475,9 @@ async function renderOrderGrid() {
 			    useClient: true, 
 			    perPage: 5 
 			},
+			columnOptions: {
+				resizable: true
+			},
 	        columns: [
 	            { header: '작업지시서',   name: 'orderId', minWidth: 160 },
 	            { header: '생산 품목', name: 'productName', minWidth: 110, align: 'center' },
@@ -575,6 +578,9 @@ async function renderShipmentGrid() {
 	   bodyHeight: 160,
 	   rowHeaders: ['rowNum'],
 	   pageOptions: { useClient: true, perPage: 5 },
+	   columnOptions: {
+	   	resizable: true
+	   },
 	   columns: [
 		{ header: '출하지시서', name: 'shipmentId', minWidth: 140 },
 		{ header: '거래처',     name: 'clientName', minWidth: 120 },
@@ -587,7 +593,7 @@ async function renderShipmentGrid() {
 			width: 100,
 			align: 'center',
 			formatter: ({ rowKey }) =>
-			`<button type="button" class="btn btn-primary btn-sm" data-row="${rowKey}">출고등록</button>`
+			`<button type="button" class="btn btn btn-outline-info btn-sm" data-row="${rowKey}">출고등록</button>`
 		}
 		],
 		data: shipmentData   // 여기서 /api/shipment/list 결과 사용
@@ -677,7 +683,6 @@ function getLowStockRows() {
 }
 
 function getNeedOrderStocks() {
-	console.log(ivOrderCheckData,"@!#!@#!@#@!#");
 	return ivOrderCheckData.filter(stock => {
 		// 출고 예정 수량 : 생산계획수량 - 작업지시(출고완)수량
 		const EXPECT_OBPLAN_QTY = stock.productPlanQty - stock.outboundPlanQty;
@@ -733,6 +738,9 @@ async function renderNeedOrderStockGrid() {
 		    useClient: true, 
 		    perPage: 5 
 		},
+		columnOptions: {
+			resizable: true
+		},
         columns: [
             { header: '품목명',   name: 'itemName', minWidth: 160 },
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
@@ -759,7 +767,7 @@ async function renderNeedOrderStockGrid() {
 		    },
 			{ header: '단위',   name: 'itemUnit', minWidth: 50 },
 			{ header: '발주',      name: "btn", width: 100, align: "center",
-			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
+			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
 			}
         ],
         data: needOrderStocks
@@ -773,7 +781,7 @@ async function renderNeedOrderStockGrid() {
 				
 				const rowData = safetyStockGrid.getRow(event.rowKey);
 				
-				console.log(rowData,"###################");
+//				console.log(rowData,"###################");
 
 				//모달 열기
 				const modalEl = document.getElementById("modalCenter");
@@ -799,7 +807,7 @@ async function initPurchaseModalByRow(rowData) {
 
     // 공급업체 전체 데이터 가져오기
     const data = await supplierList();
-	console.log("!@#!@#!@#!@#", data);
+//	console.log("!@#!@#!@#!@#", data);
     if (!data) return;
 
     // 이 품목을 공급하는 거래처 찾기
@@ -815,7 +823,7 @@ async function initPurchaseModalByRow(rowData) {
 	        item => String(item.materialId) === String(targetMaterialId)
 	    );
 	    if (found) {
-			console.log("found", found);
+//			console.log("found", found);
 	        supplier = client;
 	        targetItem = found;
 	        break;
@@ -838,7 +846,7 @@ async function initPurchaseModalByRow(rowData) {
 	const optionToSelect = Array.from(itemSelect.options).find(
 		opt => Number(opt.value) === Number(targetItemId)
 	);
-	console.log("optionToSelect : ", optionToSelect);
+//	console.log("optionToSelect : ", optionToSelect);
 	if (!optionToSelect) {
 		alert("선택된 거래처에 이 품목이 없습니다.");
 		return;
@@ -860,8 +868,7 @@ async function initPurchaseModalByRow(rowData) {
 	
 	// 발주수량으로 변환
 	needOrderQty = Math.ceil(convertFromBaseUnit(inventoryNeedOrderQty, targetItem.unit));
-	console.log(needOrderQty);
-	
+//	console.log(needOrderQty);
 	
 	// orderTableBody(purchase_regist.js에선언되어있음)의 마지막추가된 row정보
 	const lastRow = orderTableBody.lastElementChild;
@@ -871,7 +878,7 @@ async function initPurchaseModalByRow(rowData) {
 	if (!qtyInput) return;
 	// 최소수량, 단위, 단가 정보(input에 설정되어있는값가져오기)
 	const minOrder = parseInt(qtyInput.dataset.min, 10);
-	const unit     = parseInt(qtyInput.dataset.unit, 10);
+	const unit     = parseInt(qtyInput.dataset.orderUnit, 10);
 	const unitPrice    = parseInt(qtyInput.dataset.price, 10);
 	
 	// 발주필요수량을 최소주문수량, 주문단위규칙에 맞게 변형하기위해 저장
@@ -881,6 +888,7 @@ async function initPurchaseModalByRow(rowData) {
 	// 주문단위 설정 올림(발주필요수량 / 주문단위) x 주문단위
 	if(qty % unit !== 0) qty = Math.ceil(qty / unit) * unit;
 	// 입력
+	qty = Math.round(qty);
 	qtyInput.value = qty;
 	
 	// 금액 계산 후 입력
@@ -933,6 +941,9 @@ async function renderExpireDisposalGrid() {
 		    useClient: true,
 		    perPage: 5
 		},
+		columnOptions: {
+			resizable: true
+		},
         columns: [
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
             { header: '품목명',   name: 'prodName', minWidth: 160 },
@@ -975,7 +986,7 @@ async function renderExpireDisposalGrid() {
 			},
 			{
 				header: '상세',      name: "btn", width: 100, align: "center",
-				formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
+				formatter: (cellInfo) => "<button type='button' class='btn-detail btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
 			}
         ],
         data: rows

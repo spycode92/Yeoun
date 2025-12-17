@@ -102,8 +102,8 @@ function renderProductList(items) {
 			<tr>
 				<td>${prd.prdId}</td>
 				<td>${prd.prdName}</td>
-				<td>${prd.shipmentQty}</td>
-				<td>${prd.orderqQty}</td>
+				<td data-qty="${prd.shipmentQty}" name="shipmentQty">${prd.shipmentQty}</td>
+				<td data-stock="${prd.orderqQty}" name="stock">${prd.orderqQty}</td>
 				<td>
 					<input type="number" class="form-control outboundQty" min="0">
 					<input type="hidden" name="prdId" value="${prd.prdId}"/>
@@ -119,14 +119,41 @@ function renderProductList(items) {
 const submitPrdOutbound = async () => {
 	// 출고 품목을 담을 변수
 	const items = [];
+	const rows = document.querySelectorAll("#shipTbody tr");
 	
-	// 출고 품목들 items 추가
-	document.querySelectorAll("#shipTbody tr").forEach(tr => {
+	for (const row of rows) {
+		// 납품 수량
+		const shipmentQty = Number(row.querySelector("td[name=shipmentQty]").dataset.qty);
+		// 출고 수량
+		const outboundQty = Number(row.querySelector(".outboundQty").value);
+		// 재고 수량
+		const stock = Number(row.querySelector("td[name=stock]").dataset.stock);
+		
+		// 출고 수량과 재고 수량 비교
+		if (outboundQty > stock) {
+			alert("출고 수량이 재고 수량보다 많습니다.");
+			return;
+		}
+
+		// 출고 수량과 요청 수량 비교
+		if (shipmentQty > outboundQty) {
+			alert("출고 수량이 요청 수량보다 적습니다.");
+			return;
+		}
+		
+		// 출고 수량과 요청 수량 비교
+		if (shipmentQty < outboundQty) {
+			alert("출고 수량이 요청 수량보다 많습니다.");
+			return;
+		}
+		
 		items.push({
-			prdId: tr.querySelector("input[name=prdId]").value,
-			outboundQty: tr.querySelector(".outboundQty").value
+			prdId: row.querySelector("input[name=prdId]").value,
+			outboundQty
 		});
-	});
+		
+	}
+
 	
 	// body에 담아서 보낼 내용
 	const payload = {
@@ -136,8 +163,6 @@ const submitPrdOutbound = async () => {
 		type: "FG",
 		items
 	};
-	
-	console.log(payload, "페이;로드 출력");
 	
 	const res = await fetch("/inventory/outbound/fg/regist", {
 		method: "POST",

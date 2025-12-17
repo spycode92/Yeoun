@@ -25,11 +25,18 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
         SELECT COALESCE(SUM(w.PLAN_QTY), 0) 
             FROM WORK_ORDER w
             WHERE w.PLAN_ID = :planId
+            AND w.STATUS != 'CANCELED'
     """, nativeQuery = true)
 	Integer sumWorkOrderQty(@Param("planId")String planId);
 
 	// 출고 상태가 'N'인 작업지시서 조회
-	List<WorkOrder> findByOutboundYn(String outboundYn);
+	@Query("""
+		    SELECT w
+		    FROM WorkOrder w
+		    WHERE w.outboundYn = :outboundYn
+		    AND w.status != 'CANCELED'
+		""")
+	List<WorkOrder> findByOutboundYn(@Param("outboundYn") String outboundYn);
 
 	// 작업지시서 조회
 	Optional<WorkOrder> findByOrderId(String workOrderId);
@@ -38,30 +45,26 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	boolean existsByPlanIdAndStatusNot(String planId, String status);
 	
 	
-	// ===================================================
-	// 대시보드 KPI 전용
-	// ===================================================
-	// 1) 오늘 생성된 작업지시 수
-	@Query("""
-        SELECT COUNT(w)
-        FROM WorkOrder w
-        WHERE w.createdDate >= :start
-          AND w.createdDate < :end
+	// ==========================
+	// 생산관리 대시보드
+	// ==========================
+	// 오늘 완료된 작업지시 수
+	long countByStatusAndActEndDateBetween(String status, LocalDateTime start, LocalDateTime end);
+	
+	// 진행 중 공정 단계
+    long countByStatus(String status);
+    
+    // 지연 작업지시 수 (예정완료시간 초과)
+    long countByStatusAndPlanEndDateBefore(String status, LocalDateTime now);
+    
+	// 오늘 작업지시(작성일 기준)
+    @Query("""
+        select count(w)
+        from WorkOrder w
+        where w.createdDate >= :start
+          and w.createdDate <  :end
     """)
-	long countCreatedBetween(@Param("start") LocalDateTime start,
-	                         @Param("end") LocalDateTime end);
-
-	// 2) 상태별 작업지시 수 (예: IN_PROGRESS, DONE 등)
-	long countByStatus(String status);
-
-	// 3) 지연 작업지시 수
-	@Query("""
-        SELECT COUNT(w)
-        FROM WorkOrder w
-        WHERE w.planEndDate < :now
-          AND w.status <> 'DONE'
-    """)
-	long countDelayedOrders(@Param("now") LocalDateTime now);
+    long countTodayOrders(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
 
 }

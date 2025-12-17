@@ -77,15 +77,27 @@ async function loadAttendanceList(startDate, endDate) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
-	const day = today.getDate();
+	// 세션에 저장된 날짜
+	const savedStart = sessionStorage.getItem("startDate");
+	const savedEnd   = sessionStorage.getItem("endDate");
 	
-	// 이번 달 1일과 오늘 날짜 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	let startDate;
+	let endDate;
+	
+	if (savedStart && savedEnd) {// 날짜 변경이 있을 경우 저장된 날짜로 가져오기
+		startDate = savedStart;
+		endDate = savedEnd;
+	} else {
+		// 오늘 날짜 구하기
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = today.getMonth() + 1;
+		const day = today.getDate();
+		
+		// 이번 달 1일과 오늘 날짜 계산
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	}
 	 
 	// 날짜 input 기본값 설정
 	document.querySelector("#startDate").value = startDate;
@@ -98,6 +110,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.querySelector("#searchbtn").addEventListener("click", async () => {
 	const startDate = document.querySelector("#startDate").value;
 	const endDate = document.querySelector("#endDate").value;
+	
+	sessionStorage.setItem("startDate", startDate.value);
+	sessionStorage.setItem("endDate", endDate.value);
 	
 	if (!startDate || !endDate) {
 		alert("조회할 기간을 선택해주세요!");

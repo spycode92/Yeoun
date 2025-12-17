@@ -82,8 +82,14 @@ document.getElementById("completePrdOutboundBtn").addEventListener("click", asyn
 	if (data.success) {
 		alert("출고가 완료되었습니다.");
 		setTimeout(() => {
-			window.location.href = "/inventory/outbound/list";
+			window.location.href = "/inventory/outbound/productList";
 		}, 10); 
 	}
-	
 });
+
+// 출하지시서 상세 모달 열기
+function openDetailShipmentWindow(id) {
+	const url = `/inventory/outbound/detail/shipdWin/${id}`;
+	
+	window.open(url, '_blank', 'width=1320,height=610,scrollbars=yes');
+}

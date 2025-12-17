@@ -1,0 +1,31 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="reMaterial">
+	<div class="row g-2 align-items-center">
+		<!-- 검색 조건들 묶음 -->
+		<div
+			class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-2">
+			<!-- 날짜 -->
+			<div class="d-flex align-items-center gap-2">
+				<input type="date" class="form-control" id="reStartDate"
+					style="width: 140px;"> <span>~</span> <input type="date"
+					class="form-control" id="reEndDate" style="width: 140px;">
+			</div>
+			<div>
+			
+			</div>
+			<select class="form-select"  name="reSearchType"  style="width: 150px;">
+				<option value="all">전체</option>
+				<option value="mat">원재료</option>
+				<option value="lot">LOT</option>
+			</select>
+			<!-- 키워드 -->
+			<input type="text" class="form-control" placeholder="원재료명 / LOT번호"
+				id="reMaterialKeyword" style="width: 220px;">
+			<!-- 조회 버튼 -->
+			<button class="btn btn-outline-primary" id="reSearchbtn">검색</button>
+		</div>
+	</div>
+	<br>
+	<div class="card-body p-0">
+		<div id="reMaterialGrid"></div>
+	</div>
+</th:block>

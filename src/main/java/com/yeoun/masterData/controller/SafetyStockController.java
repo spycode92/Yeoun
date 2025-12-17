@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
@@ -26,12 +27,39 @@ import lombok.extern.log4j.Log4j2;
 public class SafetyStockController {
 	
 	private final SafetyStockService safetyStockService;
+
+	//안전재고 품목종류 드롭다운
+	@ResponseBody
+  	@GetMapping("/matTypeList")
+  	public List<Map<String, Object>> getMatTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return safetyStockService.getMatTypeList();
+  	}
+	//안전재고 단위 드롭다운
+	@ResponseBody
+  	@GetMapping("/unitList")
+  	public List<Map<String, Object>> getMatUnitList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return safetyStockService.getMatUnitList();
+  	}
+	//안전재고 정책방식 드롭다운
+	@ResponseBody
+  	@GetMapping("/policyTypeList")
+  	public List<Map<String, Object>> getSafetyStockPolicyList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return safetyStockService.getSafetyStockPolicyList();
+  	}
+	//안전재고 상태 드롭다운
+	@ResponseBody
+	@GetMapping("/statusList")
+  	public List<Map<String, Object>> getSafetyStockStatusList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return safetyStockService.getSafetyStockStatusList();
+  	}
 	
 	//안전재고 조회
 	@ResponseBody
   	@GetMapping("/list")
-  	public List<SafetyStock> safetyStockList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		return safetyStockService.findAll();
+  	public List<SafetyStock> safetyStockList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+			  			,@RequestParam(value = "itemId", required = false) String itemId,
+  						@RequestParam(value = "itemName", required = false) String itemName) {
+		return safetyStockService.findByItemlList(itemId, itemName);
   	}
 	//안전재고 저장
 	@ResponseBody

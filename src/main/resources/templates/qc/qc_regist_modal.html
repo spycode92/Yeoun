@@ -3,7 +3,7 @@
 
 <!-- 검사등록 모달 -->
 <div class="modal fade" id="qcRegModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
 
       <div class="modal-header">
@@ -29,7 +29,7 @@
 			    <label class="form-label">작업지시번호</label>
 			    <div id="qcOrderIdText" class="fw-semibold"></div>
 			  </div>
-			  <div class="col-md-3">
+			  <div class="col-md-2">
 			    <label class="form-label">제품</label>
 			    <div id="qcProductText"></div> 
 			  </div>
@@ -37,7 +37,7 @@
 			    <label class="form-label">지시수량</label>
 			    <div id="qcPlanQtyText"></div>  <!-- 300 EA -->
 			  </div>
-			  <div class="col-md-2">
+			  <div class="col-md-3">
 			    <label class="form-label">LOT 번호</label>
 			    <div id="qcLotNoText">-</div>
 			  </div>
@@ -75,45 +75,34 @@
             <table class="table table-sm table-bordered align-middle">
               <thead class="table-light">
               <tr>
-                <th style="width: 90px;">QC 항목명</th>
-                <th style="width: 50px;">단위</th>
-                <th style="width: 200px;">기준값</th>
-                <th style="width: 120px;">측정값</th>
-                <th style="width: 100px;">판정</th>
-                <th>비고</th>
+                <th style="width: 60px;">QC 항목명</th>
+                <th style="width: 10px;">단위</th>
+                <th style="width: 120px;">기준값</th>
+                <th style="width: 110px;">측정값</th>
+                <th style="width: 5px;">판정</th>
+                <th style="width: 150px;">비고</th>
+                <th style="width: 100px;">첨부</th>
               </tr>
               </thead>
               <tbody id="qcDetailTbody"></tbody>
             </table>
           </div>
 
+          <!-- 2행 : 전체 판정/수량 -->
           <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label class="form-label required">전체 판정</label>
               <select class="form-select form-select-sm"
                       id="overallResult"
                       name="overallResult"
                       required>
                 <option value="">선택</option>
-                <option value="PASS">PASS</option>
-                <option value="FAIL">FAIL</option>
+                <option value="PASS">합격</option>
+                <option value="FAIL">불합격</option>
               </select>
             </div>
-
-            <div class="col-md-9">
-              <label class="form-label">불합격 사유</label>
-              <textarea class="form-control form-control-sm"
-                        id="failReason"
-                        name="failReason"
-                        rows="1"
-                        placeholder="불합격일 경우 주요 사유를 입력하세요."
-                        readonly></textarea>
-            </div>
-          </div>
-          
-          <!-- 3행 : 수량/비고 입력 영역 추가 -->
-          <div class="row g-3 mt-3">
-            <div class="col-md-3">
+            
+            <div class="col-md-4">
               <label class="form-label">양품 수량(EA)</label>
               <input type="number"
                      class="form-control form-control-sm"
@@ -122,7 +111,7 @@
                      min="0"
                      placeholder="예: 995">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label class="form-label">불량 수량(EA)</label>
               <input type="number"
                      class="form-control form-control-sm"
@@ -131,6 +120,21 @@
                      min="0"
                      placeholder="예: 5">
             </div>
+          </div>
+          
+          <!-- 3행 : 불합격 사유/비고 -->
+          <div class="row g-3  mt-2">
+          
+            <div class="col-md-6">
+              <label class="form-label">불합격 사유</label>
+              <textarea class="form-control form-control-sm"
+                        id="failReason"
+                        name="failReason"
+                        rows="1"
+                        placeholder="불합격일 경우 주요 사유를 입력하세요."
+                        readonly></textarea>
+            </div>
+
             <div class="col-md-6">
               <label class="form-label">비고</label>
               <textarea class="form-control form-control-sm"

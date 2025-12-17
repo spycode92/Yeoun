@@ -2,6 +2,7 @@ package com.yeoun.sales.repository;
 
 import com.yeoun.sales.entity.Shipment;
 import com.yeoun.sales.entity.ShipmentItem;
+import com.yeoun.sales.enums.ShipmentStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,4 +38,29 @@ public interface ShipmentRepository extends JpaRepository<Shipment, String> {
         WHERE s.shipmentId = :shipmentId
     """)
     void updateStatusToReserved(@Param("shipmentId") String shipmentId);
+
+   // 출하지시 취소
+    Optional<Shipment> findByOrderIdAndShipmentStatusIn(
+            String orderId,
+            List<ShipmentStatus> statusList
+    );
+
+    
+    //취소시 상태 여부
+    boolean existsByOrderIdAndShipmentStatusIn(
+            String orderId,
+            List<ShipmentStatus> statusList
+    );
+
+    // 운송번호 자동생성
+    @Query("""
+    	    SELECT MAX(s.trackingNumber)
+    	    FROM Shipment s
+    	    WHERE s.trackingNumber LIKE :prefix%
+    	""")
+    	String findLastTrackingNumber(@Param("prefix") String prefix);
+
+
+
+
 }

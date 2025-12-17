@@ -104,4 +104,6 @@ public class Shipment {
 		public void changeStatus(ShipmentStatus status) {
 		    this.shipmentStatus = status;
 		}
+
+		
 }

@@ -8,12 +8,12 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
 import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.service.AlarmService;
-import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.repository.InventoryRepository;
@@ -32,6 +32,7 @@ import com.yeoun.outbound.entity.OutboundItem;
 import com.yeoun.outbound.mapper.OutboundMapper;
 import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.outbound.repository.OutboundRepository;
+import com.yeoun.sales.dto.OrderDetailDTO;
 import com.yeoun.sales.entity.Orders;
 import com.yeoun.sales.entity.Shipment;
 import com.yeoun.sales.enums.OrderStatus;
@@ -291,15 +292,12 @@ public class OutboundService {
 			Shipment shipment = shipmentRepository.findByShipmentId(outboundOrderDTO.getShipmentId())
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
-			// 출하지시 상태 변경
-			shipment.changeStatus(ShipmentStatus.SHIPPED);
-			
 			// 수주확인서 조회
 			Orders orders = ordersRepository.findByOrderId(shipment.getOrderId())
 					.orElseThrow(() -> new NoSuchElementException("수주 내역을 찾을 수 없습니다."));
 			
 			// 수주 상태값 변경(출하)
-			orders.changeStatus(OrderStatus.SHIPPED.toString());			
+			orders.changeStatus(OrderStatus.SHIPPED);		
 		}
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");
@@ -317,10 +315,61 @@ public class OutboundService {
 		}
 	}
 	
+	// 원자재 출고 등록 취소
+	@Transactional
+	public void canceledMaterialOutbound(String orderId) {
+		// 출고 내역 조회
+		Outbound outbound = outboundRepository.findByWorkOrderId(orderId)
+				.orElseThrow(() -> new NoSuchElementException("출고 내역을 찾을 수 없습니다."));
+		
+		canceledOutbound(outbound);
+	}
+	
+	// 완제품 출고 등록 취소
+	@Transactional
+	public void canceledProductOutbound(String shipmentId) {
+		Outbound outbound = outboundRepository.findByShipmentId(shipmentId)
+				.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
+		
+		// 출고 취소
+		canceledOutbound(outbound);
+	}
+	
+	private void canceledOutbound(Outbound outbound) {
+		// 이미 취소된 상태라면 로직 중단
+	    if ("CANCELED".equals(outbound.getStatus())) {
+	        throw new IllegalStateException("이미 취소된 출고 내역입니다.");
+	    }
+		
+		for (OutboundItem item : outbound.getItems()) {
+			// 재고 조회
+			Inventory inventory = inventoryRepository.findByIvId(item.getIvId())
+					.orElseThrow(() -> new NoSuchElementException("재고를 찾을 수 없습니다."));
+			
+			// 출고 예정 수량
+			long expectObAmount = inventory.getExpectObAmount();
+			// 출고 수량
+			long outboundAmount = item.getOutboundAmount();
+			
+			long result = expectObAmount -outboundAmount;
+			
+			// 출고 예정수량 변경(음수로 내려가지 않도록 Math.max 사용)
+			inventory.setExpectObAmount(Math.max(0, result));
+		}
+		
+		// 출고 상태 변경(취소)
+		outbound.updateStatus("CANCELED");
+	}
+	
 	// ===========================================================================
 	// 출하지시서 목록 조회 (추후 출하지시 관련된 작업으로 옮길 예정)
 	public List<OutboundOrderDTO> getShipmentList() {
 		return outboundMapper.findAllShipment();
+	}
+
+	// 출하지지서 상세 조회
+	public OrderDetailDTO getShipmentDetail(String shipmentId) {
+		return outboundMapper.findShipment(shipmentId);
 	}
 
 }

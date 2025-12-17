@@ -3,8 +3,10 @@ package com.yeoun.masterData.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.ProcessMst;
@@ -37,15 +39,19 @@ public class ProcessMstService {
 	}
 	// 제품별 공정 라우트 그리드 조회
 	@Transactional(readOnly = true)
-	public List<RouteHeader> getRouteHeaderList(String prdId, String routeName) {
-		log.info("searchParams 조회된개수 - {}", prdId + routeName);
+	public List<Map<String, Object>> getRouteHeaderList(String prdId, String routeName) {
 		
 		return routeHeaderRepository.findByPrdIdAndRouteName(prdId, routeName);
 	}
+	//공정코드 드롭다운
+	@Transactional(readOnly = true)
+	public List<String> processIdList() {
+		return processMstRepository.processIdList();
+	}
 	// 공정코드 그리드 조회
 	@Transactional(readOnly = true)
-	public List<ProcessMst> getProcessCodeList() {
-		return processMstRepository.findByprocessCode();
+	public List<Map<String, Object>> findByprocesslList(String processId, String processName) {
+		return processMstRepository.findByprocesslList(processId, processName);
 	}
 	// 공정단계 그리드 조회
 	@Transactional(readOnly = true)
@@ -126,31 +132,68 @@ public class ProcessMstService {
 			return "error: " + e.getMessage();
 		}
 	}
+	
 	// 공정단계 그리드 저장
 	public String saveProcess(String empId, Map<String,Object> param) {
 		log.info("productMstSaveList-Service------------>{}",param);
 		try {
-
-			//routeInfo 저장
+			//routeInfo created만저장
+			RouteHeader routeHeader = null;
 			Object routeInfoObj = param.get("routeInfo");
 			if (routeInfoObj instanceof Map) {
+				@SuppressWarnings("unchecked")
 				Map<String,Object> routeInfo = (Map<String,Object>) routeInfoObj;
-				RouteHeader routeHeader = RouteHeader.builder()
-						.routeId(routeInfo.get("routeId").toString())
-						.product(productMstRepository.findById(routeInfo.get("prdId").toString()
-										).orElseThrow(() -> new IllegalArgumentException("product-prdId 없음: " + routeInfo.get("prdId").toString())))
-						.routeName(routeInfo.get("routeName").toString())
-						.useYn(routeInfo.get("useYn").toString())
-						.description(routeInfo.get("description").toString())
-						.createdId(empId)
-						.createdDate(LocalDateTime.now())
-						.build();
+				
+				// 1. 필요한 PK 및 연관 객체 조회 (routeId로 RouteHeader 조회)
+	            String routeId = routeInfo.get("routeId").toString();
+	            Optional<RouteHeader> existingHeaderOpt = routeHeaderRepository.findById(routeId);
+				Optional<ProductMst> pmPrdId = productMstRepository.findById(routeInfo.get("prdId").toString());
+				
+
+				if (pmPrdId.isEmpty()) {
+	                return "FAIL: ProductMst (prdId) not found.";
+	            }
+				
+				ProductMst productMst = pmPrdId.get(); // Optional에서 실제 엔티티 추출
+				//수정시 저장
+				if(existingHeaderOpt.isPresent()) {
+					RouteHeader existingHeader = existingHeaderOpt.get();
+					
+					routeHeader = RouteHeader.builder()
+							.routeId(routeInfo.get("routeId").toString())
+							.product(productMst)// Optional<ProductMst> 대신 ProductMst 객체 사용
+							.routeName(routeInfo.get("routeName").toString())
+							.useYn(routeInfo.get("useYn").toString())
+							.description(routeInfo.get("description").toString())
+							.createdId(existingHeader.getCreatedId())
+							.createdDate(existingHeader.getCreatedDate())
+							.updatedId(empId)
+							.updatedDate(LocalDateTime.now())
+							.build();
+					
+					
+				}else {
+					// --- 🅱️ 신규 등록 로직 (INSERT) ---
+	                routeHeader = RouteHeader.builder()
+	                        .routeId(routeId)
+	                        .product(productMst)
+	                        .routeName(routeInfo.get("routeName").toString())
+	                        .useYn(routeInfo.get("useYn").toString())
+	                        .description(routeInfo.get("description").toString())
+	                        
+	                        // 신규 등록 필드 설정
+	                        .createdId(empId)
+	                        .createdDate(LocalDateTime.now())
+	                        .build();
+					
+				}
 				routeHeaderRepository.save(routeHeader);
 			}
 
 			// createdRows
 			Object createdObj = param.get("createdRows");
 			if (createdObj instanceof List) {
+				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
 					RouteStep routeStep = RouteStep.builder()
@@ -160,7 +203,8 @@ public class ProcessMstService {
 							.stepSeq(Integer.parseInt(row.get("stepSeq").toString()))
 							.process(processMstRepository.findById(row.get("processId").toString())
 											.orElseThrow(() -> new IllegalArgumentException("process-processId 없음: " + row.get("processId").toString())))
-							.qcPointYn(row.get("qcPointYn").toString())	
+							.qcPointYn(row.get("qcPointYn").toString())
+							.remark(row.get("remark").toString())
 							.createdId(empId)
 							.createdDate(LocalDateTime.now())
 							.build();
@@ -170,55 +214,39 @@ public class ProcessMstService {
 			}
 
 			// updatedRows
-			// Object updatedObj = param.get("updatedRows");
-			// if (updatedObj instanceof List) {
-			// 	@SuppressWarnings("unchecked")
-			// 	List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
-			// 	java.util.List<String> missingIds = new ArrayList<>();
-			// 	for (Map<String,Object> row : updated) {
-			// 		Object idObj = row.get("prdId");
-			// 		String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
-
-			// 		ProductMst target = null;
-			// 		if (!prdId.isEmpty()) {
-			// 			Optional<ProductMst> opt = productMstRepository.findById(prdId);
-			// 			if (opt.isPresent()) target = opt.get();
-			// 		}
-
-			// 		// prdId가 비어있거나 조회 실패한 경우, itemName+prdName로 매핑을 시도
-			// 		if (target == null) {
-			// 			Object itemNameObj = row.get("itemName");
-			// 			Object prdNameObj = row.get("prdName");
-			// 			if (itemNameObj != null && prdNameObj != null) {
-			// 				String itemName = String.valueOf(itemNameObj);
-			// 				String prdName = String.valueOf(prdNameObj);
-			// 				Optional<ProductMst> opt2 = productMstRepository.findByItemNameAndPrdName(itemName, prdName);
-			// 				if (opt2.isPresent()) target = opt2.get();
-			// 			}
-			// 		}
-
-			// 		if (target != null) {
-			// 			// 기존 레코드 업데이트
-			// 			applyMapToProduct(existingToMap(target), target, row);
-			// 			target.setUpdatedId(empId);
-			// 			productMstRepository.save(target);
-			// 		} else {
-			// 			// 존재하지 않는 prdId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
-			// 			if (!prdId.isEmpty()) {
-			// 				missingIds.add(prdId);
-			// 				continue;
-			// 			}
-			// 			// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
-			// 			ProductMst p = mapToProduct(row);
-			// 			p.setCreatedId(empId);
-			// 			productMstRepository.save(p);
-			// 		}
-			// 	}
-			// 	if (!missingIds.isEmpty()) {
-			// 		// 명시된 prdId들이 존재하지 않음: 롤백을 유도하고 에러 반환
-			// 		throw new IllegalArgumentException("Unknown prdId(s) for update: " + String.join(",", missingIds));
-			// 	}
-			// }
+			Object updatedObj = param.get("updatedRows");
+			if (updatedObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+				for (Map<String,Object> row : updated) {
+					
+					String routeStepId  = row.get("routeStepId").toString();
+					Optional<RouteStep> existingStepOpt = routeStepRepository.findById(routeStepId);
+					if(existingStepOpt.isPresent()) {
+						RouteStep existingStep = existingStepOpt.get();
+					
+						RouteStep routeStep = RouteStep.builder()
+								.routeStepId(row.get("routeStepId").toString())
+								.routeHeader(routeHeaderRepository.findById(row.get("routeId").toString())
+												.orElseThrow(() -> new IllegalArgumentException("routeHeader-routeId 없음: " + row.get("routeId").toString())))
+								.stepSeq(Integer.parseInt(row.get("stepSeq").toString()))
+								.process(processMstRepository.findById(row.get("processId").toString())
+												.orElseThrow(() -> new IllegalArgumentException("process-processId 없음: " + row.get("processId").toString())))
+								.qcPointYn(row.get("qcPointYn").toString())
+								.remark(row.get("remark").toString())
+								.createdId(existingStep.getCreatedId())
+								.createdDate(existingStep.getCreatedDate())
+								.updatedId(empId)
+								.updatedDate(LocalDateTime.now())
+								.build();
+						routeStepRepository.save(routeStep);
+						
+					}
+				
+				}
+			}
+				
+			
 
 			return "success";
 		} catch (Exception e) {
@@ -227,14 +255,15 @@ public class ProcessMstService {
 		}
 	}
 
-	// 공정단계 삭제수정 useYn='N' 처리 
+	// 제품별공정 라우트 삭제수정 useYn='N' 처리 
 	public String modifyProcess(String empId, Map<String,Object> param) {
-		log.info("processStepDelete-Service------------>{}",param);
+		log.info("modifyProcess-Service------------>{}",param);
 		try {
 
 			// routes
 			Object routesObj = param.get("routes");
 			if (routesObj instanceof List) {
+				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> routes = (List<Map<String,Object>>) routesObj;
 				for (Map<String,Object> row : routes) {
 					Object idObj = row.get("routeId");
@@ -257,7 +286,7 @@ public class ProcessMstService {
 	}
 	// 공정코드 삭제수정 useYn='N' 처리
 	public String modifyProcessCode(String empId, Map<String,Object> param) {
-		log.info("processCodeDelete-Service------------>{}",param);
+		log.info("modifyProcessCode-Service------------>{}",param);
 		try {
 
 			// processCodes
@@ -289,6 +318,23 @@ public class ProcessMstService {
 			return "success";
 		} catch (Exception e) {
 			log.error("deleteProcessCode error", e);
+			return "error: " + e.getMessage();
+		}
+	}
+	
+	//라우트모달 - 공정단계 삭제
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public String deleteRouteStep(String empId,List<String> param) {
+		log.info("deleteRouteStep------------->{}",param);
+		try {
+			for (String routeStepId : param) {
+				if (routeStepRepository.existsById(routeStepId)) {
+					routeStepRepository.deleteById(routeStepId);
+				}
+			}
+			return "success";
+		} catch (Exception e) {
+			log.error("deleteMaterialMst error", e);
 			return "error: " + e.getMessage();
 		}
 	}

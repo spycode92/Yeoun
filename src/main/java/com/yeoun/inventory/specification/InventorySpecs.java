@@ -48,18 +48,24 @@ public class InventorySpecs {
                 : cb.equal(root.join("warehouseLocation", JoinType.LEFT).get("rack"), rack);
     }
 
-    public static Specification<Inventory> ibDateGoe(LocalDateTime ibDate) {
+    public static Specification<Inventory> ibDateGoe(LocalDateTime from) {
         return (root, query, cb) ->
-            (ibDate == null)
-                ? null
-                : cb.greaterThanOrEqualTo(root.get("ibDate"), ibDate);
+            (from == null) ? null : cb.greaterThanOrEqualTo(root.get("ibDate"), from);
     }
 
-    public static Specification<Inventory> expirationDateGoe(LocalDateTime expDate) {
+    public static Specification<Inventory> ibDateLoe(LocalDateTime to) {
         return (root, query, cb) ->
-            (expDate == null)
-                ? null
-                : cb.greaterThanOrEqualTo(root.get("expirationDate"), expDate);
+            (to == null) ? null : cb.lessThanOrEqualTo(root.get("ibDate"), to);
+    }
+
+    public static Specification<Inventory> expirationDateGoe(LocalDateTime from) {
+        return (root, query, cb) ->
+            (from == null) ? null : cb.greaterThanOrEqualTo(root.get("expirationDate"), from);
+    }
+
+    public static Specification<Inventory> expirationDateLoe(LocalDateTime to) {
+        return (root, query, cb) ->
+            (to == null) ? null : cb.lessThanOrEqualTo(root.get("expirationDate"), to);
     }
 
     // 상품명 검색 (RAW/SUB/FG 공통) – 단순 OR LIKE 예시

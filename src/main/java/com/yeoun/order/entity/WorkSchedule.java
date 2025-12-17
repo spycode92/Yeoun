@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.yeoun.masterData.entity.ProdLine;
+import com.yeoun.equipment.entity.ProdLine;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

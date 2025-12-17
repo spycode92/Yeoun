@@ -134,7 +134,10 @@ function initGrid() {
 		    useClient: true,
 		    perPage: 20
 		},
-		useClientSort: true, 
+		useClientSort: true,
+		columnOptions: {
+			resizable: true
+		},
 		columns: [
 //       		{ 
 //		        header: '내역', name: 'ivHistoryId', width: 80, align: 'center',

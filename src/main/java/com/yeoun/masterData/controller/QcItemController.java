@@ -1,6 +1,7 @@
 package com.yeoun.masterData.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -10,10 +11,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.masterData.dto.QcItemDTO;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.service.QcItemService;
 
@@ -31,16 +32,17 @@ public class QcItemController {
 	//품질항목관리 연결페이지(검사 X)
   	@GetMapping("/qc_item")
   	public String qcItem(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		//model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
-  		
+		model.addAttribute("qcIdList", qcItemService.qcIdList());//기안자 목록 불러오기
 		return "masterData/qc_item";
  	}
     
   	//품질의기준 조회
   	@ResponseBody
   	@GetMapping("/qc_item/list")
-  	public List<QcItem> qcItemLilist() {
-  		return qcItemService.findAll();
+  	public List<Map<String, Object>> qcItemList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+	  			,@RequestParam(value = "qcItemId", required = false) String qcItemId) {
+			log.info("qc_item/list called with qcItemId={}", qcItemId);
+			return qcItemService.qcItemList(qcItemId);
   	}
   	
   	//품질기준 저장
@@ -49,7 +51,6 @@ public class QcItemController {
   		//model.addAttribute("qcItem", qcItem);
   		
   		qcItemService.saveQcItem(loginDTO.getEmpId(),qcItem);
-  		
   		return "redirect:/masterData/qc_item";
   		
   	}

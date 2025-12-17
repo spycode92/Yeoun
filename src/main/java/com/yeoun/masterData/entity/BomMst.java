@@ -20,7 +20,7 @@ import lombok.Setter;
 @IdClass(BomMstId.class)
 public class BomMst {
 	
-	@Column(name="BOM_ID", length = 20, nullable = false)
+	@Column(name="BOM_ID", length = 50, nullable = false)
 	private String bomId; //BOMid
 	
 	@Id
@@ -52,6 +52,9 @@ public class BomMst {
 	
 	@Column(name="UPDATED_DATE")
 	private LocalDate updatedDate; //수정일시
+
+	@Column(name="USE_YN", length = 1)
+	private String useYn; //사용여부
 
 
 }

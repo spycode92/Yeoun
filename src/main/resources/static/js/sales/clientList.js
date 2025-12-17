@@ -19,7 +19,26 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             loadClientList();
         });
-    }
+    }	
+	/* 🔥 초기화 버튼 */
+	const btnReset = document.getElementById("btnReset");
+	if (btnReset) {
+	    btnReset.addEventListener("click", () => {
+
+	        const keywordInput =
+	            document.querySelector("input[name='keyword']");
+	        const itemKeywordInput =
+	            document.querySelector("input[name='itemKeyword']");
+
+	        if (keywordInput) keywordInput.value = "";
+	        if (itemKeywordInput) itemKeywordInput.value = "";
+
+	        console.log("🔄 검색 조건 초기화");
+
+	        loadClientList();
+	    });
+	}
+
 
     /* 엔터 검색 */
     document.getElementById("keyword")?.addEventListener("keydown", e => {
@@ -32,8 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /* 그리드 생성 */
     initClientGrid();
     
-    /* 초기 데이터 로드 */
-    loadClientList();
+   
 });
 
 
@@ -55,7 +73,7 @@ function initClientGrid() {
 		    }
         },
 
-        { headerName: "코드", field: "clientId", width: 130 },
+        { headerName: "코드", field: "clientId", width: 180 },
         { headerName: "거래처명", field: "clientName", flex: 1 },
         { headerName: "사업자번호", field: "businessNo", width: 150 },
         { headerName: "대표자명", field: "ceoName", width: 140 },
@@ -93,7 +111,7 @@ function initClientGrid() {
         defaultColDef: { 
             resizable: true, 
             sortable: true, 
-            filter: true 
+            filter: false 
         },
         pagination: true,
         paginationPageSize: 20,
@@ -133,23 +151,34 @@ function initClientGrid() {
 /* ==========================================================
    2. 검색 및 목록 조회
 ========================================================== */
-
 function loadClientList() {
-    
+
     if (!gridApi) {
         console.error("❌ Grid API가 초기화되지 않았습니다.");
         return;
     }
 
-    const keyword = document.getElementById("keyword")?.value ?? "";
+    const keyword =
+        document.querySelector("input[name='keyword']")?.value.trim() ?? "";
+
+    const itemKeyword =
+        document.querySelector("input[name='itemKeyword']")?.value.trim() ?? "";
+
     const type = window.currentType ?? "CUSTOMER";
 
-    console.log("🔍 검색 조건:", { keyword, type });
-    
-    /* 로딩 표시 (v32+) */
+    console.log("🔍 검색 조건:", { keyword, itemKeyword, type });
+
     gridApi.setGridOption("loading", true);
 
-    const params = new URLSearchParams({ keyword, type });
+    const params = new URLSearchParams({
+        keyword,
+        type
+    });
+
+    // 🔥 SUPPLIER일 때만 itemKeyword 포함
+    if (type === "SUPPLIER" && itemKeyword) {
+        params.append("itemKeyword", itemKeyword);
+    }
 
     fetch(`/sales/client/data?${params.toString()}`)
         .then(res => {
@@ -159,27 +188,17 @@ function loadClientList() {
             return res.json();
         })
         .then(list => {
-            console.log("✅ 데이터 수신:", list?.length ?? 0);
-            
-            if (!gridApi) return;
-            
             gridApi.setGridOption("loading", false);
-            
-            if (list && list.length > 0) {
-                gridApi.setGridOption("rowData", list);
-            } else {
-                gridApi.setGridOption("rowData", []);
-            }
+            gridApi.setGridOption("rowData", list ?? []);
         })
         .catch(err => {
             console.error("❌ 데이터 로드 실패:", err);
             alert("거래처 목록을 불러오는데 실패했습니다.\n" + err.message);
-            if (gridApi) {
-                gridApi.setGridOption("loading", false);
-                gridApi.setGridOption("rowData", []);
-            }
+            gridApi.setGridOption("loading", false);
+            gridApi.setGridOption("rowData", []);
         });
 }
+
 
 /* ==========================================================
    3. 상세조회

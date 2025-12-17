@@ -1,33 +1,68 @@
 package com.yeoun.sales.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class OrderItemDTO {
 
     private Long orderItemId;
     private String orderId;
+
     private String prdId;
     private String prdName;
-    private Integer orderQty;
 
-    private String clientName;   // 거래처명
-    private String managerName;  // 담당자명 ⭐추가
-    private String managerTel;   // 연락처 ⭐추가
-    private String managerEmail; // 이메일 ⭐추가
+    private BigDecimal orderQty;     // 🔥 BigDecimal 권장
+    private BigDecimal unitPrice;
+    private BigDecimal totalPrice;
 
-    private LocalDate orderDate;     // 수주일자
-    private LocalDate deliveryDate;  // 납기일
+    private String itemMemo;
+    private String itemStatus;
+
+    /* ===== 수주 마스터에서 내려오는 정보 ===== */
+    private String clientName;
+    private String managerName;
+    private String managerTel;
+    private String managerEmail;
+
+    private LocalDate orderDate;
+    private LocalDate deliveryDate;
+
+    private String empName;
     
-    private String empName;   // ⭐ 수주 담당자명 (내부 사용자)
+    public OrderItemDTO(
+            Long orderItemId,
+            String orderId,
+            String prdId,
+            String prdName,
+            BigDecimal orderQty,
+            String clientName,
+            String managerName,
+            String managerTel,
+            String managerEmail,
+            LocalDate orderDate,
+            LocalDate deliveryDate,
+            String empName
+    ) {
+        this.orderItemId = orderItemId;
+        this.orderId = orderId;
+        this.prdId = prdId;
+        this.prdName = prdName;
+        this.orderQty = orderQty;
+        this.clientName = clientName;
+        this.managerName = managerName;
+        this.managerTel = managerTel;
+        this.managerEmail = managerEmail;
+        this.orderDate = orderDate;
+        this.deliveryDate = deliveryDate;
+        this.empName = empName;
+    }
 
 }
-

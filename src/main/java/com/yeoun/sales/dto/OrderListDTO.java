@@ -2,6 +2,8 @@ package com.yeoun.sales.dto;
 
 import java.time.LocalDate;
 
+import com.yeoun.sales.enums.OrderStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +18,7 @@ public class OrderListDTO {
     private String clientName;
     private LocalDate orderDate;
     private LocalDate deliveryDate;
-    private String orderStatus;
+    private OrderStatus orderStatus; 
     private String managerName;
     private String memo;
 

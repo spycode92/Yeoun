@@ -45,22 +45,6 @@ public class MainController {
 	private final ApprovalDocService approvalDocService;
 
 	private final SimpMessagingTemplate messagingTemplate;
-	@GetMapping("/test")
-	public String test() {
-        // 1) 테스트용 알림 DTO (원하는 구조로)
-        String dto = "새 입고가 완료되었습니다. 새로고침 해주세요.";
-
-        // 2) /alarm/inventory 로 브로드캐스트
-        messagingTemplate.convertAndSend("/alarm/inventory", dto);
-		return "/main/organizationChartModal";
-	}
-
-	// 메인페이지 맵핑
-	// @GetMapping("")
-	// public String Main() {
-	//
-	// return "/main/main";
-	// }
 
 	// 메인페이지 스케줄페이지
 	@GetMapping("")

@@ -3,6 +3,7 @@ package com.yeoun.common.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.common.entity.FileAttach;
@@ -12,6 +13,7 @@ import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.main.repository.ScheduleRepository;
+import com.yeoun.qc.entity.QcResultDetail;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -81,6 +83,11 @@ public class FileAttachService {
 			log.error("도장 이미지 저장 실패", e);
 			throw new RuntimeException("도장 이미지 저장 중 오류가 발생했습니다.", e);
 		}
+	}
+
+	public List<FileAttachDTO> uploadFilesForEntity(QcResultDetail detail, List<MultipartFile> files) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

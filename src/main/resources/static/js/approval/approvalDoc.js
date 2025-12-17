@@ -796,30 +796,47 @@ function formChange(formType) {
 		document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
 		document.getElementById('positionForm').style.display = 'none';//직급
 		document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		document.getElementById('start-date').required = false;
+		document.getElementById('end-date').required = false;
+		document.getElementById('leave-type').required = false;//leave-type
 	} else if (formType == '연차신청서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
 		document.getElementById('leaveTypeForm').style.display = 'flex';//휴가종류	
 		document.getElementById('positionForm').style.display = 'none';//직급
 		document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		document.getElementById('start-date').required = true;
+		document.getElementById('end-date').required = true;
+		document.getElementById('leave-type').required = true;//leave-type
 	} else if (formType == '반차신청서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
 		document.getElementById('leaveTypeForm').style.display = 'flex';//휴가종류	
 		document.getElementById('positionForm').style.display = 'none';//직급
 		document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		document.getElementById('start-date').required = true;
+		document.getElementById('end-date').required = true;
+		document.getElementById('leave-type').required = true;//leave-type
 	} else if (formType == '인사발령신청서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 		document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
 		document.getElementById('positionForm').style.display = 'flex';//직급
 		document.getElementById('toDeptForm').style.display = 'flex'; //발령부
+		document.getElementById('start-date').required = false;
+		document.getElementById('end-date').required = false;
+		document.getElementById('leave-type').required = false;//leave-type
+
 	} else if (formType == '자유양식결재서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 		document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
 		document.getElementById('positionForm').style.display = 'none';//직급
 		document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		document.getElementById('start-date').required = false;
+		document.getElementById('end-date').required = false;
+		document.getElementById('leave-type').required = false;//leave-type
+
 	}
 }
 // f- 그리드 클릭시 상세보기 document.getElementById('myInput').disabled = true;
@@ -1508,6 +1525,7 @@ document.getElementById('modal-doc').addEventListener('submit', async function (
 
 	if (approverArr.length === 0) {
 		console.log("결재자 배열이 비어있습니다.");
+		alert("결재 권한자 없습니다.  선택해주세요");
 		return;
 	}
 	//결재권한자 3명까지

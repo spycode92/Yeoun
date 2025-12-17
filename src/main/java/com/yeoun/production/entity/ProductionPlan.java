@@ -60,6 +60,11 @@ public class ProductionPlan {
     @Comment("수정 시각")
     private LocalDateTime updatedAt;
     
+    @Column(name = "UPDATED_BY" , length = 30)
+    @Comment("수정자 ID")
+    private String updatedBy;
+
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", length = 20, nullable = false)
     private ProductionStatus status; 

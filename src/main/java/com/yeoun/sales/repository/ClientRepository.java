@@ -31,7 +31,35 @@ public interface ClientRepository extends JpaRepository<Client, String> {
     	List<Client> search(
     	        @Param("keyword") String keyword,
     	        @Param("type") String type
-    	);
+    	);    
+    
+    
+    /**협력사 기준 품목 또는 사업자명 검색  */  
+    @Query("""
+    		SELECT DISTINCT c
+    		FROM Client c
+    		JOIN ClientItem ci ON c.clientId = ci.clientId
+    		JOIN MaterialMst m ON ci.materialId = m.matId
+    		WHERE c.clientType = 'SUPPLIER'
+    		  AND m.useYn = 'Y'
+    		  AND (
+    		        :keyword IS NULL OR
+    		        c.clientName LIKE CONCAT('%', :keyword, '%') OR
+    		        c.businessNo LIKE CONCAT('%', :keyword, '%') OR
+    		        c.managerName LIKE CONCAT('%', :keyword, '%')
+    		  )
+    		  AND (
+    		        :itemKeyword IS NULL OR
+    		        ci.materialId LIKE CONCAT('%', :itemKeyword, '%') OR
+    		        m.matName LIKE CONCAT('%', :itemKeyword, '%')
+    		  )
+    		""")
+    		List<Client> searchSupplierByItem(
+    		    @Param("keyword") String keyword,
+    		    @Param("itemKeyword") String itemKeyword
+    		);
+
+
 
     /*코드 생성*/
     @Query(value = """

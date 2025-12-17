@@ -47,22 +47,22 @@ public class ProductionPlanService {
              .orElse("미지정");
 
      return new OrderItemDTO(
-             oi.getOrderItemId(),
-             oi.getOrderId(),
-             oi.getPrdId(),
-             oi.getProduct().getPrdName(),
-             oi.getOrderQty().intValue(),
+    		    oi.getOrderItemId(),
+    		    oi.getOrderId(),
+    		    oi.getPrdId(),
+    		    oi.getProduct().getPrdName(),
+    		    oi.getOrderQty(),   // ✅ BigDecimal 그대로
 
-             oi.getOrder().getClient().getClientName(),     // 거래처명
-             oi.getOrder().getClient().getManagerName(),    // 담당자명
-             oi.getOrder().getClient().getManagerTel(),     // 연락처
-             oi.getOrder().getClient().getManagerEmail(),   // 이메일
+    		    oi.getOrder().getClient().getClientName(),
+    		    oi.getOrder().getClient().getManagerName(),
+    		    oi.getOrder().getClient().getManagerTel(),
+    		    oi.getOrder().getClient().getManagerEmail(),
 
-             oi.getOrder().getOrderDate(),                  // 수주일자
-             oi.getOrder().getDeliveryDate(),               // 납기일
+    		    oi.getOrder().getOrderDate(),
+    		    oi.getOrder().getDeliveryDate(),
 
-             empName                                        // ⭐ 내부 담당자명
-     );
+    		    empName
+    		);
  }
 
 
@@ -92,9 +92,7 @@ public class ProductionPlanService {
         return prefix + String.format("%03d", seq);
     }
 
-    /* ================================
-        생산계획 생성 (수동)
-    ================================ */
+
     /* ================================
     생산계획 생성 (수동, 모달 선택 기반)
  ================================ */
@@ -419,7 +417,8 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
     ============================ */
     public List<OrderItemDTO> getOrderItemsByProduct(String prdId) {
 
-        List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+      //  List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+        List<OrderItem> list = orderItemRepository.findByPrdIdAndItemStatus(prdId, "CONFIRMED");
 
         List<OrderItemDTO> dtoList = new ArrayList<>();
 
@@ -498,6 +497,47 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
 
         log.info("✅ prdId={} : 모든 원자재 충분 → BOM 정상", prdId);
         return false;
+    }
+    
+    /* ============================
+    		생산계획 취소
+  		============================ */    
+    
+    @Transactional
+    public void cancelProductionPlan(String planId, String empId) {
+
+        // 1️⃣ 생산계획 조회
+        ProductionPlan plan = planRepo.findById(planId)
+            .orElseThrow(() -> new IllegalArgumentException("생산계획이 존재하지 않습니다."));
+
+        // 2️⃣ 상태 체크 (검토대기만 가능)
+        if (plan.getStatus() != ProductionStatus.PLANNING) {
+            throw new IllegalStateException(
+                "검토대기 상태의 생산계획만 취소할 수 있습니다."
+            );
+        }
+
+        // 3️⃣ 생산계획 상태 취소
+        plan.setStatus(ProductionStatus.CANCELLED);
+        plan.setUpdatedBy(empId);
+
+        // 4️⃣ 생산계획 상세 조회
+        List<ProductionPlanItem> planItems =
+            itemRepo.findByPlanId(planId);
+
+        for (ProductionPlanItem item : planItems) {
+
+            // 4-1️⃣ 생산계획 ITEM 상태 취소
+            item.setStatus(ProductionStatus.CANCELLED);            
+
+            // 4-2️⃣ 연결된 주문상세 상태 복구
+            Long orderItemId = item.getOrderItemId();
+            if (orderItemId != null) {
+                orderItemRepository
+                    .updateItemStatusToConfirmedByOrderItemId(orderItemId);
+            
+            }
+        }
     }
 
 }

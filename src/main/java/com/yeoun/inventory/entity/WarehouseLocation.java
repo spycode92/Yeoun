@@ -16,18 +16,12 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "WAREHOUSE_LOCATION")
-@SequenceGenerator(
-		name = "WAREHOUSE_LOCATION_SEQ_GENERATOR", // JPA 에서 사용하는 시퀀스 이름(DB의 시퀀스 이름이 아님!)
-		sequenceName = "WAREHOUSE_LOCATION_SEQ", // 오라클에서 사용하는 시퀀스 이름
-		initialValue = 1, 			// 초기값(오라클 시퀀스의 start with 1과 동일)
-		allocationSize = 1          // 증가값(오라클 시퀀스의 increment by 값과 동일)
-		)
 @Getter
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
 public class WarehouseLocation {
-	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "WAREHOUSE_LOCATION_SEQ_GENERATOR")
+	@Id 
 	@Column(name = "LOCATION_ID", updatable = false)
 	private String locationId; // 로케이션 고유ID
 	

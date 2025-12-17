@@ -126,6 +126,26 @@
                             <input class="form-control edit-mode d-none" id="ceoName" th:value="${client.ceoName}">
                         </div>
                     </div>
+                    
+                    <div class="info-row">
+					    <div class="info-label">업태</div>
+					    <div class="info-value">
+					        <span class="view-mode" th:text="${client.bizType}"></span>
+					        <input class="form-control edit-mode d-none"
+					               id="bizType"
+					               th:value="${client.bizType}">
+					    </div>
+					</div>
+					
+					<div class="info-row">
+					    <div class="info-label">업종</div>
+					    <div class="info-value">
+					        <span class="view-mode" th:text="${client.bizItem}"></span>
+					        <input class="form-control edit-mode d-none"
+					               id="bizItem"
+					               th:value="${client.bizItem}">
+					    </div>
+					</div>
 
                     <!-- 계좌 정보 -->
                     <div class="info-row">

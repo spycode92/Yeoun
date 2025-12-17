@@ -1,0 +1,131 @@
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr"
+	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
+	data-template="vertical-menu-template-free"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+<title>여운</title>
+<meta name="description" content="" />
+<!-- FontAweosome -->
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+	rel="stylesheet" />
+
+<!-- Icons. Uncomment required icon fonts -->
+<link rel="stylesheet" th:href="@{/assets/vendor/fonts/boxicons.css}" />
+
+<!-- Core CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/core.css}"
+      class="template-customizer-core-css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/theme-default.css}"
+      class="template-customizer-theme-css" />
+<link rel="stylesheet" th:href="@{/assets/css/demo.css}" />
+
+<!-- Vendors CSS -->
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css}" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/apex-charts/apex-charts.css}" />
+
+<link rel="stylesheet" th:href="@{/css/common.css}"/>
+
+<!-- Socket -->
+<link rel="stylesheet" th:href="@{/css/messenger/header.css}">
+
+<!-- Page CSS -->
+
+<!-- Toast Grid CSS-->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
+
+<!-- Helpers -->
+<script th:src="@{/assets/vendor/js/helpers.js}"></script>
+
+<!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+<!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+<script th:src="@{/assets/js/config.js}"></script>
+	</head>
+	<body>
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+    
+    <h2 class="mb-4 fw-bold">발주 상세정보</h2>
+
+    <!-- 상세정보 카드 전체 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-bold">기본 정보</h5>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-3 g-4 mb-3">
+                <div class="col">
+                    <label class="text-muted small mb-1">발주번호</label>
+                    <div class="fw-semibold fs-6" th:text="${orderDetailDTO.orderId}"></div>
+                </div>
+                <div class="col">
+                    <label class="text-muted small mb-1">거래처</label>
+                    <div class="fw-semibold fs-6" th:text="${orderDetailDTO.clientName}"></div>
+                </div>
+                <div class="col">
+                    <label class="text-muted small mb-1">주소</label>
+                    <div class="fw-semibold fs-6"  th:text="|${orderDetailDTO.postcode}) ${orderDetailDTO.addr} ${orderDetailDTO.addrDetail}|"></div>
+                </div>
+                <div class="col">
+                    <label class="text-muted small mb-1">납기 예정일</label>
+                    <div class="fw-semibold fs-6" th:text="${orderDetailDTO.deliveryDate}"></div>
+                </div>
+                <div class="col">
+                    <label class="text-muted small mb-1">납품 상태</label>
+                    <div class="fw-semibold fs-6">
+	           			<span th:if="${orderDetailDTO.orderStatus == 'WAITING'}" class="badge bg-secondary">예약대기</span>
+					    <span th:if="${orderDetailDTO.orderStatus == 'RESERVED'}" class="badge bg-info text-dark">예약중</span>
+					    <span th:if="${orderDetailDTO.orderStatus == 'PENDING'}" class="badge bg-primary">출고등록</span>
+					    <span th:if="${orderDetailDTO.orderStatus == 'LACK'}" class="badge bg-danger">재고부족</span>
+					    <span th:if="${orderDetailDTO.orderStatus == 'SHIPPED'}" class="badge bg-success ">출하완료</span>
+					    <span th:if="${orderDetailDTO.orderStatus == 'CANCEL'}" class="badge bg-dark">취소</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+			<!-- 품목 테이블 -->
+			<div class="card shadow-sm">
+				<div class="card-header bg-light">
+					<h5 class="mb-0 fw-bold">출하 품목 목록</h5>
+				</div>
+			</div>
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+					<thead class="table-light">
+						<tr>
+							<th class="text-center">제품코드</th>
+							<th class="text-center">제품명</th>
+	                        <th class="text-center">주문수량</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="item : ${orderDetailDTO.items}">
+							<td class="text-center" th:text="${item.prdId}"></td>
+							<td class="text-center" th:text="${item.prdName}"></td>
+							<td class="text-center" th:text="${item.orderQty}"></td>
+                    	</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>

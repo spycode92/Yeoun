@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>폐기 이력</title>
+    <!-- Inventory Specific CSS -->
+    <link rel="stylesheet" th:href="@{/css/inventory/inventory.css}" />
+    <style type="text/css">
+    	#loading-overlay{
+    		display: none;
+    	}
+	    .spinner-border {
+		  display: inline-block;
+		  width: 2rem;
+		  height: 2rem;
+		  vertical-align: -0.125em;
+		  border: 0.25em solid currentColor;
+		  border-right-color: transparent;
+		  border-radius: 50%;
+		  animation: spinner-border 0.75s linear infinite;
+		}
+		
+		@keyframes spinner-border {
+		  to { transform: rotate(360deg); }
+		}
+		
+		.spinner-border.text-primary {
+		  color: #0d6efd !important;
+		}
+    </style>
+</head>
+
+<th:block layout:fragment="content">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h2 class="fw-bold py-3 mb-4">폐기 이력</h2>
+        <!-- Search Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="historySearchForm">
+				    <div class="d-flex flex-row align-items-center gap-3">
+						<div>
+							<label class="form-label" for="startDate">기간</label>
+							<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+								<input type="date" class="form-control" id="startDate" style="width: 140px;">
+								<span>~</span>
+								<input type="date" class="form-control" id="endDate" style="width: 140px;">
+							</div>
+						</div>
+						<div style="min-width: 120px;">
+							<label class="form-label" for="workType">유형</label>
+							<select class="form-select" id="workType">
+							    <option value="">전체</option>
+							    <option value="INBOUND">입고</option>
+							    <option value="INVENTORY">재고</option>
+							    <option value="MANUFACTURE">생산</option>
+							</select>
+						</div>
+<!-- 						<div style="min-width: 120px;"> -->
+<!-- 							<label class="form-label" for="searchType">검색</label> -->
+<!-- 							<select class="form-select" id="searchType"> -->
+<!-- 							    <option value="">전체</option> -->
+<!-- 							    <option value="itemId">상품</option> -->
+<!-- 							    <option value="lotNo">LOT</option> -->
+<!-- 							    <option value="empId">사번</option> -->
+<!-- 							</select> -->
+<!-- 						</div> -->
+						<div style="min-width: 220px;">
+							<label class="form-label" for="searchKeyword">검색어</label>
+							<input type="text" class="form-control" id="searchKeyword" placeholder="로트번호/사번/사원명/상품명">
+						</div>
+						
+						<div style="min-width: 100px;">
+						  <label class="form-label d-block">&nbsp;</label>
+						  <button type="button" class="btn btn-primary w-100" id="btnSearch">검색</button>
+						</div>
+					</div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div class="card position-relative">
+            <h5 class="card-header">폐기 목록</h5>
+            <div class="card-body position-relative">
+       	   		<div id="loading-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; 
+				    background:rgba(255,255,255,0.6); 
+				    z-index:99; text-align:center; display:flex; 
+				    align-items:center; justify-content:center;">
+					<div style="margin-top:30vh;">
+						<div class="spinner-border text-primary" role="status">
+						</div>
+						<br>
+						<span class="visually">데이터 불러오는 중...</span>
+					</div>
+				</div>
+                <div id="disposeGrid"></div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="myScript">
+    <script th:src="@{/js/dispose/disposeList.js}"></script>
+</th:block>
+
+</html>

@@ -329,6 +329,9 @@ function initStockTakeGrid() {
             useClient: true,
             perPage: 20
         },
+		columnOptions: {
+			resizable: true
+		},
         columns: [
             // 기본 식별 정보
             { header: 'LOT 번호',   name: 'lotNo',    minWidth: 180 },

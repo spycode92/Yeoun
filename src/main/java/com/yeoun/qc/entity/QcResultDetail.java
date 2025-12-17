@@ -6,6 +6,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.common.util.FileUtil.FileUploadHelpper;
+import com.yeoun.qc.service.QcResultService.QcFileKeyUtil;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -21,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class QcResultDetail {
+public class QcResultDetail implements FileUploadHelpper {
 	
 	// QC 결과 상세ID
 	@Id
@@ -65,6 +68,18 @@ public class QcResultDetail {
 	@LastModifiedDate
     @Column(name = "UPDATED_DATE")
     private LocalDateTime updatedDate;
+	
+	// ---------------------------------------------------------------
+	@Override
+	public String getTargetTable() {
+	    return "QC_RESULT_DETAIL";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+	    return QcFileKeyUtil.toFileRefId(this.qcResultDtlId);
+	}
+
 	
 
 }

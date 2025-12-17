@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -28,18 +27,45 @@ import lombok.extern.log4j.Log4j2;
 public class ProductMstService {
 	
 	private final ProductMstRepository productMstRepository;
+
+	//완제품 품목명(향수타입) 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdItemNameList() {
+		return productMstRepository.findByPrdItemNameList();
+	}
+	//완제품 제품유형 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdTypeList() {
+		return productMstRepository.findByPrdTypeList();
+	}
+	//완제품 단위 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdUnitList() {
+		return productMstRepository.findByPrdUnitList();
+	}
+	//완제품 제품상태 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdStatusList() {
+		return productMstRepository.findByPrdStatusList();
+	}
+ 
 	//1. 완제품 그리드 조회
 	@Transactional(readOnly = true)
 	public List<ProductMst> findAll() {
-		log.info("productMstRepository.findAll() 조회된개수 - {}",productMstRepository.findAll());
 		return productMstRepository.findAll();
+	}
+	// 전체조회와 특정 prdId/prdName 조회(부분검색)를 모두 처리
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdIdList(String prdId, String prdName) {
+		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
+		return productMstRepository.findByPrdIdList(prdId, prdName);
 	}
 
 	//2. 완제품 그리드 저장
 	// 프론트엔드에서 보낼 것으로 예상되는 구조:
 	// { createdRows: [{prdId:..., itemName:...}, ...], updatedRows: [...], deletedRows: [...] }
+	@Transactional
 	public String saveProductMst(String empId, Map<String,Object> param) {
-		log.info("productMstSaveList------------->{}",param);
 		try {
 			// createdRows
 			Object createdObj = param.get("createdRows");
@@ -47,8 +73,20 @@ public class ProductMstService {
 				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
+					Object idObj = row.get("prdId");
+					String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+	
+					if (!prdId.isEmpty()) {
+						productMstRepository.findById(prdId)
+							    .ifPresent(existingProduct -> {
+							        throw new IllegalStateException("중복되는 품번이 이미 존재합니다.");
+							    });//중복중
+					}
+					
 					ProductMst p = mapToProduct(row);
 					p.setCreatedId(empId);
+					p.setCreatedDate(LocalDate.now());
+					if (p.getUseYn() == null) p.setUseYn("Y");
 					productMstRepository.save(p);
 				}
 			}
@@ -72,8 +110,17 @@ public class ProductMstService {
 					if (target != null) {
 						// 기존 레코드 업데이트
 						ProductMst p = mapToProduct(row);
-						p.setCreatedId(row.get("createdId").toString());
-						p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						// preserve created metadata from existing record unless explicitly provided
+						if (row.get("createdId") == null) {
+							p.setCreatedId(target.getCreatedId());
+						}
+						if (row.get("createdDate") == null) {
+							p.setCreatedDate(target.getCreatedDate());
+						} else {
+							try { p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString())); } catch(Exception ignore) {}
+						}
+						// preserve USE_YN when not provided in update
+						if (p.getUseYn() == null) p.setUseYn(target.getUseYn() == null ? "Y" : target.getUseYn());
 						p.setUpdatedId(empId);
 						p.setUpdatedDate(LocalDate.now());
 						productMstRepository.save(p);
@@ -86,6 +133,7 @@ public class ProductMstService {
 						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
 						ProductMst p = mapToProduct(row);
 						p.setCreatedId(empId);
+						if (p.getUseYn() == null) p.setUseYn("Y");
 						productMstRepository.save(p);
 					}
 			}
@@ -93,8 +141,7 @@ public class ProductMstService {
 			}
 
 			return "success";
-		} catch (Exception e) {
-			log.error("saveProductMst error", e);
+		} catch(Exception e) {
 			return "error: " + e.getMessage();
 		}
 	}
@@ -117,6 +164,10 @@ public class ProductMstService {
 		if (row.get("effectiveDate") != null) {
 			try { p.setEffectiveDate(Integer.valueOf(String.valueOf(row.get("effectiveDate")))); } catch(Exception e) {}
 		}
+		// useYn 처리: 전달된 값이 있으면 사용
+		if (row.get("useYn") != null) {
+			p.setUseYn(String.valueOf(row.get("useYn")).trim());
+		}
 		return p;
 	}
 	//3. 완제품 그리드 삭제
@@ -130,56 +181,37 @@ public class ProductMstService {
 		log.info("deleteProduct------------->{}",param);
 		Map<String, Object> result = new HashMap<>();
 		try {
-			Object rowKeysObj = param.get("rowKeys");
-			if (!(rowKeysObj instanceof List)) {
-				result.put("status", "no_data");
-				result.put("deletedCount", 0);
-				return result;
-			}
-			@SuppressWarnings("unchecked")
-			List<Object> rowKeys = (List<Object>) rowKeysObj;
-			List<String> prdIds = rowKeys.stream()
-				.map(key -> {
-					if (key instanceof Number) {
-						return String.valueOf(((Number) key).longValue());
-					} else {
-						return String.valueOf(key);
+			Object keysObj = param.get("rowKeys");
+			int updated = 0;
+			if (keysObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<String> rowKeys = (List<String>) keysObj;
+				for (String key : rowKeys) {
+					if (key == null) continue;
+					String prdId = key.trim();
+					if (prdId.isEmpty()) continue;
+					Optional<ProductMst> opt = productMstRepository.findById(prdId);
+					if (opt.isPresent()) {
+						ProductMst p = opt.get();
+						p.setUseYn("N");
+						p.setUpdatedDate(java.time.LocalDate.now());
+						productMstRepository.save(p);
+						updated++;
 					}
-				})
-				.filter(s -> s != null && !s.trim().isEmpty())
-				.collect(Collectors.toList());
-
-			if (prdIds.isEmpty()) {
-				result.put("status", "no_data");
-				result.put("deletedCount", 0);
-				return result;
+				}
 			}
-
-			List<ProductMst> existing = productMstRepository.findAllById(prdIds);
-			if (existing == null || existing.isEmpty()) {
-				result.put("status", "no_exist");
-				result.put("deletedCount", 0);
-				return result;
-			}
-
-			try {
-				productMstRepository.deleteAll(existing);
-			} catch (DataIntegrityViolationException dive) {
-				log.error("deleteProduct DataIntegrityViolation (FK constraint?)", dive);
-				result.put("status", "constraint_violation");
-				result.put("message", "삭제 실패: 연관된 데이터가 존재합니다. 먼저 관련 데이터를 삭제하세요.");
-				result.put("deletedCount", 0);
-				return result;
-			}
-
 			result.put("status", "success");
-			result.put("deletedCount", existing.size());
+			result.put("updatedCount", updated);
+			return result;
+		} catch (DataIntegrityViolationException dive) {
+			log.error("deleteProduct data integrity error", dive);
+			result.put("status", "error");
+			result.put("message", dive.getMessage());
 			return result;
 		} catch (Exception e) {
 			log.error("deleteProduct error", e);
 			result.put("status", "error");
 			result.put("message", e.getMessage());
-			result.put("deletedCount", 0);
 			return result;
 		}
 	}

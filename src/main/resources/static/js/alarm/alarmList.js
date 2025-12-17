@@ -4,10 +4,18 @@ const startDate = document.getElementById('startDate');
 const endDate = document.getElementById('endDate');
 const today = new Date();
 
+
+function formatDateToYMD(date) {
+    const year  = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 0~11 → 1~12
+    const day   = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // 오늘 날짜 기준으로 endDate와 startDate 설정
 function setDateRange() {
     const today = new Date();
-	const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateToYMD(today);   // 로컬 기준 오늘 날짜
 	
     // endDate 초기값 오늘 날짜, max설정 
     endDate.value = today.toISOString().split('T')[0];
@@ -16,7 +24,7 @@ function setDateRange() {
     // startDate 초기값 30일 전 날짜
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(today.getDate() - 30);
-    startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
+    startDate.value = formatDateToYMD(thirtyDaysAgo);
 }
 
 // endDate 변경 시 startDate 최대값 업데이트

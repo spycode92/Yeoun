@@ -67,6 +67,20 @@ public class InventoryDTO {
 	
 	private String status; // 상태
 	
+	// 조회를 위해 추가
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime ibDateFrom;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime ibDateTo;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime expDateFrom;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime expDateTo;
+	
 	// --------------------------------------------------------------------------------
 	@Builder
 	public InventoryDTO(Long ivId, String lotNo, String locationId, String itemId, Long ivAmount,

@@ -7,7 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.masterData.entity.ProdLine;
+import com.yeoun.equipment.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
 
 import jakarta.persistence.Column;

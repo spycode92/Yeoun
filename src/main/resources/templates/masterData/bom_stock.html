@@ -10,36 +10,124 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </head>
+<th:block layout:fragment="pageCss">
+	<style>
+		.tui-grid-cell:has(.modified-cell-highlight) {
+			/* 부모 셀의 배경색을 덮어씁니다. */
+			background-color: #FFE5E5 !important;
+			color: #000 !important;
+		}
+
+		.modified-cell-highlight {
+			background-color: #FFE5E5 !important;
+			color: #000 !important;
+			width: 100% !important; 
+			height: 100% !important;
+			padding: 0 !important; /* 내부 패딩을 제거하여 가장자리까지 채움 */
+		}
+	</style>
+</th:block>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	<h2>BOM정보</h2>
+	<h2>BOM정보/상세</h2>
 	 <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="card-title mb-0"></h5>
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#safetyStockModal">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#safetyStock-modal">
            안전재고 보기
         </button>
       </div>
-      	<div class="d-flex justify-content-end" style="margin:10px;">
-			<button id="addBomRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-			<button id="saveBomRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			<button id="deleteBomRowBtn" class="btn btn-danger" type="button">삭제</button>
-		</div>
-		<div id="bomGrid" style="display: grid;margin:10px;"></div>
-		<!-- QC 항목 등록 모달 -->
-		<div class="modal fade" id="safetyStockModal" tabindex="-1">
+
+	  	<div class="nav-align-top mb-4">
+	         <ul class="nav nav-tabs" role="tablist">
+	           <li class="nav-item">
+	             <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-bomDetail-tab" aria-controls="navs-bomDetail-tab" aria-selected="true">
+	               BOM 상세
+	             </button>
+	           </li>
+	           <li class="nav-item">
+	             <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-bom-tab" aria-controls="navs-bom-tab" aria-selected="false">
+	               BOM 정보
+				</button>
+	           </li>
+	         </ul>
+	         <div class="tab-content" >
+	           <div class="tab-pane fade show active"  id="navs-bomDetail-tab" role="tabpanel">
+					<div class="row" data-masonry='{"percentPosition": true }' style="margin:10px;">
+						<div class="col-sm-4 col-lg-3 mb-3" style="margin-top: 16px;">
+							<h5 class="card-title">BOM LIST</h5>
+							<div id="bomDetailGrid" style="display: grid;"></div>				
+						</div>
+						<div class="col-sm-9">
+								<div class="d-flex justify-content-end" style="margin:10px;">
+									<button id="saveBomDetailRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+								</div>
+								<figure class="p-3 mb-0">
+									<h5 class="card-title">완제품</h5>
+									<div id="bomPrdGrid" style="display: grid;"></div>
+								</figure>
+								<figure class="p-3 mb-0">
+									<h5 class="card-title">원재료</h5>
+									<div id="bomMatGrid" style="display: grid;"></div>
+								</figure>
+								<figure class="p-3 mb-0">
+									<h5 class="card-title">포장재</h5>
+									<div id="bomMatTypeGrid" style="display: grid;"></div>
+								</figure>
+						</div>
+					</div>
+				</div>
+	           <div class="tab-pane fade" id="navs-bom-tab" role="tabpanel">
+				 <div class="d-flex justify-content-start">
+			        	<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
+				        	<select  id="bomId" class="form-select">
+				        	    <option value="" selected>BOMID</option>
+			        	    	<option th:each="row : ${bomIdList}" 
+										th:value="${row[0]}" 
+										th:text="${row[0]}"
+										name="bomId">
+								</option>
+				        	</select>
+				        </div>
+						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+							<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료id">
+						</div>
+				        
+			           	<button type="button" class="btn btn-primary" onclick="bomGridAllSearch()" style="margin-left:5px;">조회</button>
+					</div>
+	             	<div class="d-flex justify-content-end" style="margin:10px;">
+	             	<button class="btn btn-outline-secondary btn-sm me-1" type="button" data-bs-toggle="modal" data-bs-target="#matItems-modal">원재료 조회</button>
+						<button id="addBomRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
+						<button id="saveBomRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+						<button id="deleteBomRowBtn" class="btn btn-danger" type="button">삭제</button>
+					</div>
+					<div id="bomGrid" style="display: grid;margin:10px;"></div>
+	           </div>
+	         </div>
+       	</div>
+      
+		<!-- 안전재고 모달 -->
+		<div class="modal fade" id="safetyStock-modal" tabindex="-1">
 		  <div class="modal-dialog modal-xl modal-dialog-centered">
 		    <div class="modal-content">
 		      <div class="modal-header">
 		        <h2 class="modal-title">안전재고</h2>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 		      </div>
-		
 		      <div class="modal-body small-text">
+				<div class="d-flex justify-content-start">
+					<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+						<input type="text" id="itemId" name="itemId" class="form-control"  placeholder="품목코드">
+					</div>
+					<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+						<input type="text" id="itemName" name="itemName" class="form-control"  placeholder="품목명">
+					</div>
+					<button type="button" class="btn btn-primary" onclick="safetyStockGridAllSearch()" style="margin-left:5px;">조회</button>
+				</div>
 		       	<div class="d-flex justify-content-end" style="margin:10px;">
 			  		<button id="addSafetyStockRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
 					<button id="saveSafetyStockRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger" type="button">삭제</button>
+			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger" type="button">빈행 삭제</button>
 				 </div>
 		         <div id="safetyStockGrid" style="display: grid;margin-right:5px;"></div>
 		      </div>
@@ -49,9 +137,32 @@
 		    </div>
 		  </div>
 		</div>
+		
+		<!-- 원재료 id 조회용 모달 -->
+		<div class="modal fade" id="matItems-modal" tabindex="-1">
+		  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">원재료 id 조회</h5>
+		        <button class="btn-close" data-bs-dismiss="modal"></button>
+		      </div>
+		      <div class="modal-body small">
+		        <p class="text-muted mb-2">
+		          Bom에 원재료를 넣기 위한 원재료 id 목록입니다. 더블클릭하면 값이 들어갑니다.
+		        </p>
+		       	<div id="matItemsGrid" style="display: grid;margin-right:5px;"></div>
+	
+		      </div>
+		      <div class="modal-footer">
+		        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
 	</div>
 </th:block>
 </body>
 <th:block layout:fragment="myScript"> 
+		<script th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
 		<script th:inline="javascript" th:src="@{/js/masterData/bomStock.js}"></script>
 </th:block>

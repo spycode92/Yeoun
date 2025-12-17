@@ -6,10 +6,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.yeoun.lot.dto.LotMaterialDetailDTO;
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
+import com.yeoun.lot.dto.LotProcessDetailDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
+import com.yeoun.lot.dto.LotRootDetailDTO;
+import com.yeoun.lot.dto.LotUsedProductNodeDTO;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.service.LotTraceService;
 
@@ -25,66 +30,127 @@ public class LotTraceController {
 	private final LotTraceService lotTraceService;
 	
 	// LOT 추적 페이지
+//	@GetMapping("/trace")
+//	public String view(@RequestParam(name = "lotNo", required = false) String lotNo, 
+//					   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
+//					   @RequestParam(name = "keyword", required = false) String keyword,
+//					   @RequestParam(name="status", required=false) String status,
+//	                   @RequestParam(name="type", required=false) String type,
+//					   Model model) {
+//		
+//		// 1) 왼쪽에 표시할 WIP + FIN LOT 목록
+//		List<LotRootDTO> lotList = lotTraceService.getFinishedLots(keyword, status, type);
+//		model.addAttribute("lotList", lotList);
+//		
+//		// 2) 검색어 유지
+//	    model.addAttribute("keyword", keyword);
+//	    model.addAttribute("status", status);
+//	    model.addAttribute("type", type);
+//		
+//		return "/lot/trace";
+//	}
+	
 	@GetMapping("/trace")
-	public String view(@RequestParam(name = "lotNo", required = false) String lotNo, 
-					   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
+	public String view(@RequestParam(name = "mode", required = false, defaultValue = "PRODUCT") String mode,
+					   @RequestParam(name = "keyword", required = false) String keyword,
+					   @RequestParam(name="status", required=false) String status,
+					   @RequestParam(name="type", required=false) String type,
 					   Model model) {
 		
-		// 1. 왼쪽에 표시할 FIN LOT 목록
-		List<LotRootDTO> lotList = lotTraceService.getFinishedLots(); 
-		model.addAttribute("lotList", lotList);
+		// mode 정규화
+        String m = (mode == null) ? "PRODUCT" : mode.trim().toUpperCase();
 		
-		// 2) 기본 선택 LOT 처리
-        //    - lotNo 파라미터가 없고 목록이 비어있지 않으면 첫 LOT 자동 선택
-        if (lotNo == null && !lotList.isEmpty()) {
-            lotNo = lotList.get(0).getLotNo();
+        List<LotRootDTO> lotList;
+        if ("MATERIAL".equals(m)) {
+            // 자재 ROOT (RAW/SUB/PKG)
+            lotList = lotTraceService.getMaterialRootLots(keyword, status, type);
+        } else {
+            // 기존 완제품(WIP/FIN)
+            lotList = lotTraceService.getFinishedLots(keyword, status, type);
+            m = "PRODUCT";
         }
 
-        // 3) 선택된 LOT 상세 조회 후 오른쪽 카드에 바인딩
-        if (lotNo != null) {
-        	
-        	// LOT 상세
-            LotMaster selected = lotTraceService.getLotDetail(lotNo);
-            model.addAttribute("selectedLot", selected);
-            
-            // 1차: 공정 단계 리스트
-            List<LotProcessNodeDTO> processNodes =
-                    lotTraceService.getProcessNodesForLot(lotNo);
-            model.addAttribute("processNodes", processNodes);
-            
-            // 2차: 자재 LOT 
-            List<LotMaterialNodeDTO> materialNodes = 
-            		lotTraceService.getMaterialNodesForLot(lotNo);
-            model.addAttribute("materialNodes", materialNodes);
-            
-            if (stepSeq != null) {
-                processNodes.stream()
-                        .filter(p -> p.getStepSeq().equals(stepSeq))
-                        .findFirst()
-                        .ifPresent(p -> model.addAttribute("selectedProcess", p));
-            }
-        }
-        
-		return "/lot/trace";
+        model.addAttribute("mode", m);
+        model.addAttribute("lotList", lotList);
+
+        // 검색어 유지
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
+        model.addAttribute("type", type);
+
+        return "/lot/trace";
 	}
 	
+	
+	// LOT 상세 + 공정 + 자재 LOT를 한 번에 가져와서
+	// 오른쪽 카드(body) fragment 로만 렌더링
+	@GetMapping("/trace/detail")
+	public String getLotDetailFragment(@RequestParam("lotNo") String lotNo,
+	                                   Model model) {
 
+	    // LOT 기본 정보
+		LotRootDetailDTO rootDetail = lotTraceService.getRootLotDetail(lotNo);
+	    model.addAttribute("rootDetail", rootDetail);
+
+	    // 오른쪽 상세 카드용 fragment만 반환
+	    return "/lot/trace_detail :: detail";
+	}
+	
+	// =====================================================================
+	// 공정 리스트 
+	@GetMapping("/trace/process-list")
+	@ResponseBody
+	public List<LotProcessNodeDTO> getProcessList(@RequestParam("lotNo") String lotNo) {
+		
+		// LOT 기준 공정 단계 목록 조회 (기존 서비스 그대로 재사용)
+	    return lotTraceService.getProcessNodesForLot(lotNo);
+	}
+	
+	// 공정 상세 조회 (LOT 트리에서 공정 클릭 시 호출)
+	@GetMapping("/trace/process-detail")
+	@ResponseBody
+	public LotProcessDetailDTO getProcessDetail(@RequestParam("orderId") String orderId,
+								   				@RequestParam("stepSeq") Integer stepSeq) {
+		return lotTraceService.getProcessDetail(orderId, stepSeq);
+	}
 	
 	
+	// =====================================================================
+	// 자재 리스트 
+	@GetMapping("/trace/material-list")
+	@ResponseBody
+	public List<LotMaterialNodeDTO> getMaterialList(@RequestParam("lotNo") String lotNo) {
+		
+		// LOT 기준 공정 단계 목록 조회 (기존 서비스 그대로 재사용)
+	    return lotTraceService.getMaterialNodesForLot(lotNo);
+	}
 	
+	// 자재 상세 조회 (LOT 트리에서 자재 클릭 시 호출)
+	@GetMapping("/trace/material-detail")
+	@ResponseBody
+	public LotMaterialDetailDTO getMaterialDetail(@RequestParam("outputLotNo") String outputLotNo,
+												  @RequestParam("inputLotNo") String inputLotNo) {
+		return lotTraceService.getMaterialDetail(outputLotNo, inputLotNo);
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	// ===========================
+    // MATERIAL 모드 - 신규 추가
+    // ===========================
+
+    // 자재 ROOT 상세(fragment) - 오른쪽 패널
+	@GetMapping("/trace/material-root-detail")
+	public String getMaterialRootDetailFragment(@RequestParam("lotNo") String lotNo, Model model) {
+	    LotMaterialDetailDTO d = lotTraceService.getMaterialRootDetail(lotNo);
+	    model.addAttribute("materialDetail", d);
+	    return "/lot/trace_detail :: detail";
+	}
+
+    // 자재 LOT → 사용된 완제품 LOT 목록(Forward)
+	@GetMapping("/trace/material/used-products")
+	@ResponseBody
+	public List<LotUsedProductNodeDTO> getUsedProducts(@RequestParam("inputLotNo") String inputLotNo) {
+	    return lotTraceService.getUsedProductsByMaterialLot(inputLotNo);
+	}
 	
 	
 	

@@ -1,188 +1,70 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/layouts/layout.html}">
-<body>
-<th:block layout:fragment="content">
-	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	
-	<h2>QC 결과 조회</h2>
-	
-	<div class="row g-2 align-items-center">
-	
-	 <!-- Search Filter -->
-<!--         <div class="card mb-4"> -->
-<!--             <div class="card-body"> -->
-                <form id="qcResultSearchForm">
-                    <div class="row gx-3 gy-2 align-items-center">
-					    <!-- 검사일자 -->
-					    <div class="col-md-2">
-					      <label class="form-label" for="workDate">검사일자 (시작)</label>
-					      <input type="date" class="form-control" id="startDate">
-					    </div>
-					    <div class="col-md-2">
-					      <label class="form-label" for="workDate">검사일자 (종료)</label>
-					      <input type="date" class="form-control" id="endDate">
-					    </div>
-					    <!-- 검색어 -->
-                        <div class="col-md-3">
-                            <label class="form-label" for="searchKeyword">검색어 (작업지시번호)</label>
-                            <input type="text" class="form-control" id="searchKeyword" placeholder="검색어 입력">
-                        </div>
-					    <!-- 합격 여부 구분-->
-                        <div class="col-md-2">
-                            <label class="form-label" for="searchHStatus">합격 여부</label>
-                            <select class="form-select" id="searchHStatus">
-                                <option value="">전체</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-outline-primary  w-100" id="btnSearchProcess">검색</button>
-                        </div>
-                    </div>
-                </form>
-<!--             </div> -->
-<!--         </div> -->
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
 
-	</div>
+  <th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
-	<br>
-	
-	<div class="card-body p-0">
-	    <div id="qcResultGrid"></div>
-    </div>
-    
-<!-- 검사결과 조회 모달 -->
-<div class="modal fade" id="qcViewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
+      <h2>QC 결과 조회</h2>
 
-      <div class="modal-header">
-        <h5 class="modal-title">
-          QC 결과 –
-          <span id="qcViewTitleOrder"></span> /
-          <span id="qcViewTitleProductName"></span>
-          <small class="text-muted" id="qcViewTitleProductCode"></small>
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="row g-2 align-items-center">
 
-      <div class="modal-body">
-        <!-- hidden -->
-        <input type="hidden" id="qcViewResultId">
-        <input type="hidden" id="qcViewOrderId">
-
-        <!-- 1행 : 기본 작업 정보 (등록 모달과 동일 구성) -->
-        <div class="row mb-3">
-          <div class="col-md-3">
-            <label class="form-label">작업지시번호</label>
-            <div id="qcViewOrderIdText" class="fw-semibold"></div>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">제품</label>
-            <div id="qcViewProductText"></div>
-          </div>
-          <div class="col-md-2">
-            <label class="form-label">지시수량</label>
-            <div id="qcViewPlanQtyText"></div>
-          </div>
-          <div class="col-md-2">
-            <label class="form-label">LOT 번호</label>
-            <div id="qcViewLotNoText"></div>
-          </div>
-        </div>
-
-        <!-- 2행 : 검사/수량 정보 -->
-		<div class="row mb-3 g-3">
-		  <div class="col-md-3">
-		    <label class="form-label">검사일자</label>
-		    <div id="qcViewInspectionDateText"
-		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
-		  </div>
-		  <div class="col-md-3">
-		    <label class="form-label">검사자</label>
-		    <div id="qcViewInspectorNameText"
-		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
-		  </div>
-		  <div class="col-md-2">
-		    <label class="form-label">검사수량</label>
-		    <div id="qcViewInspectionQtyText"
-		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
-		  </div>
-		  <div class="col-md-2">
-		    <label class="form-label">양품 수량</label>
-		    <div id="qcViewGoodQtyText"
-		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
-		  </div>
-		  <div class="col-md-2">
-		    <label class="form-label">불량 수량</label>
-		    <div id="qcViewDefectQtyText"
-		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
-		  </div>
-		</div>
-
-
-
-        <!-- 디테일 테이블 : 등록 모달이랑 구조 동일, readonly만 다름 -->
-        <div class="table-responsive mb-3">
-          <table class="table table-sm table-bordered align-middle">
-            <thead class="table-light">
-            <tr>
-              <th style="width: 90px;">QC 항목명</th>
-              <th style="width: 50px;">단위</th>
-              <th style="width: 200px;">기준값</th>
-              <th style="width: 180px;">측정값</th>
-              <th style="width: 70px;">판정</th>
-              <th>비고</th>
-            </tr>
-            </thead>
-            <tbody id="qcViewDetailTbody"></tbody>
-          </table>
-        </div>
-
-        <!-- 3행 : 전체 판정 + 사유 + 비고 (등록 모달의 하단과 매칭) -->
-        <div class="row g-3">
-		  <div class="col-md-3">
-		    <label class="form-label">전체 판정</label>
-		    <div>
-		      <span id="qcViewOverallResultBadge"
-		            class="badge w-100 py-2 fs-6 text-center"></span>
+        <form id="qcResultSearchForm" method="get" action="/qc/result">
+		  <div class="row gx-3 gy-2 align-items-end">
+		
+		    <!-- 검사일자(기간) -->
+		    <div class="col-md-4">
+		      <label class="form-label">검사일자</label>
+		      <div class="d-flex align-items-center gap-2">
+		        <input type="date" class="form-control" id="startDate" name="startDate"
+		               th:value="${param.startDate}">
+		        <span class="text-muted fw-semibold">~</span>
+		        <input type="date" class="form-control" id="endDate" name="endDate"
+		               th:value="${param.endDate}">
+		      </div>
 		    </div>
-		  </div>
 		
-		  <div class="col-md-5">
-		    <label class="form-label">불합격 사유</label>
-		    <textarea class="form-control form-control-sm"
-		              id="qcViewFailReason"
-		              rows="1"
-		              readonly></textarea>
-		  </div>
+		    <!-- 검색어 -->
+		    <div class="col-md-3">
+		      <label class="form-label" for="searchKeyword">검색어</label>
+		      <input type="text" class="form-control"
+		             id="searchKeyword" name="keyword"
+		             th:value="${param.keyword}"
+		             placeholder="작업지시번호 / 제품명">
+		    </div>
 		
-		  <div class="col-md-4">
-		    <label class="form-label">비고</label>
-		    <textarea class="form-control form-control-sm"
-		              id="qcViewRemark"
-		              rows="1"
-		              readonly></textarea>
+		    <!-- 합격 여부 -->
+		    <div class="col-md-2">
+		      <label class="form-label" for="searchHStatus">합격 여부</label>
+		      <select class="form-select" id="searchHStatus" name="result">
+		        <option value="ALL"  th:selected="${param.result == null || param.result[0] == 'ALL'}">전체</option>
+		        <option value="PASS" th:selected="${param.result != null && param.result[0] == 'PASS'}">합격</option>
+		        <option value="FAIL" th:selected="${param.result != null && param.result[0] == 'FAIL'}">불합격</option>
+		      </select>
+		    </div>
+		
+		    <!-- 버튼 -->
+		    <div class="col-md-3 d-flex gap-2">
+		      <button type="submit" class="btn btn-outline-primary flex-fill">검색</button>
+		      <a href="/qc/result" class="btn btn-outline-secondary flex-fill">초기화</a>
+		    </div>
+		
 		  </div>
-		</div>
-
-
+		</form>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+      <br>
+
+      <div class="card-body p-0">
+        <div id="qcResultGrid"></div>
       </div>
+
+      <th:block th:replace="qc/qc_view_modal :: qcViewModal"></th:block>
 
     </div>
-  </div>
-</div>
 
+    <script src="/js/qc/qc_result.js"></script>
 
-    
-	</div>
+  </th:block>
 
-<script src="/js/qc/qc_result.js"></script>		
-	
 </th:block>
-</body>

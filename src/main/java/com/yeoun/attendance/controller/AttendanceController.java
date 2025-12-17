@@ -187,7 +187,7 @@ public class AttendanceController {
 		attendanceService.registOutwork(accessLogDTO);
 		redirectAttributes.addFlashAttribute("message", "외근 등록이 완료되었습니다.");
 		
-		return "redirect:/attendance/my";
+		return "redirect:/attendance/outwork";
 	}
 	
 	// 근무정책관리 조회
@@ -260,4 +260,24 @@ public class AttendanceController {
 		));
 	}
 	
+	// 외근 현황 페이지
+	@GetMapping("/outwork")
+	public String outworkList() {
+		return "attendance/outwork";
+	}
+	
+	// 외근 현황 조회
+	@GetMapping("/outwork/data")
+	public ResponseEntity<List<AccessLogDTO>> getOutwork(
+			@AuthenticationPrincipal LoginDTO loginDTO, 
+			@RequestParam(required = false, name = "startDate") String startDate,  
+			@RequestParam(required = false, name = "endDate") String endDate) {
+		
+		LocalDate start = (startDate != null) ? LocalDate.parse(startDate) : LocalDate.now().withDayOfMonth(1);
+		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+		
+		List<AccessLogDTO> outworkList = attendanceService.getAllOutwork(start, end, loginDTO.getEmpId());
+		
+		return ResponseEntity.ok(outworkList);
+	}
 }

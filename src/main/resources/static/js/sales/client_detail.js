@@ -61,6 +61,8 @@ function saveClient() {
         managerDept:     getValue("managerDept"),
         managerTel:      getValue("managerTel"),
         managerEmail:    getValue("managerEmail"),
+		bizType:         getValue("bizType"),
+		bizItem:         getValue("bizItem"),
         addr:            getValue("addr"),
         addrDetail:      getValue("addrDetail"),
 

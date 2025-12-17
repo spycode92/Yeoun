@@ -72,13 +72,13 @@ public class WebSecurityConfig {
                     	.hasAnyRole("SYS_ADMIN")
                     	
 	                // 급여 관리
-                    	// 사원용 급여명세서
-                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**" ,"/pay/pdf/**")
-                    	    .authenticated()
+                	// 사원용 급여명세서
+                	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**" ,"/pay/pdf/**")
+                	    .authenticated()
 
-                    	// 급여 관리자 페이지
-                    	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
-                       	.hasAnyRole("SYS_ADMIN")
+                	// 급여 관리자 페이지
+                	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
+                   	.hasAnyRole("SYS_ADMIN")
                     	
                     	
 	                // 전자결재 설정(양식/결재선 관리 등)
@@ -88,9 +88,37 @@ public class WebSecurityConfig {
 	                // MES 일반 사용자
 						.requestMatchers("/order/**")
 						.permitAll()
+						.requestMatchers("/equipment/**")
+						.permitAll()
 
+					// 물류관리부
+					// 대시보드
+					.requestMatchers("/inventory/dashboard/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_ADMIN")
+					// 재고조회
+					.requestMatchers("/inventory/list/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					// 재고이력
+					.requestMatchers("/inventory/history/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					// 재고실사
+					.requestMatchers("/inventory/stock-take/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					// 입고관리
+					.requestMatchers("/inventory/inbound/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					// 출고관리
+					.requestMatchers("/inventory/outbound/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					
+					//영업관리
+					.requestMatchers("/sales/**")
+					.hasAnyRole("SYS_ADMIN", "SALES_ADMIN")
+						
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()
+	                
+	                
 				 )
 				// ---------- 로그인 처리 설정 ---------
 				.formLogin(login -> login

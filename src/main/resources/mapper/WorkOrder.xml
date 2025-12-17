@@ -2,13 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yeoun.order.mapper.OrderMapper">
 
-	<resultMap id="EmpListMap" type="com.yeoun.emp.dto.EmpListDTO">
-	    <result property="empId" column="emp_id"/>
-	    <result property="empName" column="emp_name"/>
-	    <result property="deptName" column="dept_name"/>
-	    <result property="posName" column="pos_name"/>
-	</resultMap>
-
 	<select id="selectOrderList"
 			parameterType="com.yeoun.order.dto.WorkOrderSearchDTO"
 			resultType="com.yeoun.order.dto.WorkOrderListDTO">
@@ -55,7 +48,7 @@
 		order by w.order_id desc
 	</select>
 	
-	<select id="selectWorkers" resultMap="EmpListMap">
+	<select id="selectWorkers" resultType="com.yeoun.order.dto.WorkerListDTO">
 		select
 			e.emp_id,
 			e.emp_name,
@@ -68,6 +61,8 @@
 			on e.pos_code = p.pos_code
 		where d.dept_id = 'DEP003'
 			and p.pos_code = 'POS001'
+			and e.status = 'ACTIVE'
+		order by e.emp_name asc
 	</select>
 	
 	<select id="selectMaterials" resultType="com.yeoun.order.dto.MaterialAvailabilityDTO">
@@ -92,6 +87,7 @@
 		    p.PRD_NAME,
 		    b.MAT_ID,
 		    m.MAT_NAME,
+		    m.MAT_TYPE,
 		    b.BASE_QTY * #{planQty} AS REQUIRED_QTY,
 		    i.STOCK_QTY
 		FROM BOM b
@@ -102,6 +98,60 @@
 		LEFT JOIN INV i
 		       ON b.MAT_ID = i.ITEM_ID
 		ORDER BY b.MAT_ID
+	</select>
+	
+	<select id="selectAllSchedules" resultType="com.yeoun.order.dto.WorkScheduleDTO">
+		SELECT 
+		    s.SCHEDULE_ID,
+		    s.COLOR_CODE,
+		    s.START_DATE AS START_TIME,
+		    s.END_DATE AS END_TIME,
+		    s.WORK_ID,
+		    o.LINE_ID,
+		    l.LINE_NAME,
+		    pm.PRD_NAME AS PRODUCT_NAME
+		FROM WORK_SCHEDULE s
+			JOIN WORK_ORDER o ON s.WORK_ID=o.ORDER_ID
+			JOIN PROD_LINE l ON o.LINE_ID=l.LINE_ID
+			JOIN PRODUCT_MST pm ON O.PRD_ID=pm.PRD_ID
+		WHERE o.STATUS != 'CANCELED' OR o.STATUS != 'CREATED'
+		ORDER BY START_TIME DESC
+	</select>
+	
+	<select id="selectWorkersBySchedule" resultType="com.yeoun.order.dto.WorkerProcessDTO">
+		SELECT 
+		    SCHEDULE_ID,
+		    WORKER_ID AS EMP_ID
+		FROM WORKER_PROCESS
+		WHERE SCHEDULE_ID = #{id}
+	</select>
+	
+	<select id="existWorkingSchedule" resultType="Integer">
+		SELECT COUNT(*)
+			FROM WORK_SCHEDULE s
+			JOIN WORKER_PROCESS wp ON s.SCHEDULE_ID = wp.SCHEDULE_ID
+		WHERE wp.WORKER_ID = #{empId}
+		AND #{now} BETWEEN s.START_DATE AND s.END_DATE
+	</select>
+	
+	<select id="countLineOverlap" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER w
+		WHERE w.LINE_ID = #{lineId}
+		AND w.STATUS IN ('CREATED', 'RELEASED', 'IN_PROGRESS')
+		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
+		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}
+	</select>
+		
+	<select id="countWorkerOverlap" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER w
+			JOIN WORK_SCHEDULE s  ON w.ORDER_ID = s.WORK_ID
+			JOIN WORKER_PROCESS p ON s.SCHEDULE_ID = p.SCHEDULE_ID
+		WHERE s.WORKER_ID = #{workerId}
+		AND w.STATUS IN ('CREATED', 'RELEASED', 'IN_PROGRESS')
+		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
+		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}
 	</select>
 	
 </mapper>

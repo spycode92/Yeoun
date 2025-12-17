@@ -54,7 +54,7 @@ public class PurchaseService {
 		// 공급업체의 공급 물품들 각각의 공급가액, 부가세 합계 계산
 		for (SupplierItemDTO item : supplierDTO.getSupplierItemList()) {
 			int supply = item.getOrderAmount() * item.getUnitPrice(); // 공급가액
-			int vat = (int) Math.round(supply * 0.1); // 부가세
+			int vat = (int) (supply * 0.1); // 부가세
 			int total = supply + vat;
 			
 			// 품목별 합계액을 더해서 전체 총 금액에 더함

@@ -1,6 +1,14 @@
 const grid = new tui.Grid({
 	el: document.getElementById("materialGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 20       // 페이지당 20개 행
+	},
+	columnOptions: {
+		resizable: true
+	},
 	columns: [
 		{
 			header: "입고번호",
@@ -17,6 +25,7 @@ const grid = new tui.Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -28,7 +37,7 @@ const grid = new tui.Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
@@ -85,7 +94,7 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 		}
 		
 		// 원재료정보만필터
-		data = data.filter(row => row.materialId != null && row.materialId !== '');
+		data = data.filter(row => row.inboundType === "MAT_IB");
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
@@ -100,22 +109,39 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 	}
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
-	const day = today.getDate();
+// 페이지 뒤로가기에만 지정한 날짜 적용되게 하는 로직
+window.addEventListener("pageshow", async (e) => {
+	const isBackForward = e.persisted || performance.getEntriesByType("navigation")[0].type ===  "back_forward";
 	
-	// 이번 달 1일과 오늘 날짜 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	let startDate;
+	let endDate;
 	
-	// 날짜 input 기본값 설정
+	if (isBackForward) {
+		// 뒤로 가기 했을 경우 이전 조회 날짜 유지
+		startDate = sessionStorage.getItem("material_startDate");
+		endDate = sessionStorage.getItem("material_endDate");
+	}
+	
+	if (!startDate || !endDate) {
+		const today = new Date();
+	    const year  = today.getFullYear();
+	    const month = today.getMonth() + 1;
+	    const day   = today.getDate();
+		
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate   = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+		
+		sessionStorage.removeItem("material_startDate");
+		sessionStorage.removeItem("material_endDate");
+	}
+	
 	startDateInput.value = startDate;
-	endDateInput.value = endDate;
+	endDateInput.value   = endDate;
 	
 	await loadMaterialInbound(startDate, endDate, "all", "");
+
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색
@@ -140,6 +166,9 @@ document.querySelector("#startDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#materialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
+	sessionStorage.setItem("material_startDate", startDateInput.value);
+	sessionStorage.setItem("material_endDate", endDateInput.value);
+	
 	await loadMaterialInbound(startDate, endDate, searchType, keyword);
 });
 
@@ -149,6 +178,9 @@ document.querySelector("#endDate").addEventListener("input", async () => {
 	const endDate = endDateInput.value;
 	const keyword = document.querySelector("#materialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
+	
+	sessionStorage.setItem("material_startDate", startDateInput.value);
+	sessionStorage.setItem("material_endDate", endDateInput.value);
 	
 	await loadMaterialInbound(startDate, endDate, searchType, keyword);
 });

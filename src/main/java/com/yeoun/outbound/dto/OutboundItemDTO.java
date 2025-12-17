@@ -2,6 +2,7 @@ package com.yeoun.outbound.dto;
 
 import org.modelmapper.ModelMapper;
 
+import com.yeoun.outbound.entity.Outbound;
 import com.yeoun.outbound.entity.OutboundItem;
 
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class OutboundItemDTO {
 	@Builder
 	public OutboundItemDTO(Long outboundItemId, String outboundId, String itemId, String lotNo, Long outboundAmount,
 			String itemType, Long ivId, String locationId) {
+		this.outboundItemId = outboundItemId;
 		this.outboundId = outboundId;
 		this.itemId = itemId;
 		this.lotNo = lotNo;
@@ -37,10 +39,37 @@ public class OutboundItemDTO {
 	private static ModelMapper modelMapper = new ModelMapper();
 	
 	public OutboundItem toEntity() {
-		return modelMapper.map(this, OutboundItem.class);
+	    OutboundItem.OutboundItemBuilder builder = OutboundItem.builder()
+	        .outboundItemId(outboundItemId)
+	        .itemId(itemId)
+	        .lotNo(lotNo)
+	        .outboundAmount(outboundAmount)
+	        .itemType(itemType)
+	        .ivId(ivId)
+	        .locationId(locationId);
+
+	    if (outboundId != null && !outboundId.isEmpty()) {
+	        Outbound outbound = Outbound.builder()
+	            .outboundId(outboundId)
+	            .build();
+	        builder.outbound(outbound);
+	    }
+
+	    return builder.build();
 	}
 	
 	public static OutboundItemDTO fromEntity(OutboundItem outboundItem) {
-		return modelMapper.map(outboundItem, OutboundItemDTO.class);
+	    Outbound outbound = outboundItem.getOutbound();
+
+	    return OutboundItemDTO.builder()
+	        .outboundItemId(outboundItem.getOutboundItemId())
+	        .outboundId(outbound != null ? outbound.getOutboundId() : null)
+	        .itemId(outboundItem.getItemId())
+	        .lotNo(outboundItem.getLotNo())
+	        .outboundAmount(outboundItem.getOutboundAmount())
+	        .itemType(outboundItem.getItemType())
+	        .ivId(outboundItem.getIvId())
+	        .locationId(outboundItem.getLocationId())
+	        .build();
 	}
 }

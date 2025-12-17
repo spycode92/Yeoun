@@ -1,7 +1,15 @@
 const Grid = tui.Grid;
 const productGrid = new Grid({
 	el: document.getElementById("productGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 20       // 페이지당 10개 행
+	},	
+	columnOptions: {
+		resizable: true
+	},
 	columns: [
 		{
 			header: "입고번호",
@@ -18,6 +26,7 @@ const productGrid = new Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -29,7 +38,7 @@ const productGrid = new Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
@@ -42,7 +51,7 @@ productGrid.on("click", (ev) => {
 	if (columnName === "btn") {
 		const row = productGrid.getRow(rowKey);
 		// 입고 상세 페이지로 이동
-		location.href = `/inventory/inbound/mat/${row.inboundId}`
+		location.href = `/inventory/inbound/prd/${row.inboundId}`
 	}
 });
 
@@ -79,7 +88,7 @@ async function loadProductInbound(startDate, endDate, keyword, searchType) {
 			COMPLETED: "입고완료"
 		}
 		// 완제품 정보만필터
-		data = await data.filter(row => row.prodId != null && row.prodId !== '');
+		data = await data.filter(row => row.inboundType === "PRD_IB");
 
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
@@ -95,22 +104,39 @@ async function loadProductInbound(startDate, endDate, keyword, searchType) {
 	}
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
-	const day = today.getDate();
+// 페이지 뒤로가기에만 지정한 날짜 적용되게 하는 로직
+window.addEventListener("pageshow", async (e) => {
+	const isBackForward = e.persisted || performance.getEntriesByType("navigation")[0].type ===  "back_forward";
 	
-	// 이번 달 1일과 오늘 날짜 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	let startDate;
+	let endDate;
 	
-	// 날짜 input 기본값 설정
+	if (isBackForward) {
+		// 뒤로 가기 했을 경우 이전 조회 날짜 유지
+		startDate = sessionStorage.getItem("product_startDate");
+		endDate = sessionStorage.getItem("product_endDate");
+	}
+	
+	if (!startDate || !endDate) {
+		const today = new Date();
+	    const year  = today.getFullYear();
+	    const month = today.getMonth() + 1;
+	    const day   = today.getDate();
+		
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate   = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+		
+		sessionStorage.removeItem("product_startDate");
+		sessionStorage.removeItem("product_endDate");
+	}
+	
 	prdStartDateInput.value = startDate;
 	prdEndDateInput.value = endDate;
 	
 	await loadProductInbound(startDate, endDate, "", "");
+
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색
@@ -135,6 +161,9 @@ document.querySelector("#prdStartDate").addEventListener("input", async () => {
 	const endDate = prdEndDateInput.value;
 	const keyword = document.querySelector("#prdKeyword").value;
 	const searchType = document.querySelector("select[name='prdSearchType']").value;
+	
+	sessionStorage.setItem("product_startDate", prdStartDateInput.value);
+	sessionStorage.setItem("product_endDate", prdEndDateInput.value);
 
 	
 	await loadProductInbound(startDate, endDate, keyword, searchType);
@@ -146,6 +175,9 @@ document.querySelector("#prdEndDate").addEventListener("input", async () => {
 	const endDate = prdEndDateInput.value;
 	const keyword = document.querySelector("#prdKeyword").value;
 	const searchType = document.querySelector("select[name='prdSearchType']").value;
+	
+	sessionStorage.setItem("product_startDate", prdStartDateInput.value);
+	sessionStorage.setItem("product_endDate", prdEndDateInput.value);
 
 	
 	await loadProductInbound(startDate, endDate, keyword, searchType);

@@ -123,8 +123,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const bizInput = document.getElementById("businessNo");
 
     form.addEventListener("submit", function (e) {
+		
+		// ⭐ 계좌번호 자릿수 검증 추가
+		  if (!validateAccountNo()) {
+		      e.preventDefault();
+		      return;
+		  }
 
-        const bizNo = bizInput.value.replace(/-/g, "");
+	     const bizNo = bizInput.value.replace(/-/g, "");
 
         // 길이검증
         if (bizNo.length !== 10) {
@@ -151,4 +157,24 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();  // 비동기 처리 완료될 때까지 기본 제출 막기
     });
 });
+
+
+// ===============================
+// 5) 계좌번호 자릿수 검증 (간단)
+// ===============================
+function validateAccountNo() {
+    const accountInput = document.getElementById("accountNumber");
+
+    if (!accountInput) return true; // 화면에 없으면 통과
+
+    const val = accountInput.value.replace(/[^0-9]/g, "");
+    accountInput.value = val; // 숫자만 유지
+
+    if (val.length < 8 || val.length > 20) {
+        alert("계좌번호는 숫자 8~20자리여야 합니다.");
+        accountInput.focus();
+        return false;
+    }
+    return true;
+}
 

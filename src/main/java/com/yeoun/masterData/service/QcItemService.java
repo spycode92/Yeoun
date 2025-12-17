@@ -1,15 +1,14 @@
 package com.yeoun.masterData.service;
 
-import java.util.HashMap;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 
@@ -23,18 +22,43 @@ import lombok.extern.log4j.Log4j2;
 public class QcItemService {
 	private final QcItemRepository qcItemRepository;
 	
-	//조회
+	//품질 항목 기준 qcId 목록 조회 (distinct)
 	@Transactional(readOnly = true)
-	public List<QcItem> findAll() {
-		return qcItemRepository.findAll();
+	public List<String> qcIdList() {
+		return qcItemRepository.qcIdList();
 	}
-	//저장
+	//품질 항목 기준 조회
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> qcItemList(String qcItemId) {
+		return qcItemRepository.findByQcItemList(qcItemId);
+	}
+	//품질 항목 기준 저장
 	@Transactional
 	public QcItem saveQcItem(String empId,QcItem qcItem) {
-		qcItem.setCreatedId(empId);
+		log.info("qcItem-------------------------->",qcItem);
+		Optional<QcItem> qc = qcItemRepository.findById(qcItem.getQcItemId());
+		
+		if(qc.isPresent()) {// 수정시 저장
+	        QcItem existingItem = qc.get();
+
+	        // 수정 시, 기존의 CreatedId/CreatedDate 유지
+	        qcItem.setCreatedId(existingItem.getCreatedId());
+	        qcItem.setCreatedDate(existingItem.getCreatedDate());
+	        
+	        // 3. UpdatedId와 UpdatedDate 설정
+	        qcItem.setUpdatedId(empId);
+	        qcItem.setUpdatedDate(LocalDate.now());
+	        
+	    } else {
+	        
+	        //신규 등록 시, CreatedId와 CreatedDate 설정
+	        qcItem.setCreatedId(empId);
+	        qcItem.setCreatedDate(LocalDate.now());
+	        
+	    }
 		return qcItemRepository.save(qcItem);		
 	}
-	//삭제
+	// 품질 항목 기준 삭제
 	@Transactional
 	public String deleteQcItem(List<String> qcItemIds) {
 		log.info("qcItemRepository------------->{}", qcItemIds);

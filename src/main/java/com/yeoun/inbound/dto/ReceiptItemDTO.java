@@ -24,4 +24,5 @@ public class ReceiptItemDTO {
 	private Long unitPrice; // 단가
 	private Long supplyAmount; // 공급가액
 	private Long totalPrice; // 합계
+	private String unit; // 발주 단위
 }

@@ -16,8 +16,9 @@
 			<button class="btn btn-outline-primary" id="search">검색</button>
 		</div>
 		<div class="col-12 col-lg d-flex justify-content-end">
-			<button type="button" class="btn btn-primary"
-				data-bs-toggle="modal" data-bs-target="#modalCenter">출고등록
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCenter" 
+				id="prdRegistBtn" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN')">
+				출고등록
 			</button>
 		</div>
 	</div>
@@ -33,7 +34,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="modalCenterTitle">출고등록</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"
+					<button type="button" class="btn-close m-0" data-bs-dismiss="modal"
 						aria-label="Close"></button>
 				</div>
 				<div class="modal-body">

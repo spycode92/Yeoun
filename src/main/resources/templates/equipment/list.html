@@ -3,26 +3,24 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layouts/layout.html}">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script th:src="@{/js/common/formatTimeJS.js}"></script>
     <style>
+        body {
+            background: #f4f3fb;
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            color: #2f2b43;
+        }
+
         .title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #4b3fbf;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
+            font-size: 1.8em;
+            margin-bottom: 1.8rem;
+            color: #697a8d;
+            font-weight: 500;
         }
 
-        .yeoun-subtitle {
-            font-size: 13px;
-            color: #7b7a93;
-            margin-bottom: 20px;
-        }
-
-        .yeoun-card {
+        .order-card {
             border-radius: 12px;
             border: 1px solid #e2e1f3;
             background: #ffffff;
@@ -31,15 +29,15 @@
             margin-bottom: 18px;
         }
 
-        .yeoun-card-header {
+        .order-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
 
-        .yeoun-card-title {
-            font-size: 16px;
+        .card-title {
+            font-size: 1.6em;
             font-weight: 600;
             color: #41388f;
             display: flex;
@@ -47,125 +45,68 @@
             gap: 6px;
         }
 
-        .chip-date {
+        .yeoun-badge-outline {
             border-radius: 999px;
-            background: #f5f4ff;
-            color: #5a55a9;
-            padding: 4px 12px;
-            font-size: 12px;
+            border: 1px solid rgba(111, 92, 236, 0.4);
+            color: #6f5cec;
+            padding: 2px 10px;
+            font-size: 15px;
+            background: rgba(111, 92, 236, 0.04);
         }
 
-        .stat-card {
-            border-radius: 12px;
-            background: linear-gradient(135deg, #6f5cec, #9479ff);
-            color: #fff;
-            padding: 14px 16px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card small {
-            font-size: 11px;
-            opacity: 0.9;
-        }
-
-        .stat-card strong {
-            font-size: 20px;
-            display: block;
-            margin-top: 4px;
-        }
-
-        .stat-card.sub {
-            background: #ffffff;
-            color: #514b9a;
-            border: 1px solid #dad7f7;
-            box-shadow: 0 8px 20px rgba(60, 50, 160, 0.05);
-        }
-
-        .stat-card.sub strong {
-            font-size: 18px;
-        }
-
-        .status-pill {
+        .status-badge {
+            width: 90px;
             border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 3px 20px;
+        }
+
+        .status-create     { background: #e7eef7; color: #3a5a8a; }
+        .status-release    { background: #f0eaff; color: #6a4cc3; }
+        .status-progress   { background: #e6f5ec; color: #15803d; }
+        .status-complete   { background: #e8f1ff; color: #1d4ed8; }
+        .status-cancel     { background: #fdecec; color: #c0392b; }
+
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #514d7a;
+            margin-bottom: 4px;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 13px;
+            border-radius: 8px;
+            border-color: #d9d8f2;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #6f5cec;
+            box-shadow: 0 0 0 0.15rem rgba(111, 92, 236, 0.2);
+        }
+
+        .form-text {
             font-size: 11px;
-            padding: 4px 10px;
+            color: #9a96c0;
+        }
+
+        .btn-yeoun-primary {
+            font-size: 15px;               /* 버튼 글자 키움 */
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            background: linear-gradient(135deg, #6f5cec, #9479ff);
+            color: white;
         }
 
-        .status-run {
-            background: #e8f7f1;
-            color: #138a55;
-        }
-
-        .status-stop {
-            background: #fdeff1;
-            color: #c0392b;
-        }
-
-        .status-idle {
-            background: #fdf5e6;
-            color: #c27b15;
-        }
-
-        .status-mt {
-            background: #ece7ff;
-            color: #5b3fd1;
-        }
-
-        .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-
-        .table {
-            font-size: 13px;
-            margin-bottom: 0;
-        }
-
-        .table thead {
-            background: #f5f4ff;
-        }
-
-        .table thead th {
-            border-bottom-color: #dad7f5;
-            color: #5b568a;
-            font-weight: 600;
-        }
-
-        .table tbody tr {
-            vertical-align: middle;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-
-        .table tbody tr:hover {
-            background: #f7f6ff;
-        }
-
-        .badge-kpi {
-            border-radius: 999px;
-            font-size: 11px;
-            padding: 3px 8px;
-        }
-
-        .badge-kpi-good {
-            background: #e8f7f1;
-            color: #138a55;
-        }
-
-        .badge-kpi-warn {
-            background: #fff7e5;
-            color: #c28a11;
-        }
-
-        .badge-kpi-bad {
-            background: #fdeff1;
-            color: #c0392b;
+        .btn-yeoun-primary:hover {
+            background: linear-gradient(135deg, #b8b3ff, #d9d4ff);
+            color: #5c4ac7 !important;
         }
 
         .btn-yeoun-outline {
@@ -174,321 +115,611 @@
             background: #fff;
             color: #655dc0;
             font-size: 13px;
-            padding: 6px 12px;
+            padding: 8px 14px;
         }
 
-        .btn-yeoun-outline i {
-            font-size: 14px;
+        .badge-priority {
+            border-radius: 999px;
+            font-size: 11px;
+            padding: 3px 8px;
+            background: #fdf4e2;
+            color: #d97907;
         }
 
-        /* 모달 내부 */
+        .search-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: end;
+        }
+
+        .search-row .form-control,
+        .search-row .form-select {
+            font-size: 12px;
+            height: 32px;
+            padding: 4px 10px;
+        }
+
+        .search-row .btn {
+            height: 32px;
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+
+        /** modal **/
+
+        /* 메인 카드형 모달 */
+        .yeoun-modal {
+            border-radius: 18px;
+            border: none;
+            background: #ffffff;
+            box-shadow: 0 15px 35px rgba(90, 75, 180, 0.15);
+        }
+
+        /* 헤더 */
+        .yeoun-modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #eeeafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title-wrap i {
+            color: #6a5acd;
+            font-size: 20px;
+            margin-right: 6px;
+        }
+
         .modal-title {
-            font-size: 16px;
             font-weight: 600;
-            color: #41388f;
+            color: #3b336d;
         }
 
-        .section-title {
+        /* 작업자 배치 */
+        .worker-flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 14px;
+            padding: 16px;
+            background: #faf9ff;
+            border: 1px solid #e2defc;
+            border-radius: 14px;
+            box-shadow: 0 8px 18px rgba(110, 94, 230, 0.08);
+        }
+
+        .flow-item {
+            flex: 1;
+            min-width: 160px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dedbf7;
+            padding: 14px 12px;
+            text-align: center;
+            box-shadow: 0 5px 12px rgba(150, 140, 240, 0.10);
+        }
+
+        .flow-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #5a51c8;
+            margin-bottom: 3px;
+        }
+
+        .flow-desc {
+            font-size: 12px;
+            color: #7e78aa;
+            margin-bottom: 10px;
+        }
+
+        .flow-select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #d1cdf6;
+            background: #fafaff;
+            font-size: 13px;
+            color: #4b4470;
+        }
+
+        .flow-select:focus {
+            border-color: #7b6fff;
+            box-shadow: 0 0 0 0.15rem rgba(130, 115, 255, 0.25);
+        }
+
+
+
+        /* 바디 */
+        .yeoun-modal-body {
+            padding: 24px 28px;
+        }
+
+        /* 탭 */
+        .yeoun-tabs .nav-link {
+            border: none;
+            color: #867ccc;
+            font-weight: 500;
+            padding: 10px 18px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .yeoun-tabs .nav-link.active {
+            color: #4b3fbf;
+            background: #f3f1ff;
+            font-weight: 600;
+        }
+
+        /* 상세 */
+        .wo-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 10px 5px;
+        }
+
+        /* 공통 텍스트 */
+        .wo-detail label {
             font-size: 13px;
             font-weight: 600;
-            color: #5b568a;
-            margin-bottom: 6px;
-            margin-top: 10px;
+            color: #776fb5;
+            margin-bottom: 4px;
         }
 
-        .small-text {
-            font-size: 12px;
-            color: #8b88aa;
+        .wo-detail .value {
+            font-size: 15px;
+            padding: 6px 0;
+            color: #3f3b67;
         }
+
+        .value.strong {
+            font-size: 18px;
+            font-weight: 700;
+            color: #5c53c4;
+        }
+
+        /* ===== Header ===== */
+        .wo-header {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 0.7fr;
+            gap: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eceaff;
+        }
+
+        /* ===== 일반 행 ===== */
+        .wo-row {
+            display: flex;
+            gap: 40px;
+        }
+
+        .wo-col {
+            flex: 1;
+        }
+
+        /* 설비 상세 모달 */
+        #equipDetailModal .modal-dialog {
+            max-width: 1200px;
+            width: 90%;
+        }
+
+        #equipDetailModal .modal-content {
+            /*height: 75vh;*/
+            border-radius: 16px;
+        }
+
+        #equipDetailModal .modal-body {
+            padding: 24px 28px;
+            overflow: hidden; /* 내부에서 나눠서 스크롤 */
+        }
+
     </style>
 </head>
 <body>
 <th:block layout:fragment="content">
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
-        <div class="mb-3">
+        <div class="mb-3 d-flex justify-content-between align-items-center">
             <div class="title">
-                <i class="bi bi-kanban-fill"></i>
-                라인 운영 현황
+                설비 현황
             </div>
+            <button class="btn btn-yeoun-primary" id="btnCreate">
+                <i class="bi bi-plus-circle"></i> 새로 등록
+            </button>
         </div>
 
-        <!-- 상단 KPI 카드 -->
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <small>전체 라인 가동률</small>
-                    <strong>87%</strong>
-                    <span class="small-text">목표 85% 대비 양호</span>
+        <div>
+            <div class="order-card">
+                <div class="order-card-header">
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card sub">
-                    <small>오늘 가동 라인 수</small>
-                    <strong>2 / 3</strong>
-                    <span class="small-text">1라인, 2라인 가동 중 · 예비라인 대기</span>
+
+                <!-- 검색 / 필터 영역 -->
+                <div class="mb-2 search-row">
+                    <select id="searchEquipment" class="form-select" style="max-width: 150px;">
+                        <option value="ALL">전체 설비</option>
+                        <option th:each="type : ${equipTypes}"
+                                th:value="${type.equipId}"
+                                th:text="|${type.equipId} (${type.koName})|">
+                        </option>
+                    </select>
+                    <select id="searchLine" class="form-select" style="max-width: 150px;">
+                        <option value="ALL">전체 라인</option>
+                        <option th:each="line : ${lines}"
+                                th:value="${line.lineId}"
+                                th:text="|${line.lineId} (${line.lineName})|">
+                        </option>
+                    </select>
+                    <select id="searchStatus" class="form-select" style="max-width: 150px;">
+                        <option value="ALL">전체 상태</option>
+                        <option value="RUN">가동</option>
+                        <option value="STOP">정지</option>
+                        <option value="BREAKDOWN">고장</option>
+                        <option value="MAINTENANCE">보수</option>
+                    </select>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card sub">
-                    <small>비가동(점검/고장) 라인</small>
-                    <strong>1</strong>
-                    <span class="small-text">점검 등록 필요 시 우측 메뉴에서 처리</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- 본문: 라인 리스트 -->
-        <div class="yeoun-card">
-            <div class="yeoun-card-header">
-                <div class="yeoun-card-title">
-                    <i class="bi bi-kanban"></i>
-                    오늘 라인별 운영 상태
-                </div>
-                <div class="d-flex align-items-center gap-2">
-              <span class="chip-date">
-                <i class="bi bi-calendar-week me-1"></i>2025-12-02 기준
-              </span>
-                    <!-- 나중에 날짜 선택기 붙일 자리 -->
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                    <tr>
-                        <th>라인</th>
-                        <th>상태</th>
-                        <th>오늘 작업지시</th>
-                        <th>계획량 / 완료량</th>
-                        <th>가동률</th>
-                        <th>작업자</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <!-- 라인 1: 정상 가동 -->
-                    <tr data-line="1라인" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
-                        <td>1라인</td>
-                        <td>
-                  <span class="status-pill status-run">
-                    <span class="dot"></span> 가동중
-                  </span>
-                        </td>
-                        <td>라벤더 퍼퓸 50ml, 시트러스 코롱 100ml</td>
-                        <td class="text-end">400 / 320</td>
-                        <td>
-                            <span class="badge-kpi badge-kpi-good">89%</span>
-                        </td>
-                        <td>3명</td>
-                        <td class="text-end">
-                            <button type="button"
-                                    class="btn-yeoun-outline btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#lineDetailModal">
-                                상세보기
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- 라인 2: 부분 가동 / 품목 변경 -->
-                    <tr data-line="2라인" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
-                        <td>2라인</td>
-                        <td>
-                  <span class="status-pill status-idle">
-                    <span class="dot"></span> 대기중
-                  </span>
-                        </td>
-                        <td>바닐라 퍼퓸 30ml (오후 투입 예정)</td>
-                        <td class="text-end">250 / 0</td>
-                        <td>
-                            <span class="badge-kpi badge-kpi-warn">31%</span>
-                        </td>
-                        <td>2명</td>
-                        <td class="text-end">
-                            <button type="button"
-                                    class="btn-yeoun-outline btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#lineDetailModal">
-                                상세보기
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- 라인 3: 점검/비가동 -->
-                    <tr data-line="예비라인" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
-                        <td>예비라인</td>
-                        <td>
-                  <span class="status-pill status-mt">
-                    <span class="dot"></span> 점검중
-                  </span>
-                        </td>
-                        <td>—</td>
-                        <td class="text-end">0 / 0</td>
-                        <td>
-                            <span class="badge-kpi badge-kpi-bad">0%</span>
-                        </td>
-                        <td>0명</td>
-                        <td class="text-end">
-                            <button type="button"
-                                    class="btn-yeoun-outline btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#lineDetailModal">
-                                상세보기
-                            </button>
-                        </td>
-                    </tr>
-
-                    </tbody>
-                </table>
+                <div id="equipGrid"></div>
             </div>
         </div>
     </div>
-    <!-- 라인 운영 상세 모달 -->
-    <div class="modal fade" id="lineDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
+
+    <!-- 설비 등록 모달 -->
+    <div class="modal fade" id="equipRegisterModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        라인 운영 상세
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                    <h5 class="modal-title">설비 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="equipForm" th:object="${req}" method="post">
+                    <div class="modal-body">
+
+                            <!-- 설비 종류 -->
+                            <div class="mb-3">
+                                <label class="form-label">설비 종류</label>
+                                <select class="form-select" th:field="*{equipType}" required>
+                                    <option value="">선택</option>
+                                    <option th:each="type : ${useEquipTypes}"
+                                            th:value="${type.equipId}"
+                                            th:text="|${type.equipId} (${type.koName})|">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- 라인 -->
+                            <div class="mb-3">
+                                <label class="form-label">라인</label>
+                                <select class="form-select" th:field="*{lineId}" required>
+                                    <option value="">선택</option>
+                                    <option th:each="line : ${useLines}"
+                                            th:value="${line.lineId}"
+                                            th:text="|${line.lineId} (${line.lineName})|">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- 설비명 -->
+                            <div class="mb-3">
+                                <label class="form-label">설비명</label>
+                                <input type="text" class="form-control"
+                                       th:field="*{equipName}"
+                                       placeholder="예) 충전기3"
+                                       required>
+                            </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveEquip">저장</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 설비 상세 모달 -->
+    <div class="modal fade" id="equipDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content yeoun-modal">
+
+                <!-- Header -->
+                <div class="yeoun-modal-header">
+                    <div class="modal-title-wrap d-flex align-items-center gap-2">
+                        <i class="bi bi-cpu-fill"></i>
+                        <h5 class="modal-title">
+                            설비 상세
+                        </h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
-                    <!-- 라인 기본 정보 -->
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                <!-- Body -->
+                <div class="yeoun-modal-body">
+
+                    <!-- ===== 설비 기본 정보 ===== -->
+                    <div class="wo-header mb-4">
                         <div>
-                            <div class="section-title">라인 기본 정보</div>
-                            <div class="small-text" id="lineBasicText">
-                                1라인 · 충진/혼합 설비 2대 · 오늘 작업자 3명 투입
-                            </div>
+                            <label>설비명</label>
+                            <div class="value strong" id="dEquipName">-</div>
                         </div>
+
                         <div>
-            <span class="status-pill status-run" id="lineStatusPill">
-              <span class="dot"></span> 가동중
-            </span>
-                        </div>
-                    </div>
-
-                    <hr class="my-2"/>
-
-                    <!-- 오늘 작업지시 -->
-                    <div>
-                        <div class="section-title">오늘 작업지시</div>
-                        <div class="small-text mb-1">
-                            해당 라인에 배정된 작업지시 목록이 보여지고, 클릭 시 작업지시 상세로 이동할 수 있어.
+                            <label>설비 타입</label>
+                            <div class="value" id="dEquipType">-</div>
                         </div>
 
-                        <div class="table-responsive mb-2">
-                            <table class="table table-sm align-middle">
-                                <thead>
-                                <tr>
-                                    <th style="width: 120px;">작업지시번호</th>
-                                    <th>품목</th>
-                                    <th style="width: 140px;">계획시간</th>
-                                    <th style="width: 80px;" class="text-end">수량</th>
-                                    <th style="width: 100px;">상태</th>
-                                </tr>
-                                </thead>
-                                <tbody id="lineWoTableBody">
-                                <tr>
-                                    <td>WO-20251202-01</td>
-                                    <td>라벤더 퍼퓸 50ml</td>
-                                    <td>10:00 ~ 12:00</td>
-                                    <td class="text-end">250</td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success-emphasis">In Progress</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>WO-20251202-03</td>
-                                    <td>시트러스 코롱 100ml</td>
-                                    <td>16:00 ~ 18:00</td>
-                                    <td class="text-end">150</td>
-                                    <td>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis">Planned</span>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <hr class="my-2"/>
-
-                    <!-- 비가동 / 점검 등록 -->
-                    <div>
-                        <div class="section-title">비가동 / 점검 등록</div>
-                        <div class="small-text mb-1">
-                            라인이 멈춘 경우, 사유와 시간을 기록하면 가동률·스케줄에 반영할 수 있어.
-                        </div>
-
-                        <form>
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-4">
-                                    <label class="form-label">비가동 유형</label>
-                                    <select class="form-select form-select-sm">
-                                        <option value="">선택</option>
-                                        <option>점검(Maintenance)</option>
-                                        <option>고장(Breakdown)</option>
-                                        <option>자재 부족</option>
-                                        <option>작업자 부족</option>
-                                        <option>기타</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">시작 시간</label>
-                                    <input type="datetime-local" class="form-control form-control-sm">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">종료 시간</label>
-                                    <input type="datetime-local" class="form-control form-control-sm">
-                                </div>
+                        <div>
+                            <label>상태</label>
+                            <div class="value">
+                                <span class="status-badge" id="dEquipStatus">-</span>
                             </div>
-                            <div class="mb-2">
-                                <label class="form-label">비고</label>
-                                <textarea class="form-control form-control-sm" rows="2"
-                                          placeholder="점검 내용, 고장 원인 등"></textarea>
-                            </div>
-                        </form>
+                        </div>
                     </div>
 
-                </div>
+                    <div class="wo-row mb-4">
+                        <div class="wo-col">
+                            <label>소속 라인</label>
+                            <div class="value" id="dLineName">-</div>
+                        </div>
+                        <div class="wo-col">
+                            <label>등록일시</label>
+                            <div class="value" id="dCreatedDate">-</div>
+                        </div>
+                    </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                            data-bs-dismiss="modal">닫기</button>
-                    <button type="button" class="btn btn-sm btn-primary">
-                        <i class="bi bi-clipboard-check me-1"></i> 비가동 등록
-                    </button>
+                    <!-- ===== 작업 이력 ===== -->
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">최근 작업 이력</label>
+                            <span class="form-text">
+                              ※ 최근 작업 기준 정렬
+                            </span>
+                        </div>
+
+                        <!-- Toast Grid 영역 -->
+                        <div id="equipHistoryGrid" style="height: 320px;"></div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
+
+
 </th:block>
 <th:block layout:fragment="myScript">
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        // 간단한 프로토타입용 JS:
-        // 클릭한 행의 라인명에 따라 모달 상단 텍스트만 바꿔주는 정도
-        const lineDetailModal = document.getElementById('lineDetailModal');
-        lineDetailModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            // tr 또는 버튼에 data-line 속성이 있다고 가정
-            const tr = button.closest('tr');
-            const lineName = tr ? tr.dataset.line : '1라인';
+        let equipGrid = null;
 
-            const title = lineDetailModal.querySelector('.modal-title');
-            const basicText = lineDetailModal.querySelector('#lineBasicText');
+        document.addEventListener("DOMContentLoaded", () => {
+            const gridEq = document.getElementById("equipGrid");
+            if (!gridEq) {
+                console.error("그리드 요소 없음");
+                return;
+            }
 
-            title.textContent = `라인 운영 상세 - ${lineName}`;
-            basicText.textContent = `${lineName} · 오늘 기준 작업자 및 설비 구성, 작업지시 현황을 보여줍니다.`;
+            equipGrid = new tui.Grid({
+                el: gridEq,
+                bodyHeight: 450,
+                rowHeaders: ["rowNum"],
+                scrollX: false,
+                scrollY: true,
+                pageOptions: {
+                    useClient: true,
+                    perPage: 10
+                },
+                columnOptions: { resizable: true },
+                columns: [
+                    { header: "설비명", name: "equipName", align: "left" },
+                    { header: "설비코드", name: "equipTypeId", align: "left" },
+                    { header: "라인", name: "lineId", align: "center" },
+                    { header: "상태", name: "status", align: "center" },
+                    { header: "등록일자", name: "createdDate", align: "center",
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
+                    {
+                        header: "상세",
+                        name: "btn",
+                        width: 90,
+                        align: "center",
+                        formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
+                    }
+                ]
+            })
+
+            loadEquip();
+
+            equipGrid.on("click", (event) => {
+                if (event.columnName !== "btn") return;
+                const row = equipGrid.getRow(event.rowKey);
+                openEquipDetailModal(row);
+            });
+
+            ["searchEquipment", "searchLine", "searchStatus"].forEach(id => {
+                document.getElementById(id).addEventListener("change", loadEquip);
+            });
         });
+
+        function loadEquip(){
+            const equip = document.getElementById("searchEquipment").value;
+            const line  = document.getElementById("searchLine").value;
+            const status = document.getElementById("searchStatus").value;
+
+            const query = new URLSearchParams();
+
+            if (equip !== "ALL") query.append("equipment", equip);
+            if (line !== "ALL") query.append("line", line);
+            if (status !== "ALL") query.append("status", status);
+
+            fetch("/equipment/list/data?" + query.toString())
+                .then(res => {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("작업지시 목록 : ", data);
+                    equipGrid.resetData(data);
+                })
+                .catch(err => {
+                    console.error("작업지시 목록 조회 오류", err);
+                    alert("조회 중 오류 발생");
+                });
+        }
+
+        // ======================================================
+        // 설비 상세 모달
+        let equipHistoryGrid = null;
+
+        function initEquipHistoryGrid() {
+            if (equipHistoryGrid) return;
+
+            equipHistoryGrid = new tui.Grid({
+                el: document.getElementById('equipHistoryGrid'),
+                bodyHeight: 200,
+                rowHeaders: ['rowNum'],
+                scrollX: false,
+                scrollY: true,
+                pageOptions: {
+                    useClient: true,
+                    perPage: 5
+                },
+                columns: [
+                    {
+                        header: '작업지시',
+                        name: 'orderId',
+                        align: 'center'
+                    },
+                    {
+                        header: '제품',
+                        name: 'productName',
+                        align: 'left',
+                        width: 100
+                    },
+                    {
+                        header: '상태',
+                        name: 'status',
+                        align: 'center',
+                        width: 100
+                    },
+                    {
+                        header: '시작시간',
+                        name: 'startTime',
+                        align: 'center',
+                        width: 200,
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)
+                    },
+                    {
+                        header: '종료시간',
+                        name: 'endTime',
+                        align: 'center',
+                        width: 200,
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)
+                    },
+                ]
+            });
+        }
+
+        async function openEquipDetailModal(data) {
+
+            // 기본 정보 바인딩
+            document.getElementById("dEquipName").textContent = data.equipName;
+            document.getElementById("dEquipType").textContent = data.equipTypeId || "-";
+            document.getElementById("dLineName").textContent = data.lineId || "-";
+            document.getElementById("dCreatedDate").textContent = formatTimeFull(new Date(data.createdDate));
+
+            const status = data.status ?? "UNKNOWN";
+            const statusEl = document.getElementById("dEquipStatus");
+            statusEl.textContent = status;
+            statusEl.className = "status-badge status-" + status.toLowerCase();
+
+            document.getElementById("equipDetailModal").addEventListener('shown.bs.modal', async () => {
+
+                initEquipHistoryGrid();
+                equipHistoryGrid.refreshLayout();
+
+                try {
+                    const history = await loadEquipHistory(data.equipId);
+                    console.log(history);
+                    equipHistoryGrid.resetData(history);
+                } catch (err) {
+                    console.error(err);
+                    equipHistoryGrid.resetData([]);
+                }
+            }, {once: true});
+
+            // 모달 오픈
+            const modal = new bootstrap.Modal(document.getElementById("equipDetailModal"));
+            modal.show();
+        }
+
+        // 히스토리 로드 함수
+        async function loadEquipHistory(equipId) {
+            console.log("here 1");
+            console.log("data... equipId :: ", equipId);
+            const res = await fetch(`/equipment/equip/${equipId}/history`, {
+                headers: {
+                    "Content-Type" : "application/json",
+                    [csrfHeader] : csrfToken
+                }
+            });
+            if (!res.ok) throw new Error("이력 조회 실패");
+            return await res.json();
+        }
+
+        // 설비 등록 모달
+        document.getElementById("btnCreate").addEventListener("click", (event) => {
+            const modal = new bootstrap.Modal(document.getElementById("equipRegisterModal"));
+            document.getElementById("equipForm").reset();
+            // select 강제 초기화
+            // document.getElementById("equipType").value = "";
+            // document.getElementById("lineId").value = "";
+            // document.getElementById("equipName").value = "";
+            modal.show();
+        });
+
+        // 설비 등록하기
+        document.getElementById("equipForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const payload = {
+                equipType: document.getElementById("equipType").value,
+                lineId   : document.getElementById("lineId").value,
+                equipName: document.getElementById("equipName").value
+            };
+
+            try {
+                const response = await fetch("/equipment/equip", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type" : "application/json",
+                        [csrfHeader] : csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    alert("저장 실패");
+                    return;
+                }
+
+                alert ("성공적으로 저장되었습니다.");
+                bootstrap.Modal.getInstance(
+                    document.getElementById("equipRegisterModal")
+                ).hide();
+
+                loadEquip();
+
+            } catch (err) {
+                console.log(err);
+                alert("오류가 발생했습니다.");
+            }
+
+        });
+
+
     </script>
 </th:block>
-</body>
-</html>

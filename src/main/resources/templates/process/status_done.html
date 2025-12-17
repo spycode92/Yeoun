@@ -1,0 +1,44 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="done">
+
+	<div class="row g-2 align-items-center">
+	  <form id="doneSearchForm" class="w-100">
+	    <div class="row gx-3 gy-2 align-items-end">
+	
+	      <div class="col-md-3">
+	        <label class="form-label">완료일자</label>
+	        <input type="date" class="form-control" id="doneDate">
+	      </div>
+	
+	      <div class="col-md-3">
+	        <label class="form-label">검색어</label>
+	        <input type="text" class="form-control" id="doneKeyword"
+	               placeholder="작업지시번호 / 제품코드 / 제품명">
+	      </div>
+	
+	      <div class="col-md-2">
+	        <label class="form-label" for="doneStatus">처리결과</label>
+	        <select class="form-select" id="doneStatus">
+	          <option value="">전체</option>
+	          <option value="COMPLETED">완료</option>
+	          <option value="SCRAPPED">폐기</option>
+	        </select>
+	      </div>
+	
+	      <div class="col-md-2">
+	        <button type="button" class="btn btn-outline-primary" id="btnSearchDone" style="min-width:100px;">검색</button>
+	        <button type="button" class="btn btn-outline-secondary" id="btnResetDone" style="min-width:100px;">초기화</button>
+	      </div>
+	
+	    </div>
+	  </form>
+	</div>
+
+  <br>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div id="doneGrid"></div>
+    </div>
+  </div>
+  
+</th:block>

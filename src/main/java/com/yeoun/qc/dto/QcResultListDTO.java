@@ -35,4 +35,7 @@ public class QcResultListDTO {
 	// 불합격사유
 	private String failReason;
 	
+	// 검사자
+	private String inspectorId;
+	
 }

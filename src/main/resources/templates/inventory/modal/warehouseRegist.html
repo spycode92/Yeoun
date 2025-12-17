@@ -1,0 +1,71 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="warehouse_regist">
+
+<!-- rack 상세 보기 모달 -->
+<div class="modal fade" id="registWarehouseModal" tabindex="-1"
+	aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">창고 위치 등록</h5>
+				<button class="btn-close m-0" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<!-- Zone -->
+				<div class="mb-3">
+					<label class="form-label">Zone</label>
+					<div id="zoneSelectBox" class="input-group">
+						<select class="form-select" id="zoneSelect"></select>
+						<button class="btn btn-outline-primary" id="zoneAddToggle">+신규</button>
+					</div>
+					<div id="zoneAddBox" class="input-group d-none mt-2">
+						<input type="text" class="form-control" id="zoneInput"
+							placeholder="Zone 이름 입력">
+						<button class="btn btn-outline-secondary" id="zoneCancel">취소</button>
+					</div>
+				</div>
+				<!-- Rack -->
+				<div class="mb-3">
+					<label class="form-label">Rack</label>
+					<div id="rackSelectBox" class="input-group">
+						<select class="form-select" id="rackSelect" disabled></select>
+						<button class="btn btn-outline-primary" id="rackAddToggle"
+							disabled>+ 신규</button>
+					</div>
+					<div id="rackAddBox" class="input-group d-none mt-2">
+						<input type="text" class="form-control" id="rackInput"
+							placeholder="Rack 숫자를 입력해주세요">
+						<button class="btn btn-outline-secondary" id="rackCancel">취소</button>
+					</div>
+				</div>
+				<hr>
+				<!-- Row / Column -->
+				<div class="row g-3">
+					<div class="col-md-3">
+						<label class="form-label">Row 시작</label> <input type="number"
+							id="rowStart" class="form-control" value="1">
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Row 끝</label> <input type="number"
+							id="rowEnd" class="form-control" value="3">
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Column 시작</label> <input type="number"
+							id="colStart" class="form-control" value="1">
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Column 끝</label> <input type="number"
+							id="colEnd" class="form-control" value="4">
+					</div>
+				</div>
+				<div id="previewBox" class="alert alert-info mt-4 mb-0"></div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" id="registerBtn">등록</button>
+				<button class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/js/inventory/warehouseModify.js}"></script>

@@ -57,14 +57,34 @@
                            style="width:280px;"
                            th:value="${keyword}">
                 </div>
+                
+                <!-- 🔥 협력사 전용: 취급 품목 검색 -->
+					<div class="col-12 col-md-auto"
+					     th:if="${type == 'SUPPLIER'}">
+					    <input class="form-control"
+					           id="itemKeyword"
+					           name="itemKeyword"
+					           type="search"
+					           placeholder="취급 품목명 / 자재코드"
+					           style="width:220px;"
+					           th:value="${itemKeyword}">
+					</div>
+					                
 
-                <div class="col-6 col-md-auto d-grid">
-                    <button class="btn btn-outline-primary"
-                            id="btnSearch"
-                            type="submit">
-                        검색
-                    </button>
-                  </div>
+               <div class="col-6 col-md-auto d-grid gap-2 d-md-flex">
+				    <button class="btn btn-outline-primary"
+				            id="btnSearch"
+				            type="submit">
+				        검색
+				    </button>
+				
+				    <!-- 🔥 초기화 버튼 -->
+				    <button class="btn btn-outline-secondary"
+				            id="btnReset"
+				            type="button">
+				        초기화
+				    </button>
+				</div>
 
         </form>
 

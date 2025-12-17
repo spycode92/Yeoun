@@ -1,6 +1,7 @@
 package com.yeoun.qc.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,5 +37,11 @@ public class QcRegistDTO {
 
 	// LOT 번호
 	private String lotNo;
+	
+	// QC 대기 시작 시각 (QC_RESULT 생성 시각)
+	private LocalDateTime qcCreatedAt;
+
+	// 라인명
+	private String lineName; 
 
 }

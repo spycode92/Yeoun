@@ -29,5 +29,13 @@ function convertFromBaseUnit(baseQty, targetUnit) {
 	} else {
 		return baseQty;
 	}
-	
+}
+
+// ==================================================
+// 스피너 보이기 끄기
+function showSpinner() {
+	document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideSpinner() {
+	document.getElementById('loading-overlay').style.display = 'none';
 }

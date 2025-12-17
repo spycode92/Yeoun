@@ -35,7 +35,7 @@ import lombok.ToString;
 public class InboundItem {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INBOUND_ITEM_GENERATOR")
 	@Column(name = "INBOUND_ITEM_ID", updatable = false)
-	private Long InboundItemId; // 입고대기품목 id
+	private Long inboundItemId; // 입고대기품목 id
 	
 	@Column(nullable = true)
 	private String lotNo; // 로트넘버

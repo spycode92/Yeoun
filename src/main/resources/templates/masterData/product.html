@@ -9,27 +9,23 @@
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
 </head>
-<style>
+<th:block layout:fragment="pageCss">
+	<style>
+		.tui-grid-cell:has(.modified-cell-highlight) {
+			/* 부모 셀의 배경색을 덮어씁니다. */
+			background-color: #FFE5E5 !important;
+			color: #000 !important;
+		}
 
-
-
-.status-complete {
-    background-color: #e8f5e9 !important; /* 연한 녹색 배경 */
-    color: #2e7d32 !important;            /* 진한 녹색 글씨 */
-    font-weight: bold;
-}
-.status-pending {
-    background-color: #ffe0b2 !important; /* 연한 주황색 배경 */
-    color: #ef6c00 !important;            /* 진한 주황색 글씨 */
-}
-.highlight-prd {
-    /* 배경색과 글자색을 눈에 띄게 설정 */
-    background-color: #fce4ec !important; /* 연한 핑크 */
-    color: #c2185b !important;           /* 진한 자주색 */
-    font-weight: bold;
-}
-
-</style>
+		.modified-cell-highlight {
+			background-color: #FFE5E5 !important;
+			color: #000 !important;
+			width: 100% !important; 
+			height: 100% !important;
+			padding: 0 !important; /* 내부 패딩을 제거하여 가장자리까지 채움 */
+		}
+	</style>
+</th:block>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -49,27 +45,46 @@
 	         </ul>
 	         <div class="tab-content" >
 	           <div class="tab-pane fade show active"  id="navs-product-tab" role="tabpanel">
-	             <h5 class="card-title mb-0">완제품</h5>
-	             <div class="d-flex justify-content-end" style="margin:10px;">
+				<div class="d-flex justify-content-start">
+			    	<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    	<input type="text" id="prdId" name="prdId" class="form-control"  placeholder="품번">
+				    </div>
+					<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    	<input type="text" id="prdName" name="prdName" class="form-control"  placeholder="제품명">
+				    </div>
+			       	<button type="button" class="btn btn-primary" onclick="productGridAllSearch()" style="margin-left:5px;">조회</button>
+				</div>
+	            <div class="d-flex justify-content-end" style="margin:10px;">
 			  		<button id="addProductRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
 					<button id="saveProductRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  		<button id="deleteProductRowBtn" class="btn btn-danger" type="button">삭제</button>
+			  		<button id="deleteProductRowBtn" class="btn btn-danger" type="button">신규행 삭제</button>
 				 </div>
 				 <div id="productGrid" style="display: grid;margin-right:5px;"></div>
 				</div>
 	           <div class="tab-pane fade" id="navs-material-tab" role="tabpanel">
-	             <h5 class="card-title mb-0">원재료</h5>
+				 <div class="d-flex justify-content-start">
+			        	<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    		<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료id">
+						</div>
+						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+							<input type="text" id="matName" name="matName" class="form-control"  placeholder="원재료명">
+						</div>
+			           	<button type="button" class="btn btn-primary" onclick="materialGridAllSearch()" style="margin-left:5px;">조회</button>
+					</div>
+
 	             <div class="d-flex justify-content-end" style="margin:10px;">
 			  		<button id="addMaterialRowBtn" class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
 					<button id="saveMaterialRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  		<button id="deleteMaterialRowBtn" class="btn btn-danger" type="button">삭제</button>
+			  		<button id="deleteMaterialRowBtn" class="btn btn-danger" type="button">신규행 삭제</button>
 				 </div>
 				 <div id="materialGrid" style="display: grid;margin-right:5px;"></div>
 	           </div>
 	         </div>
        	</div>
+	</div>
 </th:block>
 </body>
 <th:block layout:fragment="myScript"> 
+		<script th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
 		<script th:inline="javascript" th:src="@{/js/masterData/product.js}"></script>
 </th:block>

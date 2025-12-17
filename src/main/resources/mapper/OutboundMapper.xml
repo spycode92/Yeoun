@@ -83,6 +83,8 @@
 		        NVL(mat.MAT_NAME, '') LIKE '%' || #{keyword} || '%'
 		        OR NVL(prd.PRD_NAME, '') LIKE '%' || #{keyword} || '%'
 		        OR UPPER(NVL(oi.LOT_NO, ' '))  LIKE '%' || #{keyword} || '%'
+		        OR o.WORK_ORDER_ID LIKE '%' || #{keyword} || '%'
+		        OR o.SHIPMENT_ID LIKE '%' || #{keyword} || '%'
     		)
 		</if>
 		ORDER BY
@@ -238,60 +240,134 @@
        		s.SHIPMENT_ID, sl.PRD_ID
 	</select>
 	
+	<resultMap type="com.yeoun.outbound.dto.OutboundOrderDTO" id="OutboundDetailMap">
+	    <id property="outboundId" column="OUTBOUND_ID"/> <!-- 상세는 출고ID 기준 -->
+	    <result property="shipmentId" column="SHIPMENT_ID"/>
+	    <result property="status" column="STATUS"/>
+	    <result property="processEmpName" column="PROCESS_BY"/>
+	    <result property="createdName" column="CREATED_NAME"/>
+	    <result property="startDate" column="EXPECT_OUTBOUND_DATE"/>
+    
+    	<collection property="items" ofType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
+	        <!-- DB의 실제 PK인 OUTBOUND_ITEM_ID -->
+	        <id property="outboundItemId" column="OUTBOUND_ITEM_ID"/> 
+	        <result property="prdId" column="PRD_ID"/>
+	        <result property="prdName" column="PRD_NAME"/>
+	        <result property="shipmentQty" column="SHIPMENT_QTY"/>
+	        <result property="orderqQty" column="ORDER_QTY"/> <!-- 실제 출고량 -->
+	        <result property="lotNo" column="LOT_NO"/>
+	        <result property="locationId" column="LOCATION_ID"/>
+	    </collection>
+	</resultMap>
+	
 	<!-- 완제품 출고 상세 정보 조회 -->
-	<select id="findShipmentOutbound" resultMap="ShipmentOrderMap">
+	<select id="findShipmentOutbound" resultMap="OutboundDetailMap">
 		SELECT
+		    o.OUTBOUND_ID
+		    , o.STATUS
+		    , o.EXPECT_OUTBOUND_DATE
+		    , s.SHIPMENT_ID
+		    , s.SHIPMENT_DATE
+		    , s.EMP_ID AS CREATED_ID
+		    , e1.emp_name AS CREATED_NAME
+		    , e2.emp_name AS PROCESS_BY
+		    , oi.OUTBOUND_ITEM_ID
+		    , oi.ITEM_ID AS PRD_ID 
+		    , prd.PRD_NAME
+		    , oi.OUTBOUND_AMOUNT AS ORDER_QTY
+		    , oi.LOCATION_ID
+		    , oi.LOT_NO
+		    , oi.IV_ID
+			, si.LOT_QTY AS SHIPMENT_QTY
+			, prd.PRD_NAME
+		FROM
+		    OUTBOUND o
+		JOIN
+		    OUTBOUND_ITEM oi
+		ON 
+			o.OUTBOUND_ID = oi.OUTBOUND_ID
+		LEFT JOIN
+		    PRODUCT_MST prd
+		ON 
+			prd.PRD_ID = oi.ITEM_ID
+		LEFT JOIN
+		    SHIPMENT s
+		ON 
+			o.SHIPMENT_ID = s.SHIPMENT_ID
+		LEFT JOIN 
+            SHIPMENT_ITEM si
+        ON
+            s.SHIPMENT_ID = si.SHIPMENT_ID
+        	AND si.PRD_ID = oi.ITEM_ID
+		LEFT JOIN
+		    EMP e1
+		ON 
+			s.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+		    EMP e2
+		ON 
+			o.PROCESS_BY = e2.EMP_ID
+		WHERE
+		    o.OUTBOUND_ID = #{outboundId}
+		ORDER BY
+		    oi.OUTBOUND_ITEM_ID
+	</select>
+	
+	<!-- 출하지시서 상세 조회 -->
+	<resultMap type="com.yeoun.sales.dto.OrderDetailDTO" id="shipmentDetailMap">
+		<id property="orderId" column="SHIPMENT_ID"/>
+		<result property="clientName" column="CLIENT_NAME" />
+		<result property="deliveryDate" column="SHIPMENT_DATE" />
+		<result property="orderStatus" column="SHIPMENT_STATUS" />
+		<result property="empName" column="ENP_NAME" />
+		<result property="postcode" column="POST_CODE" />
+		<result property="addr" column="ADDR" />
+		<result property="addrDetail" column="ADDR_DETAIL" />
+	
+		<collection property="items" ofType="com.yeoun.sales.dto.OrderItemDTO">
+			<id property="orderItemId" column="SHIPMENT_ITEM_ID"/>
+			<result property="prdName" column="PRD_NAME"/>
+			<result property="prdId" column="PRD_ID"/>
+			<result property="orderQty" column="LOT_QTY"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findShipment" resultMap="shipmentDetailMap">
+		SELECT 
 			s.SHIPMENT_ID
 			, s.CLIENT_NAME
-			, s.EMP_ID AS CREATED_ID
+			, s.SHIPMENT_STATUS
 			, s.SHIPMENT_DATE
-			, o.STATUS
-			, o.OUTBOUND_ID
-			, e1.emp_name AS CREATED_NAME
-			, e2.emp_name AS PROCESS_BY
-			, NVL(sl.LOT_QTY, 0) AS SHIPMENT_QTY
-			, sl.PRD_ID 
+			, e.EMP_NAME
+			, c.ADDR
+			, c.ADDR_DETAIL
+			, c.POST_CODE
+			, si.SHIPMENT_ITEM_ID
+			, si.PRD_ID
+			, si.LOT_QTY
 			, prd.PRD_NAME
-			, oi.LOCATION_ID
-			, oi.LOT_NO
-			, oi.IV_ID
-			, NVL(oi.OUTBOUND_AMOUNT, 0) AS ORDER_QTY
 		FROM
 			SHIPMENT s
-		LEFT JOIN
-			SHIPMENT_ITEM sl
+		LEFT JOIN 
+			SHIPMENT_ITEM si
 		ON
-			s.SHIPMENT_ID = sl.SHIPMENT_ID
+			s.SHIPMENT_ID = si.SHIPMENT_ID
+		LEFT JOIN
+			EMP e
+		ON
+			s.EMP_ID = e.EMP_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			s.CLIENT_ID = c.CLIENT_ID
 		LEFT JOIN
 			PRODUCT_MST prd
 		ON
-			prd.PRD_ID = sl.PRD_ID
-		LEFT JOIN
-			EMP e1
-		ON
-			s.EMP_ID = e1.EMP_ID
-		LEFT JOIN
-			OUTBOUND o
-		ON
-			o.SHIPMENT_ID = s.SHIPMENT_ID
-		LEFT JOIN
-			EMP e2
-		ON
-			o.PROCESS_BY = e2.EMP_ID
-		LEFT JOIN
-			OUTBOUND_ITEM oi
-		ON
-			oi.OUTBOUND_ID = o.OUTBOUND_ID
-			AND oi.ITEM_ID = sl.PRD_ID
-		LEFT JOIN
-			INVENTORY iv
-		ON
-			iv.ITEM_ID = sl.PRD_ID
-			AND iv.LOT_NO = oi.LOT_NO
+			si.PRD_ID = prd.PRD_ID
 		WHERE
-			o.OUTBOUND_ID = #{outboundId}
+			s.SHIPMENT_ID = #{shipmentId}
 		ORDER BY
-       		s.SHIPMENT_ID, sl.PRD_ID
+			prd.PRD_ID
 	</select>
 </mapper>
 

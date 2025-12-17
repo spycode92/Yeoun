@@ -16,6 +16,7 @@ public enum AlarmDestination {
     PROCESS("/alarm/process"),
     LOT("/alarm/lot"),
     QC("/alarm/qc"),
+    SHIPMENT("/alarm/shipment"), 
     ALARM("/alarm/alarm");
 
     private final String destination;

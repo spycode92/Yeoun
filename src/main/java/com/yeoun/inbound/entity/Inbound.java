@@ -49,6 +49,9 @@ public class Inbound {
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
 	
+	@Column(nullable = false)
+	private String inboundType;
+	
 	// InboundItem 연관관계 매핑
 	@OneToMany(mappedBy = "inbound", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<InboundItem> items = new ArrayList<>();
@@ -61,13 +64,14 @@ public class Inbound {
 
 	@Builder
 	public Inbound(String inboundId, LocalDateTime expectArrivalDate, String inboundStatus, String materialId,
-			String prodId, LocalDateTime createdDate) {
+			String prodId, LocalDateTime createdDate, String inboundType) {
 		this.inboundId = inboundId;
 		this.expectArrivalDate = expectArrivalDate;
 		this.inboundStatus = inboundStatus;
 		this.materialId = materialId;
 		this.prodId = prodId;
 		this.createdDate = createdDate;
+		this.inboundType = inboundType;
 	}
 	
 	// 상태 변경

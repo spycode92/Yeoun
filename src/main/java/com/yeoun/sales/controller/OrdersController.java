@@ -20,6 +20,7 @@ import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.sales.dto.OrderDetailDTO;
 import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderListDTO;
+import com.yeoun.sales.enums.OrderStatus;
 import com.yeoun.sales.service.ClientService;
 import com.yeoun.sales.service.OrdersService;
 
@@ -75,6 +76,13 @@ public class OrdersController {
             @AuthenticationPrincipal LoginDTO login
     ) {
         List<ProductMst> products = ordersService.getProducts();
+        
+        
+        // 🔥 디버깅: 로그 출력
+        System.out.println("========== 제품 목록 ==========");
+        System.out.println("제품 개수: " + products.size());
+        products.forEach(p -> System.out.println(p.getPrdId() + " - " + p.getPrdName()));
+        System.out.println("==============================");
 
         model.addAttribute("products", products);
         model.addAttribute("productList", products);
@@ -157,12 +165,34 @@ public class OrdersController {
 	     return ordersService.getConfirmedOrderItems();
 	 }
 
+	
+	 /* ================================
+	   수주 상세 페이지
+	================================ */
+	@GetMapping("/{orderId}")
+	public String orderDetailPage(
+	        @PathVariable("orderId") String orderId,
+	        Model model
+	) {
+	    OrderDetailDTO detail = ordersService.getOrderDetail(orderId);
+	    model.addAttribute("order", detail);
+	    return "sales/orders_detail"; // thymeleaf 페이지
+	}
 
-//	 //수주 상세
-//	 @GetMapping("/orders/detail/{orderId}")
-//	 @ResponseBody
-//	 public OrderDetailDTO getOrderDetail(@PathVariable String orderId) {
-//	     return ordersService.getOrderDetail(orderId);
-//	 }
+	
+	 /* ================================
+	   수주 상태값 변경
+	================================ */
+	@PostMapping("/{orderId}/confirm")
+    @ResponseBody
+    public void confirmOrder(@PathVariable("orderId") String orderId) {
+        ordersService.changeStatus(orderId, OrderStatus.CONFIRMED);
+    }
+
+    @PostMapping("/{orderId}/cancel")
+    @ResponseBody
+    public void cancelOrder(@PathVariable("orderId") String orderId) {
+        ordersService.changeStatus(orderId, OrderStatus.CANCEL);
+    }
 
 }

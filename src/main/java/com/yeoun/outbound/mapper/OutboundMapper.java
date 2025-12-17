@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.yeoun.outbound.dto.OutboundOrderDTO;
+import com.yeoun.sales.dto.OrderDetailDTO;
 
 @Mapper
 public interface OutboundMapper {
@@ -24,4 +25,6 @@ public interface OutboundMapper {
 	// 출하지시서 목록 조회
 	List<OutboundOrderDTO> findAllShipment();
 
+	// 출하지시서 상세 조회
+	OrderDetailDTO findShipment(String shipmentId);
 }

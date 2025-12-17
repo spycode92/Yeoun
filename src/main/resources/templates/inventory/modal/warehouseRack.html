@@ -1,0 +1,22 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="rack_detail">
+
+<!-- rack 상세 보기 모달 -->
+<div class="modal fade" id="rackDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="text-center w-100">
+                     <span id="rackInfoBadge" class="badge bg-label-primary p-2 fs-6"></span> 
+                </div>
+                <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="border rounded p-3 bg-light">
+                    <div id="rackGridContainer" class="d-flex flex-wrap justify-content-center gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

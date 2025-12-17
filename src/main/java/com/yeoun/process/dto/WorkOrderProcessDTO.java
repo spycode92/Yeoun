@@ -1,5 +1,7 @@
 package com.yeoun.process.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,5 +46,13 @@ public class WorkOrderProcessDTO {
 	
 	// 경과시간 (첫 공정이 시작된 시간 ~ 지금까지 걸린 총 시간)
 	private String elapsedTime;
+	
+	// 완료/폐기 시각
+	private LocalDateTime doneTime; 
+	
+	// 계획 시작 시간
+	private LocalDateTime planStartDate;
+	
+	private LocalDateTime planEndDate;
 
 }

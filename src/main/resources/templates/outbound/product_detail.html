@@ -17,8 +17,8 @@
 					 	<input type="hidden" id="outboundId" th:value="${outboundOrderDTO.outboundId}"/>
 					    <input type="hidden" id="shipmentId" th:value="${outboundOrderDTO.shipmentId}"/>
 						<div class="col">
-						    <div class="text-secondary mb-1">출하지시서</div>
-						    <div class="fw-semibold" th:text="${outboundOrderDTO.shipmentId}"></div>
+						    <div class="text-secondary mb-1">출고번호</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.outboundId}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">요청자</div>
@@ -29,6 +29,15 @@
 						    <div class="fw-semibold" th:text="${outboundOrderDTO.processEmpName}"></div>
 						</div>
 						<div class="col">
+						    <div class="text-secondary mb-1">출하지시서</div>
+						    <div class="d-flex">
+						    	<div class="fw-semibold" style="margin-right:3px !important;" th:text="${outboundOrderDTO.shipmentId}"></div>
+	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+									th:attr="data-shipment-id=${outboundOrderDTO.shipmentId}"
+									onclick="openDetailShipmentWindow(this.dataset.shipmentId)"></i>
+						    </div>
+						</div>
+						<div class="col">
 						    <div class="text-secondary mb-1">출고예정일</div>
 						    <div class="fw-semibold" th:text="${#temporals.format(outboundOrderDTO.startDate, 'yyyy-MM-dd')}"></div>
 						</div>
@@ -37,6 +46,7 @@
 							<div>
 							    <span th:if="${outboundOrderDTO.status == 'WAITING'}" class="badge bg-warning text-dark">출고대기</span>
 							    <span th:if="${outboundOrderDTO.status == 'COMPLETED'}" class="badge bg-success">출고완료</span>
+							    <span th:if="${outboundOrderDTO.status == 'CANCELED'}" class="badge bg-warning ">출고취소</span>
 							</div>
 						</div>
 					 </div>

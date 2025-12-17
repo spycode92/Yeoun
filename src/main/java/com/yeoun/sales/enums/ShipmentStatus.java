@@ -5,6 +5,7 @@ public enum ShipmentStatus {
     RESERVED,   // 예약중 (재고 충분해서 예약됨)
     PENDING,    // 출고 등록
     LACK,        // 재고 부족
-    SHIPPED      // 출하완료
+    SHIPPED,      // 출하완료
+    CANCEL
 }
 

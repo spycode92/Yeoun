@@ -33,23 +33,29 @@ public class ProcessMstController {
     @GetMapping("/process_mst")
     public String processMst(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
         model.addAttribute("prdMstList", processMstService.getPrdMst()); // 라우트 제품코드 불러오기
+        model.addAttribute("processIdList", processMstService.processIdList()); // 공정코드 불러오기
         return "masterData/process_mst";
     }
 
     // 제품별 공정라우트 조회
     @ResponseBody
     @GetMapping("/process/list")
-    public List<RouteHeader> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+    public List<Map<String, Object>> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
             @RequestParam("prdId") String prdId,
             @RequestParam("routeName") String routeName) {
         return processMstService.getRouteHeaderList(prdId, routeName);
     }
+
     // 공정코드 조회
     @ResponseBody
     @GetMapping("/processCode/list")
-    public List<ProcessMst> processCodeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-        return processMstService.getProcessCodeList();
+    public List<Map<String, Object>> processCodeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+                                                    ,@RequestParam(value = "processId", required = false) String processId
+                                                    ,@RequestParam(value = "processName", required = false) String processName){
+
+        return processMstService.findByprocesslList(processId, processName);
     }  
+
     // 공정단계 조회
     @ResponseBody
     @GetMapping("/processStep/list")
@@ -58,6 +64,8 @@ public class ProcessMstController {
         log.info("processStepList controller - {}", routeId);
         return processMstService.getProcessStepList(routeId);
     }
+ 
+    
     //공정코드 저장
     @ResponseBody
     @PostMapping("/processCode/save")
@@ -78,7 +86,8 @@ public class ProcessMstController {
         return processMstService.saveProcess(empId,param);
     }
     
-    // 공정단계 삭제 yn='N' 처리
+    
+    // 공정코드 삭제 yn='N' 처리
     @ResponseBody
     @PostMapping("/process/modify")
     public String modifyProcess(Model model, @AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, Object> param) {
@@ -96,5 +105,14 @@ public class ProcessMstController {
           log.info("processCodeDelete------------->{}", param);
           return processMstService.modifyProcessCode(empId, param);
      }
+    
+    // 공정단계 삭제
+    @ResponseBody
+    @PostMapping("/processStep/delete")
+    public String deleteProcessStepList(Model model,@AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<String> param) {
+        log.info("processStepList controller - {}", param);
+        String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+        return processMstService.deleteRouteStep(empId, param);
+    }
 
 }

@@ -152,6 +152,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	
 	List<Emp> findByEmpIdIn(List<String> approverIds);
 
+	List<Emp> findByDept_DeptId(String deptId);
 
 
 }

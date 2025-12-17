@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.sales.enums.OrderStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -63,9 +65,15 @@ public class Orders {
     private String managerEmail;
 
     // 10) 수주상태
+//    @Column(name = "ORDER_STATUS", length = 20, nullable = false)
+//    @Comment("수주 진행 상태 (요청/확정/취소/완료 등)")
+//    private String orderStatus;
+    
+ // 10) 수주상태
+    @Enumerated(EnumType.STRING)
     @Column(name = "ORDER_STATUS", length = 20, nullable = false)
-    @Comment("수주 진행 상태 (요청/확정/취소/완료 등)")
-    private String orderStatus;
+    @Comment("수주 진행 상태")
+    private OrderStatus orderStatus;
 
     // 11) 배송지 우편번호
     @Column(name = "POSTCODE", length = 20)
@@ -104,14 +112,15 @@ public class Orders {
     ============================================ */
     @PrePersist
     public void prePersist() {
-        if (this.orderStatus == null) this.orderStatus = "REQUEST";  // 기본 상태
+        if (this.orderStatus == null) {
+            this.orderStatus = OrderStatus.REQUEST; 
+        }
         if (this.createdAt == null) this.createdAt = LocalDateTime.now();
         if (this.orderDate == null) this.orderDate = LocalDate.now();
     }
-    
-    // -----------------------------
-    // 수주 상태값 변경
-    public void changeStatus(String orderStatus) {
-    	this.orderStatus = orderStatus;
+    public void changeStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
     }
+
+
 }

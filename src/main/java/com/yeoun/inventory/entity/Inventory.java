@@ -116,8 +116,10 @@ public class Inventory {
 	    return movedInventory;
 	}
 	
-	
-	
+	// 재고 수량 증가
+	public void increaseAmount(long qty) {
+		this.ivAmount += qty;
+	}
 	
 	
 	

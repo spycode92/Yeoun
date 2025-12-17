@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,8 +33,21 @@ public class WorkOrderProcessController {
 	
 	// 공정 현황 페이지
 	@GetMapping("/status")
-	public String processStatus() {
+	public String processStatus(@RequestParam(name = "tab", defaultValue = "live") String tab, Model model) {
+		
+		model.addAttribute("activeTab", tab);
 		return "/process/process_status";
+	}
+	
+	@GetMapping("/status/done/data")
+	@ResponseBody
+	public List<WorkOrderProcessDTO> getDoneWorkOrdersForGrid(
+	        @RequestParam(name = "workDate", required = false)
+	        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
+	        @RequestParam(name = "searchKeyword", required = false) String keyword,
+	        @RequestParam(name = "doneStatus", required = false) String status) {
+
+	    return workOrderProcessService.getWorkOrderListForDone(workDate, keyword, status);
 	}
 	
 	// 공정 현황 목록 데이터
@@ -83,7 +97,8 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> finishStep(@RequestBody StepRequest req) {
         try {
-        	workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq());
+        	workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq(), 
+        									   req.getGoodQty(), req.getDefectQty(), req.getMemo());
         	
         	// 공정 종료 처리 후, 최신 상세 다시 조회
         	WorkOrderProcessDetailDTO detail =
@@ -131,6 +146,9 @@ public class WorkOrderProcessController {
     public static class StepRequest {
         private String orderId;
         private Integer stepSeq;
+        private Integer goodQty;
+        private Integer defectQty;
+        private String memo;
     }
 
     @Getter @Setter

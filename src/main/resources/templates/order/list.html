@@ -3,14 +3,34 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layouts/layout.html}">
 <head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-  body {
+body {
     background: #f4f3fb;
-    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family:
+        "Pretendard",
+        -apple-system,
+        BlinkMacSystemFont,
+        system-ui,
+        "Segoe UI",
+        Roboto,
+        "Apple SD Gothic Neo",
+        "Noto Sans KR",
+        "Malgun Gothic",
+        Arial,
+        sans-serif;
     color: #2f2b43;
-  }
+}
+
+/* Toast UI 전체 */
+.toastui-calendar *,
+.tui-grid-container *,
+.tui-grid-table * {
+    font-family: "Pretendard", sans-serif !important;
+}
+
 
   .title {
     font-size: 1.8em;
@@ -55,17 +75,19 @@
 
   .status-badge {
     width: 90px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 3px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    padding: 0.52em 0.593em;
+    color: white !important;
   }
 
-  .status-create     { background: #e7eef7; color: #3a5a8a; }
-  .status-release    { background: #f0eaff; color: #6a4cc3; }
-  .status-progress   { background: #e6f5ec; color: #15803d; }
-  .status-complete   { background: #e8f1ff; color: #1d4ed8; }
-  .status-cancel     { background: #fdecec; color: #c0392b; }
+  .status-create     { background: #3a5a8a; color: #e7eef7; }
+  .status-release    { background: #6a4cc3; color: #f0eaff; }
+  .status-progress   { background: #15803d; color: #e6f5ec; }
+  .status-scrap	     { background: #475569; color: #eef2f7; }
+  .status-complete   { background: #1d4ed8; color: #e8f1ff; }
+  .status-cancel     { background: #c0392b; color: #fdecec; }
 
 
   .form-label {
@@ -374,14 +396,6 @@
 	.process-line.done::before {
 	    background: #6c5ce7;
 	}
-	
-	.process-line.partial::before {
-	    background: linear-gradient(
-	        to right,
-	        #6c5ce7 0% var(--progress),
-	        #e5e2ff var(--progress) 100%
-	    );
-	}
 
 	/* 박스들을 가로로 균등 배치 */
 	.process-boxes {
@@ -655,6 +669,7 @@
 	                       data-error-for="lineId" style="display:none;">
 	                      작업 라인은 필수 선택값입니다.
 	                  </div>
+					  <div id="lineSuggestBox" class="suggest-box"></div>
 	              </div>
 	              <div class="col-4">
 	                <label class="form-label">계획 수량</label>
@@ -677,10 +692,15 @@
 	              <div class="col-3">
 	                <label class="form-label">계획 일자</label>
 	                <input type="date" class="form-control" id="planDate">
+	                <div class="invalid-feedback"
+	                     data-error-for="planStartDate" style="display:none;">
+	                     계획 일자는 필수 입력값입니다.
+	                </div>
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">시작 시간</label>
-	                <input type="time" class="form-control" id="startTime">
+	                <input type="time" class="form-control" id="startTime"
+	                	   min="09:00" max="18:00" step="1800">
 	                  <input type="hidden" th:field="*{planStartDate}">
 	                  <div class="invalid-feedback"
 	                       data-error-for="planStartDate" style="display:none;">
@@ -689,7 +709,8 @@
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">종료 시간</label>
-	                <input type="time" class="form-control" id="endTime">
+	                <input type="time" class="form-control" id="endTime"
+	                	   min="09:00" max="18:00" step="1800">
 	                  <input type="hidden" th:field="*{planEndDate}">
 	                  <div class="invalid-feedback"
 	                       data-error-for="planEndDate" style="display:none;">
@@ -949,6 +970,7 @@
 							    </select>
 				            </div>
 				        </div>
+						<div id="workerSuggestBox" class="mt-2 small text-muted suggest-box"></div>
 				    </div>
 				    
 				    <!-- ===== 5. 상태 ===== -->
@@ -962,7 +984,7 @@
 		              <label class="form-label">비고</label>
 		              <textarea id="detailRemark"
 		              			class="form-control" rows="3"
-		              			style="resize: none;" readonly
+		              			style="resize: none;"
 		              ></textarea>
 		            </div>
 				    
@@ -981,7 +1003,7 @@
       </div>
     </div>
 
-
+</div>
 </th:block>
 
 <th:block layout:fragment="myScript">
@@ -1107,11 +1129,12 @@
   function formatStatusBadge(status) {
 
     const map = {
-      "CREATED":      { text: "준비",       cls: "status-badge status-create" },
-      "RELEASED":     { text: "확정",       cls: "status-badge status-release" },
-      "IN_PROGRESS":  { text: "진행중",     cls: "status-badge status-progress" },
-      "COMPLETED":    { text: "완료",       cls: "status-badge status-complete" },
-      "CANCELED":     { text: "취소",       cls: "status-badge status-cancel" }
+      "CREATED":      { text: "준비",  cls: "status-badge bg-secondary" },
+      "RELEASED":     { text: "확정",  cls: "status-badge bg-warning" },
+      "IN_PROGRESS":  { text: "진행",  cls: "status-badge bg-primary" },
+      "SCRAPPED":	  { text: "중단",  cls: "status-badge bg-dark"},
+      "COMPLETED":    { text: "완료",  cls: "status-badge bg-success" },
+      "CANCELED":     { text: "취소",  cls: "status-badge bg-danger" }
     };
 
     const item = map[status] || { text: status, cls: "status-badge" };
@@ -1200,6 +1223,14 @@
   // 작업지시 등록 모달
   // ======================================================
 
+  function debounce(fn, delay = 300) {
+	  let timer = null;
+	  return function (...args) {
+		  clearTimeout(timer);
+		  timer = setTimeout(() => fn.apply(this, args), delay);
+	  };
+  }
+
   // 등록 모달 열기
   document.getElementById("btnCreate").addEventListener("click", () => {
     clearFormFields();
@@ -1221,8 +1252,8 @@
 
 	    document.getElementById("planDetail").innerText = `${product} (${remain} / ${total}개)`;
 	    document.getElementById("referTime").innerText = referTime;
-	    if (total < 336) {
-	    	document.getElementById("planQty").value = total;
+	    if (remain < 336) {
+	    	document.getElementById("planQty").value = remain;
 	    }
 	    
 	    const matchedOption = selectOptionByText("prdName", product);
@@ -1238,29 +1269,6 @@
 	    .then(res => res.json())
 	    .then(list => renderStockPanel(list));
 	});
-  
-  // 재고 렌더링
-  function renderStockPanel(list) {
-    const panel = document.querySelector('.stock-panel');
-	    panel.innerHTML = "";
-	
-	    list.forEach(item => {
-	        const shortage = item.requiredQty - item.stockQty;
-	        const statusClass = shortage > 0 ? "low" : "ok";
-	
-	        panel.innerHTML += `
-	            <div class="stock-item ${statusClass}">
-	                <div><strong>${item.matName}</strong> (${item.matId})</div>
-	                <div>필요량: ${item.requiredQty}</div>
-	                <div>재고량: ${item.stockQty}</div>
-	                ${shortage > 0 
-	                    ? `<div style="color:#d63030;">부족: ${shortage}</div>` 
-	                    : `<div style="color:#2ecc71;">충분</div>`}
-	            </div>
-	        `;
-	    })
-	}
-
 
   // 품목 자동 선택
   function selectOptionByText(selectId, text) {
@@ -1287,6 +1295,27 @@
 	   const hours = remain / 42;
 	   return "약 " + Math.ceil(remain / 42) + "시간(" + Math.round(hours * 10) / 10 + "시간) 소요 예상";
   }
+
+  // 유효성 검증용 페이로드
+  function collectValidatePayload() {
+	  const date	= document.getElementById("planDate").value;
+	  const start	= document.getElementById("startTime").value;
+	  const end		= document.getElementById("endTime").value;
+
+	  return {
+		  lineId: document.getElementById("lineId").value,
+		  startTime: `${date}T${start}`,
+		  endTime: `${date}T${end}`,
+		  workers: [
+			  document.querySelector('[name="prcBld"]').value,
+			  document.querySelector('[name="prcFlt"]').value,
+			  document.querySelector('[name="prcFil"]').value,
+			  document.querySelector('[name="prcCap"]').value,
+			  document.querySelector('[name="prcLbl"]').value
+		  ].filter(v => v)	// null 제거
+	  };
+  }
+
 
   // 폼 전송(실제 등록 처리)
   document.getElementById("btnCreateSubmit").addEventListener("click", async () => {
@@ -1321,6 +1350,31 @@
           remark: document.querySelector('[name="remark"]').value
       };
 
+	  // 서버 유효성 검증
+	  const validateRes = await fetch ("/order/validate", {
+		  method: "POST",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(collectValidatePayload())
+	  });
+
+	  const validation = await validateRes.json();
+	  if (!validation.valid) {
+		  alert(validation.message);
+
+		  if (validation.suggestedLines) {
+			  showSuggestedLines(validation.suggestedLines);
+		  }
+
+		  if (validation.suggestedWorkers) {
+			  showSuggestedWorkers(validation.suggestedWorkers);
+		  }
+
+		  return;
+	  }
+
       const res = await fetch("/order/create", {
           method: "POST",
           headers: {
@@ -1338,6 +1392,138 @@
           alert("등록 실패: 서버 오류");
       }
   });
+
+  // 서버 유효성 검증 호출
+  async function validateBeforeSubmit() {
+	  const payload = collectValidatePayload();
+
+	  const res = await fetch("/order/validate", {
+		  method: "POST",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(payload)
+	  });
+
+	  const result = await res.json();
+	  return result;
+  }
+
+  // change 될 때 유효성 검증
+  const watchFields = ["line", "startTime", "endTime", "PRC-BLD", "PRC-FLT", "PRC-FIL", "PRC-CAP", "PRC-LBL"];
+
+  watchFields.forEach(id => {
+	  document.getElementById(id).addEventListener("change", debounce(runValidation, 300));
+  });
+
+  async function runValidation() {
+	  const payload = collectValidatePayload();
+	  const response = await fetch("/order/validate", {
+		  method: "POST",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(payload)
+	  });
+	  const result = await response.json();
+	  updateValidationUI(result);
+  }
+
+  // line 추천
+  function showSuggestedLines(lines) {
+	const box = document.getElementById("lineSuggestBox");
+	box.innerHTML = "";
+
+	lines.forEach(lineId => {
+		const btn = document.createElement("button");
+		btn.className = "btn btn-sm btn-outline-primary me-1";
+		btn.innerText = lineId;
+		btn.onclick = () => {
+			document.querySelector('[name="lineId"]').value = lineId;
+			runValidation();
+		};
+		box.appendChild(btn);
+	});
+  }
+
+  // 작업자 추천
+  function showSuggestedWorkers(workers) {
+	  const box = document.getElementById("workerSuggestBox");
+	  box.innerHTML = "";
+
+	  workers.forEach(workerId => {
+		 const btn = document.createElement("button");
+		 btn.className = "btn btn-sm btn-outline-primary me-1";
+		 btn.innerText = workerId;
+		 btn.onclick = () => {
+			 const targetField = findEmptyWorkerField();
+
+			 if (!targetField) {
+				 alert("이미 모든 작업자 슬롯이 채워져 있습니다.");
+				 return;
+			 }
+
+			 document.querySelector(`[name="${targetField}"]`).value = workerId;
+
+			 // 값을 다 채웠다면 다시 서버 검증 진행
+			 runValidation();
+		 };
+
+		 box.appendChild(btn);
+	  });
+  }
+
+  // 작업자 필드
+  const workerFields = [
+	  "prcBld", "prcFlt", "prcFil", "prcCap", "prcLbl"
+  ];
+
+  // 비어있는 슬롯 찾기
+  function findEmptyWorkerField() {
+	  return workerFields.find(name => {
+		  const el = document.querySelector(`[name="${name}"]`);
+		  return el && !el.value;
+	  });
+  }
+
+  // 유효성검사 결과 UI
+  function updateValidationUI(result) {
+
+	  const msgBox = document.getElementById("validationMessage");
+	  const lineBox = document.getElementById("lineSuggestBox");
+	  const workerBox = document.getElementById("workerSuggestBox");
+	  const submitBtn = document.getElementById("btnSubmit");
+
+	  // 초기화
+	  msgBox.innerText = "";
+	  lineBox.innerHTML = "";
+	  workerBox.innerHTML = "";
+
+	  if (result.valid) {
+		  msgBox.innerText = "작업지시 등록 가능";
+		  msgBox.className = "text-success";
+		  submitBtn.disabled = false;
+		  return;
+	  }
+
+	  // 유효하지 않은 경우
+	  submitBtn.disabled = true;
+	  msgBox.innerText = result.message;
+	  msgBox.className = "text-danger";
+
+	  // 라인 추천
+	  if (!result.lineAvailable && result.suggestedLines) {
+		  showSuggestedLines(result.suggestedLines);
+	  }
+
+	  // 작업자 추천
+	  if (!result.workerAvailable && result.suggestedWorkers) {
+		  showSuggestedWorkers(result.suggestedWorkers);
+	  }
+  }
+
 
   // 값 초기화
   function clearFormFields(){
@@ -1371,6 +1557,7 @@
   // ======================================================
   
 	let orderId;
+  	let outboundYn;
 	  
   function openDetailModal(workId) {
     console.log("Detail:", workId);
@@ -1382,6 +1569,7 @@
             .then(data => {
                 console.log("정보:::: " , data);
                 orderId = data.orderId;
+                outboundYn = data.outboundYn;
 
                   document.getElementById("detailOrderId").innerText = data.orderId;
                   document.getElementById("detailPrdName").innerText = data.prdName;
@@ -1394,7 +1582,6 @@
                   
                   const dataStatus = data.status;
                   const statusBtn = document.getElementById("btnReleased");
-                  const modifyBtn = document.getElementById("btnModify");
                   const cancelBtn = document.getElementById("btnCanceled");
                   const statusText = document.getElementById("detailStatus");
                   
@@ -1406,7 +1593,6 @@
                 	  }               	  
                 	  statusText.innerText = '준비';
                 	  statusBtn.disabled = false; // 확정버튼 활성화
-                	  modifyBtn.disabled = false; // 수정버튼 활성화
                 	  cancelBtn.disabled = false; // 취소버튼 활성화
                   } else {
                 	  statusBtn.innerText = '확정됨';
@@ -1419,7 +1605,7 @@
                 	  		statusText.innerText = '확정';
                 	  		break;
                 	  	case "IN_PROGRESS":
-                	  		statusText.innerText = '진행중';
+                	  		statusText.innerText = '진행';
                 	  		break;
                 	  	case "COMPLETED":
                 	  		statusText.innerText = '완료';
@@ -1431,7 +1617,6 @@
                 	  		statusText.innerText = '미정';
                 	  }
                 	  statusBtn.disabled = true; // 확정버튼 비활성화
-                	  modifyBtn.disabled = true; // 수정버튼 비활성화
                 	  cancelBtn.disabled = true; // 취소버튼 비활성화
                 	  
                   }
@@ -1452,10 +1637,8 @@
 				    
 				    if (dataStatus === "CREATED"){
 				    	select.disabled = false;
-				    	document.getElementById("detailRemark").readonly = false;
 				    } else {
 				    	select.disabled = true;
-				    	document.getElementById("detailRemark").readonly = true;
 				    }
 				});
 
@@ -1505,24 +1688,29 @@
   
   // 확정
   document.getElementById("btnReleased").addEventListener("click", async () => {
+	  console.log("orderid...............", orderId);
 	  updateStatus(orderId, "RELEASED", "작업지시가 확정되었습니다.");
   });
   
   // 취소
   document.getElementById("btnCanceled").addEventListener("click", async() => {
+	  
+	  if (outboundYn?.trim() === 'Y') {
+		  alert("출고가 완료된 작업지시는 취소가 불가능합니다.");
+	  	  return;
+	  }
 	  if (!confirm("정말 취소하시겠습니까?")) return;
 	  updateStatus(orderId, "CANCELED", "작업지시가 취소되었습니다.");
   });
   
   // 작업지시서 상태변경 공통 함수
   async function updateStatus (orderId, status, alertContent){
-	  return fetch (`/order/status/${orderId}`, {
+	  return fetch (`/order/status/${orderId}?status=${status}`, {
 		  method: "PATCH",
 		  headers: {
 		      "Content-Type": "application/json",
 		      [csrfHeader]: csrfToken
-		  },
-	      body: JSON.stringify({ status: status })
+		  }
 	  })
 	  .then(res => {
 		  if (!res.ok) throw new Error ("서버 오류 : " + res.status);
@@ -1540,6 +1728,96 @@
      })
      .catch(err => console.error("오류 발생:", err));
   }
+
+  // 수정
+  document.getElementById("btnModify").addEventListener("click", async () => {
+
+	  const prcBld = document.getElementById("PRC-BLD").value;
+	  const prcFlt = document.getElementById("PRC-FLT").value;
+	  const prcFil = document.getElementById("PRC-FIL").value;
+	  const prcCap = document.getElementById("PRC-CAP").value;
+	  const prcLbl = document.getElementById("PRC-LBL").value;
+	  const remark = document.getElementById("detailRemark").value;
+	  
+	  const payload = {
+		"PRC-BLD": prcBld,
+		"PRC-FLT": prcFlt,
+		"PRC-FIL": prcFil,
+		"PRC-CAP": prcCap,
+		"PRC-LBL": prcLbl,
+		"remark": remark
+	  };
+
+	  fetch (`/order/modify/${orderId}`, {
+		  method: "PATCH",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(payload)
+	  })
+		.then(() => {
+		  alert("수정 완료");
+	  })
+	    .catch(err => console.error ("오류 발생", err));
+  });
+  
+  	// 시작입력 보정
+	const startTime = document.getElementById("startTime");
+	const endTime 	= document.getElementById("endTime");
+	 
+	function validateTimes(){
+		const start = startTime.value;
+		const end	= endTime.value;
+	
+	
+		if (!start || !end) 
+			return;
+		
+		
+		// 근무시간 범위 설정
+		if (start < "09:00" || start > "18:00") {
+			alert ("시작 시간은 09:00~18:00 사이여야 합니다.");
+			startTime.value = "";
+			return;
+		}
+		
+		if (end < "09:00" || end > "18:00") {
+			alert ("종료 시간은 09:00~18:00 사이여야 합니다.");
+			endTime.value = "";
+			return;
+		}
+		
+		// 30분 단위로 가능
+		const startMin = Number(start.split(":")[1]);
+		const endMin   = Number(end.split(":")[1]);
+		 
+		if (startMin % 30 !== 0 || endMin % 30 !== 0) {
+			alert("시간은 30분 단위로만 선택할 수 있습니다.");
+			startTime.value = "";
+			endTime.value	= "";
+			return;
+		}
+		
+		// 시작시간 < 종료시간
+		if (start >= end) {
+			alert("종료 시간은 시작 시간 이후여야 합니다.");
+			endTime.value = "";
+			return;
+		}
+	}
+	
+	// 이벤트 연결
+	startTime.addEventListener("change", () => {
+		// 시작 시간이 바뀌면 최솟값 갱신
+		if (startTime.value) {
+			endTime.min = startTime.value;
+		}
+		validateTimes();
+	});
+	
+	endTime.addEventListener("change", validateTimes);
+	
   
 </script>
 </th:block>

@@ -161,5 +161,28 @@ public class ProductionPlanController {
  }
 
 
+	 /* ============================
+     9) 🔥 생산계획 취소
+     ============================ */
+  @PostMapping("/plan/{planId}/cancel")
+  @ResponseBody
+  public Map<String, Object> cancelProductionPlan(
+          @PathVariable("planId") String planId,
+          @AuthenticationPrincipal LoginDTO login
+  ) {
+
+      Map<String, Object> result = new HashMap<>();
+
+      try {
+          planService.cancelProductionPlan(planId, login.getEmpId());
+          result.put("success", true);
+          result.put("message", "생산계획이 취소되었습니다.");
+      } catch (Exception e) {
+          result.put("success", false);
+          result.put("message", e.getMessage());
+      }
+
+      return result;
+  }
 
 }

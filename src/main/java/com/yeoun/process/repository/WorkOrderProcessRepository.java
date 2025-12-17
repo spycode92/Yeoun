@@ -1,9 +1,12 @@
 package com.yeoun.process.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.process.entity.WorkOrderProcess;
@@ -31,6 +34,47 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
 
     // 공정 Id로 정보 조회
 	Optional<WorkOrderProcess> findByWopId(String wopId);
+	
+	// QC 공정 이후 모든 공정 단계 조회 (QC 실패 시 미진행 공정 정리용)
+	List<WorkOrderProcess> findByWorkOrderOrderIdAndStepSeqGreaterThan(String orderId, int qcStepSeq);
+	
+	// ==========================
+	// 생산관리 대시보드
+	// ==========================
+    // QC 대기 상태
+    @Query("""
+            select count(p)
+            from WorkOrderProcess p
+            where p.status = 'QC_PENDING'
+              and p.process.processId = :qcProcessId
+        """)
+    long countQcPendingOnly(@Param("qcProcessId") String qcProcessId);
     
+    // QC 불합격: QC 공정에서 defectQty > 0 인 건
+    @Query("""
+        select count(p)
+        from WorkOrderProcess p
+        where p.process.processId = :qcProcessId
+          and coalesce(p.defectQty, 0) > 0
+          and p.endTime >= :start
+          and p.endTime <  :end
+    """)
+    long countQcFailToday(@Param("qcProcessId") String qcProcessId,
+                          @Param("start") LocalDateTime start,
+                          @Param("end") LocalDateTime end);
+    
+    // 진행중 공정만 + 라인/공정마스터까지 한 번에 가져오기(N+1 방지)
+    @Query("""
+    	    select wop
+    	    from WorkOrderProcess wop
+    	      join fetch wop.workOrder wo
+    	      join fetch wo.line ln
+    	      join fetch wop.process pm
+    	    where wop.status in :statuses
+    	      and wop.stepSeq between 1 and 6
+    	      and wo.status in :orderStatuses
+    	""")
+	List<WorkOrderProcess> findForHeatmap(@Param("statuses") List<String> statuses,
+    	    							  @Param("orderStatuses") List<String> orderStatuses);
 
 }

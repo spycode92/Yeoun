@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.entity.AccessLog;
 
 import org.springframework.data.repository.query.Param;
@@ -51,4 +52,8 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
 		    ORDER BY a.outTime DESC
 		""")
 	Optional<AccessLog> findLastOutTime(@Param("empId") String empId, @Param("targetDate") LocalDate targetDate);
+
+	// 외근 기록 조회
+	List<AccessLog> findAllByAccessDateBetweenAndEmp_EmpIdAndAccessType(LocalDate start, LocalDate end,
+			String empId, String accessType);
 }

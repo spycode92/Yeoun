@@ -138,14 +138,16 @@ public class AttendanceService {
 		}
 		
 		// OUT -> IN 복귀 처리
-		if ("OUT".equalsIgnoreCase(lastLog.getAccessType())
-				|| "OUTWORK".equalsIgnoreCase(lastLog.getAccessType())) {
+		if ("OUT".equalsIgnoreCase(lastLog.getAccessType())) {
 			lastLog.accessIn(now, "IN");
 			return "IN";
-		} else {
+		} else if ("IN".equalsIgnoreCase(lastLog.getAccessType())) {
 			// IN -> OUT 외출 처리
 			lastLog.accessOut(now, "OUT");
 			return "OUT";
+		} else {
+			lastLog.accessIn(now, "OUTWORK");
+			return "IN";
 		}
 	}
 	
@@ -485,6 +487,14 @@ public class AttendanceService {
 	// 건물 출입 현황
 	public List<AccessLogDTO> getAccessLogList(LocalDate start, LocalDate end) {
 		return accessLogRepository.findByAccessDateBetween(start, end)
+				.stream()
+				.map(AccessLogDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
+
+	// 외근 조회
+	public List<AccessLogDTO> getAllOutwork(LocalDate start, LocalDate end, String empId) {
+		return accessLogRepository.findAllByAccessDateBetweenAndEmp_EmpIdAndAccessType(start, end, empId, "OUTWORK")
 				.stream()
 				.map(AccessLogDTO::fromEntity)
 				.collect(Collectors.toList());

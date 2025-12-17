@@ -62,14 +62,17 @@
                     <!-- 원자재 선택 -->
                     <div class="col-md-6">
                         <label class="form-label">원자재 선택</label>
-                        <select class="form-select" name="materialId" required>
-                            <option value="">선택하세요</option>
+                        <select class="form-select" name="materialId" id="materialSelect" required>
+						    <option value="">선택하세요</option>
+						
+						    <th:block th:each="m : ${materials}">
+						        <option th:value="${m.matId}"
+						                th:text="${m.matName + ' (' + m.matUnit + ')'}"
+						                th:data-mat-unit="${m.matUnit}">
+						        </option>
+						    </th:block>
+						</select>
 
-                            <th:block th:each="m : ${materials}">
-                                <option th:value="${m.matId}"
-                                        th:text="${m.matName + ' (' + m.matUnit + ')'}"></option>
-                            </th:block>
-                        </select>
                     </div>
 
                     <div class="col-md-3">
@@ -78,26 +81,25 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">최소발주수량</label>
-                        <input type="number" name="moq" class="form-control" required>
-                    </div>
+				    <label class="form-label">최소발주수량</label>
+				    <input type="number" name="moq" class="form-control" required value="10" min="10" step="10"> </div>
                     
                     <div class="col-md-3">
 				        <label class="form-label">단위</label>
-				        <select name="unit" class="form-select" required>
-				            <option value="">단위 선택</option>
-				            <option value="EA">EA</option>
-				            <option value="KG">KG</option>
-				            <option value="G">G</option>
-				            <option value="ML">ML</option>
-				            <option value="L">L</option>
-				            <option value="PACK">PACK</option>
-				            <option value="SET">SET</option>
-				        </select>
+				        <select name="unit" id="unitSelect" class="form-select" required>
+						    <option value="">단위 선택</option>
+						    <option value="EA">EA</option>
+						    <option value="kg">kg</option>
+						    <option value="g">g</option>
+						    <option value="ml">ml</option>
+						    <option value="L">L</option>
+						    <option value="BOX">Box</option>
+						</select>
+
 				    </div>
                     
 					<div class="col-md-3">
-					    <label class="form-label">발주 단위 (ORDER UNIT)</label>
+					    <label class="form-label">발주 단위</label>
 					    <input type="text" name="orderUnit" class="form-control" required>
 					</div>                 
                     
@@ -130,6 +132,8 @@
     </div>
 
 </div>
+
+<script src="/js/sales/supplier_item.js"></script>
 
 </th:block>
 </html>

@@ -13,17 +13,27 @@ const grid1 = new Grid({
 
 		{header: 'QC항목ID' ,name: 'qcItemId' ,align: 'center'}
 		,{header: '항목명' ,name: 'itemName' ,align: 'center'}
-		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"}
+		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"
+			,renderer:{ type: StatusModifiedRenderer}
+		}
 		,{header: '단위' ,name: 'unit' ,align: 'center'}
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용' ,name: 'useYn' ,align: 'center'}//,hidden: true  
-		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center'}
-		,{header: '생성자' ,name: 'createdId' ,align: 'center'}  
-		,{header: '생성자' ,name: 'createdDate' ,align: 'center'}  
-		,{header: '수정자' ,name: 'updatedId' ,align: 'center'}  
-		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}  
+		,{header: '사용' ,name: 'useYn' ,align: 'center'}  
+		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
+		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true} 
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden: true}
+		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
+		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}  
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden: true}
+		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden: true}
+		,{
+			header: '상세보기', name: 'view_details', align: 'center', width: 100
+			, formatter: (rowInfo) => {
+				return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}
+		}   
 	  ],
 	  data: []
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -39,7 +49,12 @@ const grid1 = new Grid({
 	
 //qcitem  품질항목관리 조회
 function qcItemGridAllSearch(){
-	fetch('/masterData/qc_item/list', {
+
+	const params = {
+		qcItemId: document.getElementById("qcItemId").value ?? "",
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/masterData/qc_item/list?${queryString}`, {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -70,7 +85,9 @@ function qcItemGridAllSearch(){
 			.then(data => {
 				
 				console.log("검색데이터:", data);
-				grid1.resetData(data);
+				const camelCaseData = transformKeys(data);
+				console.log("camelCaseData",camelCaseData);
+				grid1.resetData(camelCaseData);
 			})
 			.catch(err => {
 				console.error("조회오류", err);
@@ -79,6 +96,110 @@ function qcItemGridAllSearch(){
 			});
 	 
 }
+
+
+const toCamelCase = (snakeCaseString) => {
+  if (!snakeCaseString || typeof snakeCaseString !== 'string') {
+    return snakeCaseString;
+  }
+
+  // 1. 소문자로 변환
+  // 2. 언더스코어(_)를 기준으로 문자열을 분리
+  // 3. reduce를 사용하여 카멜 케이스로 조합
+  return snakeCaseString.toLowerCase().split('_').reduce((acc, part) => {
+    // 첫 번째 파트는 그대로 사용 (created)
+    if (acc === '') {
+      return part;
+    }
+    // 두 번째 파트부터는 첫 글자를 대문자로 변환 후 뒤에 붙임 (ByName)
+    return acc + part.charAt(0).toUpperCase() + part.slice(1);
+  }, '');
+};
+
+const transformKeys = (data) => {
+  if (Array.isArray(data)) {
+    // 배열이면 배열의 모든 요소에 대해 재귀 호출
+    return data.map(transformKeys);
+  }
+
+  if (data !== null && typeof data === 'object') {
+    // 객체이면 키를 순회하며 변환
+    const newObject = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const newKey = toCamelCase(key);
+        // 값도 객체나 배열일 수 있으므로 재귀적으로 처리
+        newObject[newKey] = transformKeys(data[key]);
+      }
+    }
+    return newObject;
+  }
+
+  // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
+  return data;
+};
+
+grid1.on("click", async (ev) => {
+
+	const target = ev.nativeEvent.target;
+	// const targetElement = ev.nativeEvent.target; 이 줄이 빠진 경우
+	if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
+		console.log('Button in cell clicked, rowKey:', ev.rowKey);
+		
+		const rowData = grid1.getRow(ev.rowKey);
+		console.log('rowData data:', rowData);
+		
+		// 예: 모달 열기, 상세 정보 표시 등		
+		$('#qcItem-modal').modal('show');
+		document.getElementById('qcmodalTilte').innerText= 'QC 항목 상세';
+		document.getElementById('modalQcItemId').value = rowData.qcItemId;//QC 항목 ID
+		document.getElementById('itemName').value = rowData.itemName;//항목명
+		document.getElementById('targetType').value = rowData.targetType;//대상구분
+		document.getElementById('unit').value = rowData.unit;//단위
+		document.getElementById('stdText').value = rowData.stdText;//기준텍스트
+		document.getElementById('minValue').value = rowData.minValue;//최소값
+		document.getElementById('maxValue').value = rowData.maxValue;//최대값
+		document.getElementById('sortOrder').value = rowData.sortOrder;//정렬순서
+		document.getElementById('useYn').value = rowData.useYn;//사용여부
+		document.getElementById('createdId').value = rowData.createdByName;//생성자
+		document.getElementById('createdDate').value = rowData.createdDate;//생성일시
+		document.getElementById('updatedId').value = rowData.updatedByName;//수정자
+		document.getElementById('updatedDate').value = rowData.updatedDate;//수정일시
+		
+		document.getElementById('qcItemId').readOnly = true;
+		document.getElementById('userAndDate').style.display = 'flex';
+
+		qcItemGridAllSearch();
+	}
+
+});
+// 항목 등록
+const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');
+qcItemRegistBtn.addEventListener("click", function() {
+	document.getElementById('qcmodalTilte').innerText= 'QC 항목 등록';
+	qcModalreset();
+	document.getElementById('qcItemId').readOnly = false;
+	document.getElementById('userAndDate').style.display ='none';//생성자
+	
+});
+
+function qcModalreset() {
+	document.getElementById('qcItemId').value = '';//QC 항목 ID
+	document.getElementById('itemName').value = '';//항목명
+	document.getElementById('targetType').value = '';//대상구분
+	document.getElementById('unit').value = '';//단위
+	document.getElementById('stdText').value = '';//기준텍스트
+	document.getElementById('minValue').value = '';//최소값
+	document.getElementById('maxValue').value = '';//최대값
+	document.getElementById('sortOrder').value = '';//정렬순서
+	document.getElementById('useYn').value = '';//사용여부
+	document.getElementById('createdId').value = '';//생성자
+	document.getElementById('createdDate').value = '';//생성일시
+	document.getElementById('updatedId').value = '';//수정자
+	document.getElementById('updatedDate').value = '';//수정일시
+	qcItemGridAllSearch();//공정코드 관리 그리드 조회
+}
+
 
 // 품질항목관리 삭제
 const deleteQcRowBtn = document.getElementById('deleteQcRowBtn');
