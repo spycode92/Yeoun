@@ -35,9 +35,9 @@
 				<div class="mb-6">
 					<label class="h5 mt-3">연차 기준 설정</label>
 					<div class="d-flex">
-						<div class="form-check mb-2 ms-3" th:each="commonCode : ${commonCodeDTO}">
-							<input type="radio" id="fiscalYear" th:field="${workPolicyDTO.annualBasis}" class="form-check-input" th:value="${commonCode.codeId}" />
-							<label class="form-check-label" for="fiscalYear" th:text="${commonCode.codeName}"></label>
+						<div class="form-check mb-2 ms-3" th:each="commonCode, stat : ${commonCodeDTO}">
+							<input type="radio" th:id="'fiscalYear_' + ${stat.index}" th:field="${workPolicyDTO.annualBasis}" class="form-check-input" th:value="${commonCode.codeId}" />
+							<label class="form-check-label" th:for="'fiscalYear_' + ${stat.index}"  th:text="${commonCode.codeName}"></label>
 						</div>
 					</div>
 				</div>

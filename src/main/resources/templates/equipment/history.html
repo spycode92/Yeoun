@@ -3,317 +3,11 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layouts/layout.html}">
 <head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <script th:src="@{/js/common/formatTimeJS.js}"></script>
-    <style>
-        body {
-            background: #f4f3fb;
-            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            color: #2f2b43;
-        }
-
-        .title {
-            font-size: 1.8em;
-            margin-bottom: 1.8rem;
-            color: #697a8d;
-            font-weight: 500;
-        }
-
-        .order-card {
-            border-radius: 12px;
-            border: 1px solid #e2e1f3;
-            background: #ffffff;
-            box-shadow: 0 10px 25px rgba(80, 72, 180, 0.08);
-            padding: 16px 18px;
-            margin-bottom: 18px;
-        }
-
-        .order-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            font-size: 1.6em;
-            font-weight: 600;
-            color: #41388f;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .yeoun-badge-outline {
-            border-radius: 999px;
-            border: 1px solid rgba(111, 92, 236, 0.4);
-            color: #6f5cec;
-            padding: 2px 10px;
-            font-size: 15px;
-            background: rgba(111, 92, 236, 0.04);
-        }
-
-        .status-badge {
-            width: 90px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 3px 20px;
-        }
-
-        .status-create     { background: #e7eef7; color: #3a5a8a; }
-        .status-release    { background: #f0eaff; color: #6a4cc3; }
-        .status-progress   { background: #e6f5ec; color: #15803d; }
-        .status-complete   { background: #e8f1ff; color: #1d4ed8; }
-        .status-cancel     { background: #fdecec; color: #c0392b; }
-
-
-        .form-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #514d7a;
-            margin-bottom: 4px;
-        }
-
-        .form-control,
-        .form-select {
-            font-size: 13px;
-            border-radius: 8px;
-            border-color: #d9d8f2;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #6f5cec;
-            box-shadow: 0 0 0 0.15rem rgba(111, 92, 236, 0.2);
-        }
-
-        .form-text {
-            font-size: 11px;
-            color: #9a96c0;
-        }
-
-        .btn-yeoun-primary {
-            font-size: 15px;               /* 버튼 글자 키움 */
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #6f5cec, #9479ff);
-            color: white;
-        }
-
-        .btn-yeoun-primary:hover {
-            background: linear-gradient(135deg, #b8b3ff, #d9d4ff);
-            color: #5c4ac7 !important;
-        }
-
-        .btn-yeoun-outline {
-            border-radius: 999px;
-            border: 1px solid #c9c6f3;
-            background: #fff;
-            color: #655dc0;
-            font-size: 13px;
-            padding: 8px 14px;
-        }
-
-        .badge-priority {
-            border-radius: 999px;
-            font-size: 11px;
-            padding: 3px 8px;
-            background: #fdf4e2;
-            color: #d97907;
-        }
-
-        .search-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: end;
-        }
-
-        .search-row .form-control,
-        .search-row .form-select {
-            font-size: 12px;
-            height: 32px;
-            padding: 4px 10px;
-        }
-
-        .search-row .btn {
-            height: 32px;
-            font-size: 12px;
-            padding: 4px 10px;
-        }
-
-        /** modal **/
-
-        /* 메인 카드형 모달 */
-        .yeoun-modal {
-            border-radius: 18px;
-            border: none;
-            background: #ffffff;
-            box-shadow: 0 15px 35px rgba(90, 75, 180, 0.15);
-        }
-
-        /* 헤더 */
-        .yeoun-modal-header {
-            padding: 18px 24px;
-            border-bottom: 1px solid #eeeafc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title-wrap i {
-            color: #6a5acd;
-            font-size: 20px;
-            margin-right: 6px;
-        }
-
-        .modal-title {
-            font-weight: 600;
-            color: #3b336d;
-        }
-
-        /* 작업자 배치 */
-        .worker-flow-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: stretch;
-            gap: 14px;
-            padding: 16px;
-            background: #faf9ff;
-            border: 1px solid #e2defc;
-            border-radius: 14px;
-            box-shadow: 0 8px 18px rgba(110, 94, 230, 0.08);
-        }
-
-        .flow-item {
-            flex: 1;
-            min-width: 160px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #dedbf7;
-            padding: 14px 12px;
-            text-align: center;
-            box-shadow: 0 5px 12px rgba(150, 140, 240, 0.10);
-        }
-
-        .flow-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #5a51c8;
-            margin-bottom: 3px;
-        }
-
-        .flow-desc {
-            font-size: 12px;
-            color: #7e78aa;
-            margin-bottom: 10px;
-        }
-
-        .flow-select {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid #d1cdf6;
-            background: #fafaff;
-            font-size: 13px;
-            color: #4b4470;
-        }
-
-        .flow-select:focus {
-            border-color: #7b6fff;
-            box-shadow: 0 0 0 0.15rem rgba(130, 115, 255, 0.25);
-        }
-
-
-
-        /* 바디 */
-        .yeoun-modal-body {
-            padding: 24px 28px;
-        }
-
-        /* 탭 */
-        .yeoun-tabs .nav-link {
-            border: none;
-            color: #867ccc;
-            font-weight: 500;
-            padding: 10px 18px;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .yeoun-tabs .nav-link.active {
-            color: #4b3fbf;
-            background: #f3f1ff;
-            font-weight: 600;
-        }
-
-        /* 상세 */
-        .wo-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 10px 5px;
-        }
-
-        /* 공통 텍스트 */
-        .wo-detail label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #776fb5;
-            margin-bottom: 4px;
-        }
-
-        .wo-detail .value {
-            font-size: 15px;
-            padding: 6px 0;
-            color: #3f3b67;
-        }
-
-        .value.strong {
-            font-size: 18px;
-            font-weight: 700;
-            color: #5c53c4;
-        }
-
-        /* ===== Header ===== */
-        .wo-header {
-            display: grid;
-            grid-template-columns: 1.3fr 1fr 0.7fr;
-            gap: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eceaff;
-        }
-
-        /* ===== 일반 행 ===== */
-        .wo-row {
-            display: flex;
-            gap: 40px;
-        }
-
-        .wo-col {
-            flex: 1;
-        }
-
-        /* 설비 상세 모달 */
-        #equipDetailModal .modal-dialog {
-            max-width: 1200px;
-            width: 90%;
-        }
-
-        #equipDetailModal .modal-content {
-            /*height: 75vh;*/
-            border-radius: 16px;
-        }
-
-        #equipDetailModal .modal-body {
-            padding: 24px 28px;
-            overflow: hidden; /* 내부에서 나눠서 스크롤 */
-        }
-
-    </style>
+  	<link rel="stylesheet" th:href="@{/css/order/common.css}"/>
 </head>
 <body>
 <th:block layout:fragment="content">
@@ -353,7 +47,7 @@
                     </select>
                     <input type="date" class="form-control" id="startDate" style="max-width: 150px;">
                     ~
-                    <input type="date" class="form-control" id="EndDate" style="max-width: 150px;">
+                    <input type="date" class="form-control" id="endDate" style="max-width: 150px;">
                 </div>
 
                 <div id="historyGrid"></div>
@@ -366,6 +60,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let historyGrid = null;
+        
+        // 상태 뱃지 포맷
+        function formatStatusBadge(status) {
+
+          const map = {
+            "BREAKDOWN":  { text: "고장",  cls: "status-badge bg-danger" },
+            "REPAIR":     { text: "수리",  cls: "status-badge bg-warning" },
+            "INJECTION":  { text: "점검",  cls: "status-badge bg-success" }
+          };
+
+          const item = map[status] || { text: status, cls: "status-badge" };
+
+          return `<span class="${item.cls}">${item.text}</span>`;
+        }
+
+
 
         document.addEventListener("DOMContentLoaded", () => {
             const gridH = document.getElementById("historyGrid");
@@ -390,7 +100,8 @@
                     { header: "종류", name: "equipTypeId", align: "left" },
                     { header: "설비명", name: "equipName", align: "left" },
                     { header: "소속라인", name: "lineId", align: "center" },
-                    { header: "사유", name: "down_reason", align: "center" },
+                    { header: "사유", name: "downReason", align: "center",
+                    	formatter: ({ value }) => formatStatusBadge(value)},
                     { header: "시작일자", name: "startDate", align: "center",
                         formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
                     { header: "종료일자", name: "endDate", align: "center",
@@ -398,7 +109,7 @@
                 ]
             })
 
-            loadEquip();
+            loadHistory();
 
             historyGrid.on("click", (event) => {
                 if (event.columnName !== "btn") return;
@@ -412,11 +123,11 @@
         });
 
         function loadHistory(){
-            const equip  = document.getElementById("searchEquipment").value;
-            const line   = document.getElementById("searchLine").value;
-            const reason = document.getElementById("searchReason").value;
-            const start  = document.getElementById("startDate").value;
-            const end    = document.getElementById("endDate").value;
+            const equip  = document.getElementById("searchEquipment")?.value;
+            const line   = document.getElementById("searchLine")?.value;
+            const reason = document.getElementById("searchReason")?.value;
+            const start  = document.getElementById("startDate")?.value;
+            const end    = document.getElementById("endDate")?.value;
 
             const query = new URLSearchParams();
 
@@ -440,8 +151,6 @@
                     alert("조회 중 오류 발생");
                 });
         }
-
-        
 
 
     </script>

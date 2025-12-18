@@ -1,19 +1,8 @@
 // lotTrace.js
 // ------------------------------------------------------------
 // LOT 추적 트리(좌) + 상세(우) 제어
-// - mode = PRODUCT | MATERIAL
-// - PRODUCT: root 클릭 -> /lot/trace/detail (완제품 상세 fragment)
-//            공정그룹 -> /lot/trace/process-list
-//            자재그룹 -> /lot/trace/material-list
-//            공정상세 -> /lot/trace/process-detail
-//            자재상세 -> /lot/trace/material-detail
-//
-// - MATERIAL: root 클릭 -> /lot/material-trace/detail (자재 LOT 상세 fragment)
-//             사용완제품그룹 -> /lot/trace/material/used-products
-//             사용완제품 클릭 -> /lot/trace/detail 로 완제품 상세 fragment
-// ------------------------------------------------------------
 
-/** 전역 상태(스코프 꼬임 방지용) */
+// 전역 상태
 const TraceState = {
   mode: "PRODUCT",
   treeEl: null,
@@ -33,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 2) 트리 클릭 이벤트(이벤트 위임)
   TraceState.treeEl.addEventListener("click", onTreeClick);
+  
+  // 3) 검색 폼 즉시 검색
+  initLotTraceSearchForm();
 });
 
 /** ============================================================
@@ -326,8 +318,6 @@ async function loadProcessDetail(orderId, stepSeq) {
 function renderProcessDetail(detail) {
   showPanel("process");
 
-  // NOTE: 아래 id들은 "오른쪽 fragment(detail)"가 이미 DOM에 렌더된 상태여야 함.
-  // (즉, ROOT 상세를 먼저 loadProductRootDetail로 불러온 다음 공정 클릭해야 정상)
   document.getElementById("pd-processName").innerText = detail.processName || "-";
   document.getElementById("pd-processId").innerText = detail.processId || "-";
   document.getElementById("pd-status").innerText = detail.status || "-";
@@ -465,4 +455,38 @@ function formatDateTimeMin(dt) {
 function formatDate(dt) {
   if (!dt) return "-";
   return dt.split("T")[0].split(" ")[0];
+}
+
+/** ============================================================
+ *  LOT 검색 폼: 즉시 검색(자동 submit)
+ *  ============================================================ */
+function initLotTraceSearchForm() {
+  const form = document.getElementById("lotTraceSearchForm");
+  if (!form) return;
+
+  const mode = TraceState.mode || "PRODUCT"; // ✅ 여기 변경
+
+  const keywordEl = document.getElementById("searchKeyword");
+  const statusEl  = (mode === "PRODUCT") ? document.getElementById("pStatus") : document.getElementById("mStatus");
+  const typeEl    = (mode === "PRODUCT") ? document.getElementById("pType")   : document.getElementById("mType");
+  const btnSearch = document.getElementById("btnSearch");
+
+  const submit = () => {
+    // setPageToFirst(form); // 필요하면 활성화
+    form.requestSubmit ? form.requestSubmit(btnSearch || undefined) : form.submit();
+  };
+
+  [statusEl, typeEl].forEach(el => {
+    if (!el) return;
+    el.addEventListener("change", submit);
+  });
+
+  if (keywordEl) {
+    keywordEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submit();
+      }
+    });
+  }
 }

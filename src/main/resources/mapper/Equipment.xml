@@ -23,12 +23,12 @@
     	SELECT
     		d.DOWN_ID,
     		d.EQUIP_ID,
-    		e.EQUIP_CODE,
+    		e.EQUIP_CODE AS EQUIP_TYPE_ID,
     		e.EQUIP_NAME,
     		e.LINE_ID,
     		d.DOWN_REASON,
-    		d.START_TIME,
-    		d.END_TIME
+    		d.START_TIME AS START_DATE,
+    		d.END_TIME AS END_DATE
     	FROM EQUIP_DOWNTIME d
     		JOIN PROD_EQUIP e ON d.EQUIP_ID = e.EQUIP_ID 
     	<where>

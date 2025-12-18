@@ -39,5 +39,10 @@ public class LotRootDetailDTO {
 	// 라우트/공정 요약
 	private String routeId;        			// 라우트 ID
 	private String routeSteps;				// 라우트 단계
+	
+	// 출하 정보 (LOT_HISTORY로 계산)
+	private String shippedYn;				// 출하 여부 (Y/N)
+	private LocalDate shippedAt;			// 출하 일시
+	private Integer shippedQty;				// 출하 수량
 
 }

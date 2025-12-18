@@ -55,7 +55,7 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 			""", nativeQuery = true)
 	List<Map<String, Object>> findByBomUnitList();
 
-	// BOM 그리드 조회
+	// BOM 정보 그리드 조회
 	@Query(value="""
 				SELECT
 				    b.*,
@@ -73,14 +73,23 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 				    b.updated_id = eu.emp_id
 				WHERE (:bomId IS NULL OR :bomId = '' OR b.BOM_ID LIKE '%' || :bomId || '%')
 				AND (:matId IS NULL OR :matId = '' OR b.MAT_ID LIKE '%' || :matId || '%')
-				ORDER BY bom_id asc, bom_seq_no asc
+				ORDER BY use_yn desc,bom_id asc, bom_seq_no asc
 				""", nativeQuery = true)
 	List<Map<String, Object>> findBybomList(@Param("bomId") String bomId, @Param("matId") String matId);
 
 	// BOM 상세 정보 조회
 	@Query(value="""
-				SELECT DISTINCT bom_id 
-				FROM bom_mst
+				SELECT BOM_ID, USE_YN
+				FROM (
+				    SELECT 
+				        BOM_ID, 
+				        USE_YN,
+				        -- N을 1순위, Y를 2순위로 번호를 매김
+				        ROW_NUMBER() OVER(PARTITION BY BOM_ID ORDER BY USE_YN ASC) AS RN
+				    FROM BOM_MST
+				)
+				WHERE RN = 1
+				ORDER BY USE_YN DESC, BOM_ID ASC
 				"""
 			,nativeQuery = true
 			)

@@ -6,535 +6,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-body {
-    background: #f4f3fb;
-    font-family:
-        "Pretendard",
-        -apple-system,
-        BlinkMacSystemFont,
-        system-ui,
-        "Segoe UI",
-        Roboto,
-        "Apple SD Gothic Neo",
-        "Noto Sans KR",
-        "Malgun Gothic",
-        Arial,
-        sans-serif;
-    color: #2f2b43;
-}
-
-/* Toast UI 전체 */
-.toastui-calendar *,
-.tui-grid-container *,
-.tui-grid-table * {
-    font-family: "Pretendard", sans-serif !important;
-}
-
-
-  .title {
-    font-size: 1.8em;
-    margin-bottom: 1.8rem;
-    color: #697a8d;
-    font-weight: 500;
-  }
-
-  .order-card {
-    border-radius: 12px;
-    border: 1px solid #e2e1f3;
-    background: #ffffff;
-    box-shadow: 0 10px 25px rgba(80, 72, 180, 0.08);
-    padding: 16px 18px;
-    margin-bottom: 18px;
-  }
-
-  .order-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-
-  .card-title {
-    font-size: 1.6em;
-    font-weight: 600;
-    color: #41388f;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .yeoun-badge-outline {
-    border-radius: 999px;
-    border: 1px solid rgba(111, 92, 236, 0.4);
-    color: #6f5cec;
-    padding: 2px 10px;
-    font-size: 15px;
-    background: rgba(111, 92, 236, 0.04);
-  }
-
-  .status-badge {
-    width: 90px;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 0.25rem;
-    padding: 0.52em 0.593em;
-    color: white !important;
-  }
-
-  .status-create     { background: #3a5a8a; color: #e7eef7; }
-  .status-release    { background: #6a4cc3; color: #f0eaff; }
-  .status-progress   { background: #15803d; color: #e6f5ec; }
-  .status-scrap	     { background: #475569; color: #eef2f7; }
-  .status-complete   { background: #1d4ed8; color: #e8f1ff; }
-  .status-cancel     { background: #c0392b; color: #fdecec; }
-
-
-  .form-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #514d7a;
-    margin-bottom: 4px;
-  }
-
-  .form-control,
-  .form-select {
-    font-size: 13px;
-    border-radius: 8px;
-    border-color: #d9d8f2;
-  }
-
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #6f5cec;
-    box-shadow: 0 0 0 0.15rem rgba(111, 92, 236, 0.2);
-  }
-
-  .form-text {
-    font-size: 11px;
-    color: #9a96c0;
-  }
-
-  .btn-yeoun-primary {
-    font-size: 15px;               /* 버튼 글자 키움 */
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, #6f5cec, #9479ff);
-    color: white;
-  }
-  
-  .btn-yeoun-primary:hover {
-  	background: linear-gradient(135deg, #b8b3ff, #d9d4ff);
-  	color: #5c4ac7 !important;
-  }
-
-  .btn-yeoun-outline {
-    border-radius: 999px;
-    border: 1px solid #c9c6f3;
-    background: #fff;
-    color: #655dc0;
-    font-size: 13px;
-    padding: 8px 14px;
-  }
-
-  .badge-priority {
-    border-radius: 999px;
-    font-size: 11px;
-    padding: 3px 8px;
-    background: #fdf4e2;
-    color: #d97907;
-  }
-
-  .search-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .search-row .form-control,
-  .search-row .form-select {
-    font-size: 12px;
-    height: 32px;
-    padding: 4px 10px;
-  }
-
-  .search-row .btn {
-    height: 32px;
-    font-size: 12px;
-    padding: 4px 10px;
-  }
-
-  /** modal **/
-
-  /* 메인 카드형 모달 */
-  .yeoun-modal {
-    border-radius: 18px;
-    border: none;
-    background: #ffffff;
-    box-shadow: 0 15px 35px rgba(90, 75, 180, 0.15);
-  }
-
-  /* 헤더 */
-  .yeoun-modal-header {
-    padding: 18px 24px;
-    border-bottom: 1px solid #eeeafc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-title-wrap i {
-    color: #6a5acd;
-    font-size: 20px;
-    margin-right: 6px;
-  }
-
-  .modal-title {
-    font-weight: 600;
-    color: #3b336d;
-  }
-  
-  /* 작업자 배치 */
-  .worker-flow-container {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: stretch;
-	  gap: 14px;
-	  padding: 16px;
-	  background: #faf9ff;
-	  border: 1px solid #e2defc;
-	  border-radius: 14px;
-	  box-shadow: 0 8px 18px rgba(110, 94, 230, 0.08);
-	}
-	
-	.flow-item {
-	  flex: 1;
-	  min-width: 160px;
-	  background: #ffffff;
-	  border-radius: 12px;
-	  border: 1px solid #dedbf7;
-	  padding: 14px 12px;
-	  text-align: center;
-	  box-shadow: 0 5px 12px rgba(150, 140, 240, 0.10);
-	}
-	
-	.flow-title {
-	  font-size: 15px;
-	  font-weight: 700;
-	  color: #5a51c8;
-	  margin-bottom: 3px;
-	}
-	
-	.flow-desc {
-	  font-size: 12px;
-	  color: #7e78aa;
-	  margin-bottom: 10px;
-	}
-	
-	.flow-select {
-	  width: 100%;
-	  padding: 8px 10px;
-	  border-radius: 8px;
-	  border: 1px solid #d1cdf6;
-	  background: #fafaff;
-	  font-size: 13px;
-	  color: #4b4470;
-	}
-	
-	.flow-select:focus {
-	  border-color: #7b6fff;
-	  box-shadow: 0 0 0 0.15rem rgba(130, 115, 255, 0.25);
-	}
-
-  
-
-  /* 바디 */
-  .yeoun-modal-body {
-    padding: 24px 28px;
-  }
-
-  /* 탭 */
-  .yeoun-tabs .nav-link {
-    border: none;
-    color: #867ccc;
-    font-weight: 500;
-    padding: 10px 18px;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .yeoun-tabs .nav-link.active {
-    color: #4b3fbf;
-    background: #f3f1ff;
-    font-weight: 600;
-  }
-
-  /* 상세 */
-	.wo-detail {
-	    display: flex;
-	    flex-direction: column;
-	    gap: 20px;
-	    padding: 10px 5px;
-	}
-	
-	/* 공통 텍스트 */
-	.wo-detail label {
-	    font-size: 13px;
-	    font-weight: 600;
-	    color: #776fb5;
-	    margin-bottom: 4px;
-	}
-	
-	.wo-detail .value {
-	    font-size: 15px;
-	    padding: 6px 0;
-	    color: #3f3b67;
-	}
-	
-	.value.strong {
-	    font-size: 18px;
-	    font-weight: 700;
-	    color: #5c53c4;
-	}
-	
-	/* ===== Header ===== */
-	.wo-header {
-	    display: grid;
-	    grid-template-columns: 1.3fr 1fr 0.7fr;
-	    gap: 20px;
-	    padding-bottom: 12px;
-	    border-bottom: 1px solid #eceaff;
-	}
-	
-	/* ===== 일반 행 ===== */
-	.wo-row {
-	    display: flex;
-	    gap: 40px;
-	}
-	
-	.wo-col {
-	    flex: 1;
-	}
-	
-	/* ===== 공정 섹션 전체 ===== */
-	.wo-process-group {
-	    position: relative;
-	}
-	
-	/* 선 + 점 컨테이너 */
-	.process-line {
-	    position: relative;
-	    margin: 8px 0 18px 0;
-	    height: 16px;
-	}
-	
-	/* 가로 선 */
-	.process-line::before {
-	    content: "";
-	    position: absolute;
-	    top: 8px; /* 텍스트 아래 정확히 */
-	    left: 0;
-	    right: 0;
-	    height: 2px;
-	    background: #dcd6ff;
-	}
-	
-	/* 점 스타일 */
-	.process-line .dot {
-	    width: 10px;
-	    height: 10px;
-	    background: #b3a6ff;
-	    border-radius: 50%;
-	    position: absolute;
-	    top: 3px;
-	}
-	
-	/* 점 5개 균등 배치 */
-	.process-line .dot:nth-child(1) { left: 7.5%; }
-	.process-line .dot:nth-child(2) { left: 24%; }
-	.process-line .dot:nth-child(3) { left: 41%; }
-	.process-line .dot:nth-child(4) { left: 58%; }
-	.process-line .dot:nth-child(5) { left: 74.5%; }
-	.process-line .dot:nth-child(6) { left: 92%; }
-	
-	.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    position: absolute;
-    top: 3px;
-    transition: all .25s ease;
-	}
-	
-	/* 상태별 색 */
-	
-	.dot.done {
-	    background: #6c5ce7; /* 완료 */
-	}
-	
-	.dot.current {
-	    background: #a29bfe; /* 현재 */
-	}
-	
-	.dot.future {
-	    background: #e5e2ff; /* 미도달 */
-	}
-	
-	/* 상태별 선색 */
-	.process-line::before {
-	    content: "";
-	    position: absolute;
-	    top: 8px;
-	    left: 0;
-	    right: 0;
-	    height: 2px;
-	    background: #e5e2ff; /* default: 미래 */
-	    transition: all .25s ease;
-	}
-	
-	.process-line.done::before {
-	    background: #6c5ce7;
-	}
-
-	/* 박스들을 가로로 균등 배치 */
-	.process-boxes {
-	    display: grid;
-	    grid-template-columns: repeat(6, 1fr);
-	    gap: 14px;
-	    margin-top: 16px;
-	}
-	
-	/* 박스 디자인 */
-	.proc {
-	    background: #f7f5ff;
-	    border: 1px solid #e6e2ff;
-	    border-radius: 12px;
-	    padding: 16px 10px;
-	    display: flex;
-	    flex-direction: column;
-	    align-items: center;
-	    justify-content: center;	
-	    min-height: 85px;
-	}
-	
-	/* 공정 제목 */
-	.proc-title {
-	    font-size: 12px;
-	    font-weight: 600;
-	    color: #6c63b7;
-	    margin-bottom: 6px;
-	    text-align: center;
-	}
-	
-	/* 작업자 이름 */
-	.proc-value {
-	    font-size: 15px;
-	    color: #3f3b67;
-	    font-weight: 500;
-	    text-align: center;
-	}
-
-	
-	/* ===== 상태 ===== */
-	.wo-status .state {
-	    font-weight: 700;
-	    color: #5a54dd;
-	}
-  
-  /* 테이블 */
-  .yeoun-table thead {
-    background: #f5f3ff;
-    color: #5b53a1;
-  }
-
-  .yeoun-table td {
-    font-size: 13px;
-  }
-
-  /* 푸터 */
-  .yeoun-modal-footer {
-    border-top: 1px solid #eeeafc;
-    padding: 16px 24px;
-    text-align: right;
-  }
-
-  /* 입력폼 스타일 보완 */
-  #workCreateForm .form-label {
-    color: #6a63b9;
-    font-weight: 600;
-    font-size: 13px;
-  }
-
-  #workCreateForm .form-control,
-  #workCreateForm .form-select {
-    background: #faf9ff;
-    border-color: #dcd6fe;
-  }
-
-  #workCreateForm .form-control:focus,
-  #workCreateForm .form-select:focus {
-    border-color: #6a5acd;
-    box-shadow: 0 0 0 0.15rem rgba(106, 92, 205, 0.2);
-  }
-
-  /* info-value는 read-only 표현 */
-  .info-value {
-    background: #faf9ff;
-    border: 1px solid #e3dfff;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    color: #4a436d;
-  }
-
-  .status-tag {
-    font-weight: 600;
-    color: #6a5acd;
-  }
-
-  /* 테이블 */
-  .yeoun-table thead {
-    background: #f5f3ff;
-    color: #5b53a1;
-  }
-  
-  /* 재고 */
-  .stock-panel {
-    width: 300px;
-    background: #faf9ff;
-    border-left: 1px solid #ddd;
-    padding: 16px;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-    border-radius: 8px;
-	}
-	.stock-item {
-	    padding: 12px;
-	    margin-bottom: 10px;
-	    background: white;
-	    border-radius: 8px;
-	    border: 1px solid #eee;
-	}
-	.stock-item.low {
-	    border-color: #ff6b6b;
-	    background: #fff5f5;
-	}
-	.stock-item.ok {
-	    border-color: #63c76a;
-	    background: #f3fff5;
-	}
-  
-  	.detail-select {
-	    background-color: #fff;
-	    border: 1px solid #d4caff;
-	    border-radius: 8px;
-	    padding: 5px;
-	    font-size: 14px;
-	    color: #444;
-  	}
-
-</style>
+  <link rel="stylesheet" th:href="@{/css/order/common.css}"/>
+  <link rel="stylesheet" th:href="@{/css/order/list.css}"/>
 </head>
 <body>
 <th:block layout:fragment="content">
@@ -548,7 +21,7 @@ body {
       <i class="bi bi-plus-circle"></i> 새로 등록
     </button>
   </div>
-  <!-- ===== 왼쪽: 작업지시 목록 ===== -->
+  <!-- ===== 작업지시 목록 ===== -->
   <div>
     <div class="order-card">
       <div class="order-card-header">
@@ -691,30 +164,35 @@ body {
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">계획 일자</label>
-	                <input type="date" class="form-control" id="planDate">
+	                <input type="date" class="form-control" id="planDate" name="planDate">
 	                <div class="invalid-feedback"
-	                     data-error-for="planStartDate" style="display:none;">
-	                     계획 일자는 필수 입력값입니다.
+	                     data-error-for="planDate" style="display:none;">
+	                     계획 일자는 필수 입력값입니다.<br>
+	                     계획 일자는 과거일 수 없습니다.
 	                </div>
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">시작 시간</label>
-	                <input type="time" class="form-control" id="startTime"
+	                <input type="time" class="form-control" id="startTime" name="startTime"
 	                	   min="09:00" max="18:00" step="1800">
 	                  <input type="hidden" th:field="*{planStartDate}">
 	                  <div class="invalid-feedback"
-	                       data-error-for="planStartDate" style="display:none;">
+	                       data-error-for="startTime" style="display:none;">
 	                      시작 시간은 필수 입력값입니다.
 	                  </div>
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">종료 시간</label>
-	                <input type="time" class="form-control" id="endTime"
+	                <input type="time" class="form-control" id="endTime" name="endTime"
 	                	   min="09:00" max="18:00" step="1800">
 	                  <input type="hidden" th:field="*{planEndDate}">
 	                  <div class="invalid-feedback"
+	                       data-error-for="endTime" style="display:none;">
+	                  	   종료 시간은 필수 입력값입니다.
+	                  </div>
+	                  <div class="invalid-feedback"
 	                       data-error-for="planEndDate" style="display:none;">
-	                      종료 시간은 필수 입력값입니다.
+	                       시작 시간보다 이른 시간을 선택할 수 없습니다.
 	                  </div>
 	              </div>
 	            </div>
@@ -735,7 +213,8 @@ body {
 				    </select>
 	                  <div class="invalid-feedback"
 	                       data-error-for="prcBld" style="display:none;">
-	                      블렌딩 작업자를 선택해야 합니다.
+	                      작업자를 선택해야 합니다.<br/>
+	                      작업자가 중복될 수 없습니다.
 	                  </div>
 				  </div>
 				  
@@ -752,7 +231,8 @@ body {
 				    </select>
 	                  <div class="invalid-feedback"
 	                       data-error-for="prcFlt" style="display:none;">
-	                      여과기 작업자를 선택해야 합니다.
+	                      작업자를 선택해야 합니다.<br/>
+	                      작업자가 중복될 수 없습니다.
 	                  </div>
 				  </div>
 				
@@ -769,7 +249,8 @@ body {
 				    </select>
 	                  <div class="invalid-feedback"
 	                       data-error-for="prcFil" style="display:none;">
-	                      충전기 작업자를 선택해야 합니다.
+	                      작업자를 선택해야 합니다.<br/>
+	                      작업자가 중복될 수 없습니다.
 	                  </div>
 				  </div>
 				
@@ -786,7 +267,25 @@ body {
 				    </select>
 	                  <div class="invalid-feedback"
 	                       data-error-for="prcCap" style="display:none;">
-	                      캡핑기 작업자를 선택해야 합니다.
+	                      작업자를 선택해야 합니다.<br/>
+	                      작업자가 중복될 수 없습니다.
+	                  </div>
+				  </div>
+				  
+				  <div class="flow-item">
+				  	<div class="flow-title">QC</div>
+				  	<div class="flow-desc">품질 검사</div>
+				  	<select th:field="*{prcQc}" class="flow-select" id="qcSelect">
+	  					<option value="" selected th:selected="${prcQc == null}">선택</option>
+	            		<th:block th:each="worker : ${qcWorkers}">
+		            		<option th:value="${worker.empId}"
+		                  			th:text="|${worker.empName} (${worker.posName})|"
+		                  	></option>
+	            		</th:block>
+				  	</select>
+				  	  <div class="invalid-feedback"
+	                       data-error-for="prcQc" style="display:none;">
+	                      작업자를 선택해야 합니다.
 	                  </div>
 				  </div>
 				
@@ -803,7 +302,8 @@ body {
 				    </select>
 	                  <div class="invalid-feedback"
 	                       data-error-for="prcLbl" style="display:none;">
-	                      포장기 작업자를 선택해야 합니다.
+	                      작업자를 선택해야 합니다.<br/>
+	                      작업자가 중복될 수 없습니다.
 	                  </div>
 				  </div>
 				
@@ -826,6 +326,8 @@ body {
 
         <!-- Footer -->
         <div class="yeoun-modal-footer">
+          <div id="validationMessage" class="medium me-auto"></div>
+          
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
           <button type="button" class="btn btn-yeoun-primary" id="btnCreateSubmit">
             <i class="bi bi-check2-circle"></i> 저장
@@ -954,8 +456,13 @@ body {
 				            </div>
 				            <div class="proc">
 				            	<span class="proc-title">QC</span>
-				            	<select class="proc-value detail-select" disabled>
-				            		<option value="" selected>품질 검사팀</option>
+				            	<select class="proc-value detail-select" id="PRC-QC" disabled>
+				            		<option value="">선택</option>
+				            		<th:block th:each="worker : ${qcWorkers}">
+					            		<option th:value="${worker.empId}"
+					                  			th:text="${worker.empName}"
+					                  	></option>
+				            		</th:block>
 				            	</select>
 				            </div>
 				            <div class="proc">
@@ -1017,113 +524,7 @@ body {
 </script>
 <script>
 
-  let workOrderGrid = null;
-
-  document.addEventListener("DOMContentLoaded", () => {
-
-    const gridEl = document.getElementById("workOrderGrid");
-    if (!gridEl) {
-      console.error("workOrderGrid 요소 없음!");
-      return;
-    }
-
-    // 1) Grid 생성
-    workOrderGrid = new tui.Grid ({
-      el: gridEl,
-      bodyHeight: 450,
-      rowHeaders: ["rowNum"],
-      scrollX: false,
-      scrollY: true,
-      pageOptions: {
-        useClient: true,
-        perPage: 10
-      },
-      columnOptions: {resizable: true},
-      columns: [
-        {header: "작업지시번호", name: "orderId", width: 160, align: "center"},
-        {header: "품번", name: "prdId", align: "center"},
-        {header: "품목군", name: "prdName", align: "left"},
-        {header: "계획수량", name: "planQty", align: "right"},
-        {
-          header: "시작시간",
-          name: "startDate",
-          align: "center",
-          formatter: ({ value }) => formatDate(value)
-        },
-        {
-          header: "종료시간",
-          name: "endDate",
-          align: "center",
-          formatter: ({ value }) => formatDate(value)
-        },
-        {
-          header: "상태",
-          name: "status",
-          align: "center",
-          formatter: ({ value }) => formatStatusBadge(value)
-        },
-        {header: "출고여부", name: "outboundYn", align: "center"},
-        {
-          header: "상세",
-          name: "btn",
-          width: 90,
-          align: "center",
-          formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
-        }
-      ]
-    });
-
-    // 2) 검색 버튼 클릭 시 조회
-    document.getElementById("btnSearchOrder").addEventListener("click", () => {
-        loadWorkOrderGrid();
-    });
-
-    // 3) 페이지 로드 시 전체 조회
-    loadWorkOrderGrid();
-
-    // 4) 상세 버튼 클릭 이벤트
-    workOrderGrid.on("click", (event) => {
-      if (event.columnName !== "btn") return;
-      const row = workOrderGrid.getRow(event.rowKey);
-      openDetailModal(row.orderId);
-    });
-
-  });
-
-  // ======================================================
-  // 작업지시 목록 조회
-  // ======================================================
-  function loadWorkOrderGrid(){
-      const raw = document.getElementById("searchKeyword").value;
-
-      const keyword = raw
-          .trim()                 // 양쪽 공백 제거
-          .replace(/\s+/g, " ")   // 여러 칸 띄어쓰기 → 하나로
-          .toLowerCase();         // 소문자 통일
-      const status  = document.getElementById("searchStatus").value  || "";
-      const startDateFrom   = document.getElementById("startDateFrom").value || "";
-
-    const query = new URLSearchParams({
-      keyword,
-      status,
-    startDateFrom
-    });
-
-    fetch("/order/list/data?" + query.toString())
-            .then(res => {
-              if (!res.ok) throw new Error("HTTP " + res.status);
-              return res.json();
-            })
-            .then(data => {
-              console.log("작업지시 목록 : ", data);
-              workOrderGrid.resetData(data);
-            })
-            .catch(err => {
-              console.error("작업지시 목록 조회 오류", err);
-              alert("조회 중 오류 발생");
-            });
-
-  }
+	let workOrderGrid = null;
 
   // 상태 뱃지 포맷
   function formatStatusBadge(status) {
@@ -1159,667 +560,10 @@ body {
 
     return `${yy}-${mm}-${dd} ${hh}:${mi}`;
   }
-
-  // ====================================
-  // 유효성 검증
-  // ====================================
-  function validateModalForm() {
-
-      let valid = true;
-
-      function showError(fieldName, condition) {
-          const el = document.querySelector(`[name="${fieldName}"]`);
-          const errBox = document.querySelector(`[data-error-for="${fieldName}"]`);
-
-          if (!el || !errBox) return;
-
-          if (condition) {
-              el.classList.add("is-invalid");
-              errBox.style.display = "block";
-              valid = false;
-          } else {
-              el.classList.remove("is-invalid");
-              errBox.style.display = "none";
-          }
-      }
-
-      // ===========================
-      // 필드별 검증
-      // ===========================
-
-      showError("planId", !document.querySelector(`[name="planId"]`).value);
-      showError("routeId", !document.querySelector(`[name="routeId"]`).value);
-      showError("prdId", !document.querySelector(`[name="prdId"]`).value);
-      showError("lineId", !document.querySelector(`[name="lineId"]`).value);
-
-      const qty = document.querySelector(`[name="planQty"]`).value;
-      showError("planQty", !qty || qty <= 0);
-
-      // 시간 검증
-      const start = document.getElementById("startTime").value;
-      const end   = document.getElementById("endTime").value;
-
-      showError("planStartDate", !start);
-      showError("planEndDate", !end);
-
-      if (start && end) {
-          const s = new Date(`2000-01-01T${start}`);
-          const e = new Date(`2000-01-01T${end}`);
-          showError("planEndDate", e <= s);  // 종료가 시작보다 이전이면 에러
-      }
-
-      // 작업자 검증
-      showError("prcBld", !document.querySelector(`[name="prcBld"]`).value);
-      showError("prcFlt", !document.querySelector(`[name="prcFlt"]`).value);
-      showError("prcFil", !document.querySelector(`[name="prcFil"]`).value);
-      showError("prcCap", !document.querySelector(`[name="prcCap"]`).value);
-      showError("prcLbl", !document.querySelector(`[name="prcLbl"]`).value);
-
-      return valid;
-  }
-
-
-  // ======================================================
-  // 작업지시 등록 모달
-  // ======================================================
-
-  function debounce(fn, delay = 300) {
-	  let timer = null;
-	  return function (...args) {
-		  clearTimeout(timer);
-		  timer = setTimeout(() => fn.apply(this, args), delay);
-	  };
-  }
-
-  // 등록 모달 열기
-  document.getElementById("btnCreate").addEventListener("click", () => {
-    clearFormFields();
-    const modal = new bootstrap.Modal(document.getElementById("workCreateModal"));
-    modal.show();
-  });
-  
-  let maxQty = null;
-
-  // 생산계획서 정보 불러오기
-  document.getElementById("planId").addEventListener("change", function() {
-	    const option = this.selectedOptions[0];
-	    const product = option.dataset.name;
-	    const total = option.dataset.total;
-        const remain = option.dataset.remain;
-	    
-	    maxQty = remain;	// 수량 저장
-	    referTime = calcRecommendedHours(total);	// 소요시간 계산
-
-	    document.getElementById("planDetail").innerText = `${product} (${remain} / ${total}개)`;
-	    document.getElementById("referTime").innerText = referTime;
-	    if (remain < 336) {
-	    	document.getElementById("planQty").value = remain;
-	    }
-	    
-	    const matchedOption = selectOptionByText("prdName", product);
-	    let prdId;
-
-	    if (matchedOption) {
-	        prdId = matchedOption.value;
-	        document.getElementById("routeHeader").value = `RT-${prdId}`;
-	    }
-	    
-	    
-	    fetch(`/order/check?prdId=${prdId}&planQty=${remain}`)
-	    .then(res => res.json())
-	    .then(list => renderStockPanel(list));
-	});
-
-  // 품목 자동 선택
-  function selectOptionByText(selectId, text) {
-	    const select = document.getElementById(selectId);
-	    for (let option of select.options) {
-	        if (option.text.trim() === text.trim()) {
-	            option.selected = true;
-	            return option;
-	        }
-	    }
-	    return null;
-	}
-  
-  // 계획 수량 제한
-  document.getElementById("planQty").addEventListener("input", function () {
-    if (maxQty && Number(this.value) > maxQty) {
-        alert(`이 생산계획의 최대 수량은 ${maxQty}개입니다.`);
-        this.value = maxQty;
-    }
-  });
-  
-  // 예상 소요 시간 계산
-  function calcRecommendedHours(remain) {
-	   const hours = remain / 42;
-	   return "약 " + Math.ceil(remain / 42) + "시간(" + Math.round(hours * 10) / 10 + "시간) 소요 예상";
-  }
-
-  // 유효성 검증용 페이로드
-  function collectValidatePayload() {
-	  const date	= document.getElementById("planDate").value;
-	  const start	= document.getElementById("startTime").value;
-	  const end		= document.getElementById("endTime").value;
-
-	  return {
-		  lineId: document.getElementById("lineId").value,
-		  startTime: `${date}T${start}`,
-		  endTime: `${date}T${end}`,
-		  workers: [
-			  document.querySelector('[name="prcBld"]').value,
-			  document.querySelector('[name="prcFlt"]').value,
-			  document.querySelector('[name="prcFil"]').value,
-			  document.querySelector('[name="prcCap"]').value,
-			  document.querySelector('[name="prcLbl"]').value
-		  ].filter(v => v)	// null 제거
-	  };
-  }
-
-
-  // 폼 전송(실제 등록 처리)
-  document.getElementById("btnCreateSubmit").addEventListener("click", async () => {
-
-      if (!validateModalForm()) return;
-
-      const date = document.getElementById("planDate").value;
-      const start = document.getElementById("startTime").value;
-      const end = document.getElementById("endTime").value;
-
-      if (date && start) {
-          document.getElementById("planStartDate").value = `${date}T${start}`;
-      }
-
-      if (date && end) {
-          document.getElementById("planEndDate").value = `${date}T${end}`;
-      }
-
-      const payload = {
-          planId: document.querySelector('[name="planId"]').value,
-          prdId:  document.querySelector('[name="prdId"]').value,
-          lineId: document.querySelector('[name="lineId"]').value,
-          routeId: document.querySelector('[name="routeId"]').value,
-          planQty: document.querySelector('[name="planQty"]').value,
-          planStartDate: document.getElementById("planStartDate").value,
-          planEndDate:   document.getElementById("planEndDate").value,
-          prcBld: document.querySelector('[name="prcBld"]').value,
-          prcFlt: document.querySelector('[name="prcFlt"]').value,
-          prcFil: document.querySelector('[name="prcFil"]').value,
-          prcCap: document.querySelector('[name="prcCap"]').value,
-          prcLbl: document.querySelector('[name="prcLbl"]').value,
-          remark: document.querySelector('[name="remark"]').value
-      };
-
-	  // 서버 유효성 검증
-	  const validateRes = await fetch ("/order/validate", {
-		  method: "POST",
-		  headers: {
-			  "Content-Type": "application/json",
-			  [csrfHeader]: csrfToken
-		  },
-		  body: JSON.stringify(collectValidatePayload())
-	  });
-
-	  const validation = await validateRes.json();
-	  if (!validation.valid) {
-		  alert(validation.message);
-
-		  if (validation.suggestedLines) {
-			  showSuggestedLines(validation.suggestedLines);
-		  }
-
-		  if (validation.suggestedWorkers) {
-			  showSuggestedWorkers(validation.suggestedWorkers);
-		  }
-
-		  return;
-	  }
-
-      const res = await fetch("/order/create", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              [csrfHeader]: csrfToken
-          },
-          body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-          alert("등록이 완료되었습니다.");
-          bootstrap.Modal.getInstance(document.getElementById("workCreateModal")).hide();
-          loadWorkOrderGrid();  // 그리드 갱신
-      } else {
-          alert("등록 실패: 서버 오류");
-      }
-  });
-
-  // 서버 유효성 검증 호출
-  async function validateBeforeSubmit() {
-	  const payload = collectValidatePayload();
-
-	  const res = await fetch("/order/validate", {
-		  method: "POST",
-		  headers: {
-			  "Content-Type": "application/json",
-			  [csrfHeader]: csrfToken
-		  },
-		  body: JSON.stringify(payload)
-	  });
-
-	  const result = await res.json();
-	  return result;
-  }
-
-  // change 될 때 유효성 검증
-  const watchFields = ["line", "startTime", "endTime", "PRC-BLD", "PRC-FLT", "PRC-FIL", "PRC-CAP", "PRC-LBL"];
-
-  watchFields.forEach(id => {
-	  document.getElementById(id).addEventListener("change", debounce(runValidation, 300));
-  });
-
-  async function runValidation() {
-	  const payload = collectValidatePayload();
-	  const response = await fetch("/order/validate", {
-		  method: "POST",
-		  headers: {
-			  "Content-Type": "application/json",
-			  [csrfHeader]: csrfToken
-		  },
-		  body: JSON.stringify(payload)
-	  });
-	  const result = await response.json();
-	  updateValidationUI(result);
-  }
-
-  // line 추천
-  function showSuggestedLines(lines) {
-	const box = document.getElementById("lineSuggestBox");
-	box.innerHTML = "";
-
-	lines.forEach(lineId => {
-		const btn = document.createElement("button");
-		btn.className = "btn btn-sm btn-outline-primary me-1";
-		btn.innerText = lineId;
-		btn.onclick = () => {
-			document.querySelector('[name="lineId"]').value = lineId;
-			runValidation();
-		};
-		box.appendChild(btn);
-	});
-  }
-
-  // 작업자 추천
-  function showSuggestedWorkers(workers) {
-	  const box = document.getElementById("workerSuggestBox");
-	  box.innerHTML = "";
-
-	  workers.forEach(workerId => {
-		 const btn = document.createElement("button");
-		 btn.className = "btn btn-sm btn-outline-primary me-1";
-		 btn.innerText = workerId;
-		 btn.onclick = () => {
-			 const targetField = findEmptyWorkerField();
-
-			 if (!targetField) {
-				 alert("이미 모든 작업자 슬롯이 채워져 있습니다.");
-				 return;
-			 }
-
-			 document.querySelector(`[name="${targetField}"]`).value = workerId;
-
-			 // 값을 다 채웠다면 다시 서버 검증 진행
-			 runValidation();
-		 };
-
-		 box.appendChild(btn);
-	  });
-  }
-
-  // 작업자 필드
-  const workerFields = [
-	  "prcBld", "prcFlt", "prcFil", "prcCap", "prcLbl"
-  ];
-
-  // 비어있는 슬롯 찾기
-  function findEmptyWorkerField() {
-	  return workerFields.find(name => {
-		  const el = document.querySelector(`[name="${name}"]`);
-		  return el && !el.value;
-	  });
-  }
-
-  // 유효성검사 결과 UI
-  function updateValidationUI(result) {
-
-	  const msgBox = document.getElementById("validationMessage");
-	  const lineBox = document.getElementById("lineSuggestBox");
-	  const workerBox = document.getElementById("workerSuggestBox");
-	  const submitBtn = document.getElementById("btnSubmit");
-
-	  // 초기화
-	  msgBox.innerText = "";
-	  lineBox.innerHTML = "";
-	  workerBox.innerHTML = "";
-
-	  if (result.valid) {
-		  msgBox.innerText = "작업지시 등록 가능";
-		  msgBox.className = "text-success";
-		  submitBtn.disabled = false;
-		  return;
-	  }
-
-	  // 유효하지 않은 경우
-	  submitBtn.disabled = true;
-	  msgBox.innerText = result.message;
-	  msgBox.className = "text-danger";
-
-	  // 라인 추천
-	  if (!result.lineAvailable && result.suggestedLines) {
-		  showSuggestedLines(result.suggestedLines);
-	  }
-
-	  // 작업자 추천
-	  if (!result.workerAvailable && result.suggestedWorkers) {
-		  showSuggestedWorkers(result.suggestedWorkers);
-	  }
-  }
-
-
-  // 값 초기화
-  function clearFormFields(){
-
-      // ⬇ select, input 들 직접 초기화
-      document.querySelector('select[name="planId"]').value = "";
-      document.querySelector('select[name="prdId"]').value = "";
-      document.querySelector('select[name="lineId"]').value = "";
-      document.querySelector('input[name="routeId"]').value = "";
-      document.querySelector('input[name="planQty"]').value = "";
-      document.getElementById("planDate").value = "";
-      document.getElementById("startTime").value = "";
-      document.getElementById("endTime").value = "";
-
-      // 작업자들
-      document.querySelector('select[name="prcBld"]').value = "";
-      document.querySelector('select[name="prcFlt"]').value = "";
-      document.querySelector('select[name="prcFil"]').value = "";
-      document.querySelector('select[name="prcCap"]').value = "";
-      document.querySelector('select[name="prcLbl"]').value = "";
-
-      // 표시용 텍스트도 초기화
-      document.getElementById("planDetail").innerText = "생산 계획을 선택해주세요.";
-      document.getElementById("referTime").innerText = "생산 계획을 선택해주세요.";
-  }
-
-
-
-  // ======================================================
-  // 작업지시 상세 모달
-  // ======================================================
-  
-	let orderId;
-  	let outboundYn;
-	  
-  function openDetailModal(workId) {
-    console.log("Detail:", workId);
-    const modal = new bootstrap.Modal(document.getElementById("workDetailModal"));
-
-    // 1) 기본 정보 로드
-    fetch(`/order/detail/${workId}`)
-            .then(res => res.json())
-            .then(data => {
-                console.log("정보:::: " , data);
-                orderId = data.orderId;
-                outboundYn = data.outboundYn;
-
-                  document.getElementById("detailOrderId").innerText = data.orderId;
-                  document.getElementById("detailPrdName").innerText = data.prdName;
-                  document.getElementById("detailPlanQty").innerText = data.planQty;
-                  document.getElementById("detailPlanDate").innerText = data.planDate;
-                  document.getElementById("detailPlanTime").innerText = data.planTime;
-                  document.getElementById("detailLineName").innerText = data.lineName;
-                  document.getElementById("detailRouteId").innerText = data.routeId;
-                  document.getElementById("detailRemark").value = data.remark;
-                  
-                  const dataStatus = data.status;
-                  const statusBtn = document.getElementById("btnReleased");
-                  const cancelBtn = document.getElementById("btnCanceled");
-                  const statusText = document.getElementById("detailStatus");
-                  
-                  if (dataStatus === "CREATED"){
-                	  statusBtn.innerText = '확정';
-                	  statusBtn.classList.add('btn-success');
-                	  if (statusBtn.classList.contains('btn-info')){
-                		  statusBtn.classList.remove('btn-info');
-                	  }               	  
-                	  statusText.innerText = '준비';
-                	  statusBtn.disabled = false; // 확정버튼 활성화
-                	  cancelBtn.disabled = false; // 취소버튼 활성화
-                  } else {
-                	  statusBtn.innerText = '확정됨';
-                	  statusBtn.classList.add('btn-info');
-                	  if (statusBtn.classList.contains('btn-success')){
-                		  statusBtn.classList.remove('btn-success');
-                	  }
-                	  switch (dataStatus){
-                	  	case "RELEASED":
-                	  		statusText.innerText = '확정';
-                	  		break;
-                	  	case "IN_PROGRESS":
-                	  		statusText.innerText = '진행';
-                	  		break;
-                	  	case "COMPLETED":
-                	  		statusText.innerText = '완료';
-                	  		break;
-                	  	case "CANCELED":
-                	  		statusText.innerText = '취소';
-                	  		break;
-                	  	default:
-                	  		statusText.innerText = '미정';
-                	  }
-                	  statusBtn.disabled = true; // 확정버튼 비활성화
-                	  cancelBtn.disabled = true; // 취소버튼 비활성화
-                	  
-                  }
-                  
-
-                  // 작업자 렌더링
-                  data.infos.forEach(info => {
-				    const select = document.getElementById(info.processId);  
-				
-				    if (!select) return;
-				
-				    // workerId가 null이면 선택값 없음
-				    if (info.workerId) {
-				        select.value = info.workerId;
-				    } else {
-				        select.value = ""; // '선택'
-				    }
-				    
-				    if (dataStatus === "CREATED"){
-				    	select.disabled = false;
-				    } else {
-				    	select.disabled = true;
-				    }
-				});
-
-
-                  // 진행률 처리
-                  updateProcessUI(data.infos);
-            });
-
-      modal.show();
-  }
-  
-  // 상태 설정
-  function updateProcessUI(workInfoList) {
-	  
-	const dots = document.querySelectorAll(".process-line .dot");
-    const processLine = document.querySelector(".process-line");
-
-    // 1) 점 상태 초기화
-    dots.forEach(dot => dot.className = "dot");
-
-    // 2) 점 색상 매핑
-    workInfoList.forEach((step, i) => {
-        const dot = dots[i];
-        if (!dot) return;
-
-        switch (step.status) {
-            case "DONE":
-                dot.classList.add("done");
-                break;
-            case "IN_PROGRESS":
-                dot.classList.add("current");
-                break;
-            default:
-                dot.classList.add("future");
-        }
-    });
-
-    // 3) 진행률: COMPLETED 개수로 퍼센트 계산
-    const completedCount = workInfoList.filter(s => s.status === "COMPLETED").length;
-    const totalCount = workInfoList.length;
-    const progressPercent = (completedCount / totalCount) * 100;
-
-    // 4) CSS 변수로 선 색상 조절
-    processLine.style.setProperty("--progress", progressPercent + "%");
-
-}
-  
-  // 확정
-  document.getElementById("btnReleased").addEventListener("click", async () => {
-	  console.log("orderid...............", orderId);
-	  updateStatus(orderId, "RELEASED", "작업지시가 확정되었습니다.");
-  });
-  
-  // 취소
-  document.getElementById("btnCanceled").addEventListener("click", async() => {
-	  
-	  if (outboundYn?.trim() === 'Y') {
-		  alert("출고가 완료된 작업지시는 취소가 불가능합니다.");
-	  	  return;
-	  }
-	  if (!confirm("정말 취소하시겠습니까?")) return;
-	  updateStatus(orderId, "CANCELED", "작업지시가 취소되었습니다.");
-  });
-  
-  // 작업지시서 상태변경 공통 함수
-  async function updateStatus (orderId, status, alertContent){
-	  return fetch (`/order/status/${orderId}?status=${status}`, {
-		  method: "PATCH",
-		  headers: {
-		      "Content-Type": "application/json",
-		      [csrfHeader]: csrfToken
-		  }
-	  })
-	  .then(res => {
-		  if (!res.ok) throw new Error ("서버 오류 : " + res.status);
-		  return res.text();
-	  })
-      .then(() => {
-    	 alert(alertContent);
-    	 
-   		// 모달 닫기
-   	    const modal = bootstrap.Modal.getInstance(document.getElementById("workDetailModal"));
-   	    modal.hide();
-   	    
-   	    // 목록 새로고침
-   	    loadWorkOrderGrid(); 
-     })
-     .catch(err => console.error("오류 발생:", err));
-  }
-
-  // 수정
-  document.getElementById("btnModify").addEventListener("click", async () => {
-
-	  const prcBld = document.getElementById("PRC-BLD").value;
-	  const prcFlt = document.getElementById("PRC-FLT").value;
-	  const prcFil = document.getElementById("PRC-FIL").value;
-	  const prcCap = document.getElementById("PRC-CAP").value;
-	  const prcLbl = document.getElementById("PRC-LBL").value;
-	  const remark = document.getElementById("detailRemark").value;
-	  
-	  const payload = {
-		"PRC-BLD": prcBld,
-		"PRC-FLT": prcFlt,
-		"PRC-FIL": prcFil,
-		"PRC-CAP": prcCap,
-		"PRC-LBL": prcLbl,
-		"remark": remark
-	  };
-
-	  fetch (`/order/modify/${orderId}`, {
-		  method: "PATCH",
-		  headers: {
-			  "Content-Type": "application/json",
-			  [csrfHeader]: csrfToken
-		  },
-		  body: JSON.stringify(payload)
-	  })
-		.then(() => {
-		  alert("수정 완료");
-	  })
-	    .catch(err => console.error ("오류 발생", err));
-  });
-  
-  	// 시작입력 보정
-	const startTime = document.getElementById("startTime");
-	const endTime 	= document.getElementById("endTime");
-	 
-	function validateTimes(){
-		const start = startTime.value;
-		const end	= endTime.value;
-	
-	
-		if (!start || !end) 
-			return;
-		
-		
-		// 근무시간 범위 설정
-		if (start < "09:00" || start > "18:00") {
-			alert ("시작 시간은 09:00~18:00 사이여야 합니다.");
-			startTime.value = "";
-			return;
-		}
-		
-		if (end < "09:00" || end > "18:00") {
-			alert ("종료 시간은 09:00~18:00 사이여야 합니다.");
-			endTime.value = "";
-			return;
-		}
-		
-		// 30분 단위로 가능
-		const startMin = Number(start.split(":")[1]);
-		const endMin   = Number(end.split(":")[1]);
-		 
-		if (startMin % 30 !== 0 || endMin % 30 !== 0) {
-			alert("시간은 30분 단위로만 선택할 수 있습니다.");
-			startTime.value = "";
-			endTime.value	= "";
-			return;
-		}
-		
-		// 시작시간 < 종료시간
-		if (start >= end) {
-			alert("종료 시간은 시작 시간 이후여야 합니다.");
-			endTime.value = "";
-			return;
-		}
-	}
-	
-	// 이벤트 연결
-	startTime.addEventListener("change", () => {
-		// 시작 시간이 바뀌면 최솟값 갱신
-		if (startTime.value) {
-			endTime.min = startTime.value;
-		}
-		validateTimes();
-	});
-	
-	endTime.addEventListener("change", validateTimes);
-	
-  
 </script>
+<script th:src="@{/js/order/list.js}"></script>
+<script th:src="@{/js/order/create.js}"></script>
+<script th:src="@{/js/order/detail.js}"></script>
 </th:block>
 
 </body>

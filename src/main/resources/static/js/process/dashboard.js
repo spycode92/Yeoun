@@ -232,6 +232,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".rack .big-mid").forEach(el => {
     const stay = Number(el.dataset.stay);
     const active = Number(el.dataset.active);
+	
+	// 서버가 이미 라벨 포함 텍스트를 넣어둔 경우(예: "QC대기 14분")는 덮어쓰지 않음
+    const current = (el.textContent || "").trim();
+    if (current.includes("QC") || current.includes("대기") || current.includes("시작대기")) {
+      return;
+    }
 
     // 진행중(또는 QC대기 포함해서 inProgressCnt에 들어오는 값)인 경우만 포맷 적용
     if (active > 0 && !Number.isNaN(stay)) {

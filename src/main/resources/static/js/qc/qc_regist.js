@@ -261,7 +261,7 @@ function openQcRegModal(rowData) {
 
 	// 모달 열기
 	qcRegModal.show();
-	qcDirty = false; 
+	setTimeout(() => { qcDirty = false; }, 0);
 	
 	// 모달 열릴 때 FAIL 사유 상태 동기화
 	updateFailReasonState();
@@ -334,6 +334,41 @@ function renderQcDetailTable(detailList) {
 
     tbody.appendChild(tr);
   });
+  
+  // 측정값 입력 시 자동 PASS/FAIL (tbody에 1회만 바인딩)
+  if (!tbody.dataset.autoJudgeBound) {
+    tbody.dataset.autoJudgeBound = "Y";
+
+    tbody.addEventListener("input", (e) => {
+      const input = e.target;
+      if (!input.matches('input[name$=".measureValue"]')) return;
+
+      const row = input.closest("tr");
+      if (!row) return;
+
+      const select = row.querySelector('select[name$=".result"]');
+      if (!select) return;
+
+      const raw = input.value;
+      const minAttr = input.dataset.min;
+      const maxAttr = input.dataset.max;
+
+      if (!minAttr && !maxAttr) return;
+      if (!raw) return;
+
+      const v = Number(raw);
+      if (Number.isNaN(v)) {
+        select.value = "FAIL";
+        return;
+      }
+
+      let pass = true;
+      if (minAttr && !Number.isNaN(Number(minAttr)) && v < Number(minAttr)) pass = false;
+      if (maxAttr && !Number.isNaN(Number(maxAttr)) && v > Number(maxAttr)) pass = false;
+
+      select.value = pass ? "PASS" : "FAIL";
+    });
+  }
 }
 
 // 상세 테이블 값
@@ -423,7 +458,7 @@ function onClickSaveQcResult() {
 
 	// FAIL인데 불합격 사유가 없으면 막기
 	if (overallResult === "FAIL" && failReason === "") {
-	  alert("전체 판정이 FAIL인 경우, 불합격 사유를 입력해주세요.");
+	  alert("전체 판정이 불합격인 경우, 불합격 사유를 입력해주세요.");
 	  failReasonEl?.removeAttribute("readonly");
 	  failReasonEl?.focus();
 	  return;
@@ -459,7 +494,6 @@ function onClickSaveQcResult() {
 	if (planQty !== null && !isNaN(planQty)) {
 	  if (goodQty + defectQty !== planQty) {
 	    alert("양품 수량 + 불량 수량이 지시수량과 일치하지 않습니다.");
-	    // 필요하면 여기서 return 빼고 경고만 띄우게 바꿀 수도 있어
 	    return;
 	  }
 	}
@@ -467,7 +501,7 @@ function onClickSaveQcResult() {
 	const hasDetailFail = detailRows.some(r => (r.result || "").toUpperCase() === "FAIL");
 
 	if (overallResult === "PASS" && hasDetailFail) {
-	  if (!confirm("상세 항목에 FAIL이 포함되어 있습니다.\n그래도 전체 판정을 PASS로 저장할까요?")) {
+	  if (!confirm("상세 항목에 불합격이 포함되어 있습니다.\n그래도 전체 판정을 합격으로 저장할까요?")) {
 	    return;
 	  }
 	}
@@ -512,89 +546,48 @@ function onClickSaveQcResult() {
     const csrfToken     = csrfTokenMeta ? csrfTokenMeta.content : null;
     const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
 
-    // 5) fetch 호출 
-    fetch(`/qc/${qcResultId}/save`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
-      },
-      body: JSON.stringify(payload)
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("QC 저장 결과:", data);
+	// 5) fetch 호출
+	fetch(`/qc/${qcResultId}/save`, {
+	  method: "POST",
+	  headers: {
+	    "Content-Type": "application/json",
+	    ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+	  },
+	  body: JSON.stringify(payload)
+	})
+	.then((res) => {
+	  if (!res.ok) throw new Error("HTTP " + res.status);
+	  return res.json();
+	})
+	.then((data) => {
+	  if (!data.success) {
+	    alert(data.message || "QC 저장 중 오류가 발생했습니다.");
+	    return;
+	  }
 
-        if (data.success) {
-          alert(data.message || "QC 검사 결과가 저장되었습니다.");
-		  
-		  qcSaved = true;
-		  qcDirty = false;
-          // 모달 닫고 목록 새로고침
-          qcRegModal.hide();
-          loadQcRegistGrid();
-        } else {
-          alert(data.message || "QC 저장 중 오류가 발생했습니다.");
-        }
-      })
-      .catch((err) => {
-        console.error("QC 저장 오류:", err);
-        alert("QC 저장 중 오류가 발생했습니다.");
-      });
-  }
-  
-  // 측정값 입력 시 자동 PASS/FAIL 판정
-  const qcDetailTbody = document.getElementById("qcDetailTbody");
+	  // ✅ 파일 업로드(저장 후)
+	  uploadAllSelectedFiles()
+	    .then(() => {
+	      alert(data.message || "QC 검사 결과가 저장되었습니다.");
+	      qcSaved = true;
+	      qcDirty = false;
+	      qcRegModal.hide();
+	      loadQcRegistGrid();
+	    })
+	    .catch(() => {
+	      alert("QC 저장은 완료됐지만, 첨부파일 업로드 중 일부 오류가 발생했습니다.");
+	      qcSaved = true;
+	      qcDirty = false;
+	      qcRegModal.hide();
+	      loadQcRegistGrid();
+	    });
+	})
+	.catch((err) => {
+	  console.error("QC 저장 오류:", err);
+	  alert("QC 저장 중 오류가 발생했습니다.");
+	});
+} // onClickSaveQcResult 끝
 
-  if (qcDetailTbody) {
-    qcDetailTbody.addEventListener("input", (e) => {
-      // 측정값 input이 아닐 경우 무시
-      const input = e.target;
-      if (!input.matches('input[name$=".measureValue"]')) return;
-
-      const row = input.closest("tr");
-      if (!row) return;
-
-      const select = row.querySelector('select[name$=".result"]');
-      if (!select) return;
-
-      const raw = input.value;
-      const minAttr = input.dataset.min;
-      const maxAttr = input.dataset.max;
-
-      // min/max 둘 다 없으면 자동판정 대상 아님
-      if (!minAttr && !maxAttr) {
-        return;
-      }
-
-      if (!raw) {
-        return;
-      }
-
-      const v = Number(raw);
-      if (Number.isNaN(v)) {
-        // 숫자 아니면 FAIL으로
-        select.value = "FAIL";
-        return;
-      }
-
-      let pass = true;
-
-      if (minAttr && !Number.isNaN(Number(minAttr)) && v < Number(minAttr)) {
-        pass = false;
-      }
-      if (maxAttr && !Number.isNaN(Number(maxAttr)) && v > Number(maxAttr)) {
-        pass = false;
-      }
-
-      select.value = pass ? "PASS" : "FAIL";
-    });
-  }
 
   // 파일첨부
   function uploadQcDetailFiles(qcResultDtlId, files) {
@@ -633,21 +626,6 @@ function onClickSaveQcResult() {
       });
   }
   
-  // 파일 선택 시 자동 업로드
-  document.addEventListener("change", (e) => {
-    const input = e.target;
-    if (!input.matches(".qc-file-input")) return;   
-
-    const qcResultDtlId = input.dataset.dtlId;
-    const files = input.files;
-
-    if (!qcResultDtlId || !files || files.length === 0) {
-      return;
-    }
-
-    uploadQcDetailFiles(qcResultDtlId, files);  
-  });
-
   // 검사 시작 후 저장 아닌 취소 눌렀을 경우
   function cancelQc(orderId) {
     // CSRF
@@ -656,12 +634,12 @@ function onClickSaveQcResult() {
     const csrfToken      = csrfTokenMeta ? csrfTokenMeta.content : null;
     const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
 
-    fetch(`/qc/cancel?orderId=${encodeURIComponent(orderId)}`, {
-      method: "POST",
-      headers: {
-        ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
-      }
-    })
+	fetch(`/qc/cancel?orderId=${encodeURIComponent(orderId)}`, {
+	  method: "POST",
+	  headers: {
+	    ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+	  }
+	})
     .then(res => {
       if (!res.ok) throw new Error("HTTP " + res.status);
       return res.json();
@@ -762,4 +740,41 @@ function onClickSaveQcResult() {
     e.target.blur();
   });
 
+  function uploadAllSelectedFiles() {
+    const inputs = document.querySelectorAll("#qcDetailTbody .qc-file-input");
+    const tasks = [];
+
+    inputs.forEach(input => {
+      const dtlId = input.dataset.dtlId;
+      const files = input.files;
+      if (!dtlId || !files || files.length === 0) return;
+
+      tasks.push(uploadQcDetailFilesPromise(dtlId, files));
+    });
+
+    return Promise.allSettled(tasks);
+  }
+
+  function uploadQcDetailFilesPromise(qcResultDtlId, files) {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append("qcDetailFiles", files[i]);
+    }
+
+    const csrfTokenMeta  = document.querySelector('meta[name="_csrf_token"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+    const csrfToken      = csrfTokenMeta ? csrfTokenMeta.content : null;
+    const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+    return fetch(`/qc/detail/${qcResultDtlId}/files`, {
+      method: "POST",
+      headers: {
+        ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+      },
+      body: formData
+    }).then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    });
+  }
 

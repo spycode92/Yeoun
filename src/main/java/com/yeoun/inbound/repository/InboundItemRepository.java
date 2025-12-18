@@ -13,7 +13,7 @@ public interface InboundItemRepository extends JpaRepository<InboundItem, Long> 
 	// 입고ID로 입고품목 조회
 	List<InboundItem> findAllByInbound_InboundId(String inboundId);
 
-	Optional<InboundItem> findTopByLotNoOrderByInboundItemIdDesc(String lotNo);
+	Optional<InboundItem> findTopByLotNoOrderByInboundItemIdAsc(String lotNo);
 
 	InboundItem findByLotNo(String lotNo);
 

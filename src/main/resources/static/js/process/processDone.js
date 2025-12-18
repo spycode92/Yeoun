@@ -87,6 +87,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("doneStatus")?.addEventListener("change", () => {
     loadDoneGrid();
   });
+  
+  // 완료일자(date) 바뀌면 바로 검색 (change + input)
+  const doneDateEl = document.getElementById("doneDate");
+
+  doneDateEl?.addEventListener("change", () => loadDoneGrid());
+  doneDateEl?.addEventListener("input",  () => loadDoneGrid());
 
   // 초기화 버튼
   document.getElementById("btnResetDone")?.addEventListener("click", (e) => {

@@ -1,10 +1,12 @@
 window.onload = function () {	
 	bomDetailGridAllSearch();// bom상세 그리드 조회
 	bomGridAllSearch();// bom 정보그리드 조회
+	bomHdrGridAllSearch(); //bom 그룹 그리드 조회
 	safetyStockGridAllSearch();//안전재고 그리드 조회
 	matGridAllSearch();	// bom 정보 - bom 원재료id 모달
 	prdItemList(); // bom 정보 - bom 완제품id 드롭다운
 	bomUnitList(); // bom 정보 - bom 단위 드롭다운 
+	bomHdrTypeList(); //bom 그룹 - bom hdr type 드롭다운
 	safetyStockMatTypeList(); //안전재고 - 품목유형 드롭다운
 	safetyStockPolicyTypeList(); //안전재고 - 정책방식 드롭다운
 	safetyStockUnitList(); //안전재고 - 단위 드롭다운
@@ -22,18 +24,30 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
         } else if (targetId === '#navs-bom-tab') {//bom 정보 탭
             grid2.refreshLayout();
 			bomGridAllSearch();
-        }
+			matGridAllSearch();	// bom 정보 - bom 원재료id 모달
+			prdItemList(); // bom 정보 - bom 완제품id 드롭다운
+			bomUnitList(); // bom 정보 - bom 단위 드롭다운 
+        }else if(targetId === '#navs-bomGroup-tab'){ //bom그룹탭
+			grid8.refreshLayout();
+			bomHdrGridAllSearch();
+			bomHdrTypeList(); //bom 그룹 - bom hdr type 드롭다운
+		}
     });
 });
 
 const modalElement = document.getElementById('safetyStock-modal');//안전재고 모달
 modalElement.addEventListener('shown.bs.modal', function () {
     grid3.refreshLayout();
+	safetyStockMatTypeList(); //안전재고 - 품목유형 드롭다운
+	safetyStockPolicyTypeList(); //안전재고 - 정책방식 드롭다운
+	safetyStockUnitList(); //안전재고 - 단위 드롭다운
+	safetyStockStatusList(); //안전재고 - 상태 드롭다운
 });
 
 const routeModalElement = document.getElementById('matItems-modal');//원재료 모달
 routeModalElement.addEventListener('shown.bs.modal', function () {
     grid7.refreshLayout();
+	matGridAllSearch();	
 });
 
 //bom 정보 그리드 드롭다운 리스트
@@ -41,11 +55,15 @@ let prdListItems = []; //완제품id
 let matListItems = []; //원재료 id
 let unitListItems = []; //bom 단위
 
+//bom 그룹 그리드 드롭다운 리스트
+let bomHdrTypeListItems = []; //bom Hdr 타입 
+
 //안전재고 그리드 드롭다운 리스트
 let safetyStockMatTypeListItems = []; //안전재고 품목유형
 let safetyStockPolicyTypeListItems = []; //안전재고 정책방식
 let safetyStockUnitListItems = []; //안전재고 단위
 let safetyStockStatusListItems = []; //안전재고 상태
+
 
 const Grid = tui.Grid;
 //g-grid1 bom 상세 bomDetailGrid
@@ -55,6 +73,14 @@ const grid1 = new Grid({
 	  rowHeaders: ['rowNum'],
 	  columns: [
 			{header: 'BOMID' ,name: 'bomId' ,align: 'center',filter: "select"}
+			,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width:83
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: false   // ⭐ 이걸로 구분
+					}
+				}
+			}  
+
 	  ]
 	  ,bodyHeight: 1200 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -242,7 +268,24 @@ const grid2 = new Grid({
 		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
 		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}   
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center', hidden: true}        
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 83
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: false   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
+			
+		}        
 	  ]
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -390,6 +433,60 @@ const grid7 = new Grid({
 	  	  }
 });
 
+// BOM 그룹 그리드 bomGroupGrid
+const grid8 = new Grid({
+		  el: document.getElementById('bomGroupGrid'), 
+		  data: [],
+	      rowHeaders: ['rowNum'],
+		  columns: [
+			    {header: 'BOM 그룹 ID' ,name: 'bomHdrId' ,align: 'center'
+					,renderer:{ type: StatusModifiedRenderer}	
+				}
+			    ,{header: 'BOM ID' ,name: 'bomId' ,align: 'center'
+					,renderer:{ type: StatusModifiedRenderer}	
+				}
+			    ,{header: 'BOM 그룹 명' ,name: 'bomHdrName' ,align: 'center',filter: "select",editor: 'text'
+					,renderer:{ type: StatusModifiedRenderer}
+					
+				}
+			    ,{header: 'BOM 그룹 타입' ,name: 'bomHdrType' ,align: 'center',filter: "select",width: 155
+					,renderer:{ type: StatusModifiedRenderer
+						,options: {
+							isSelect: true   // ⭐ 이걸로 구분
+						}
+					}
+					,editor: {
+						type: 'select', // 드롭다운 사용
+						options: {
+							listItems: bomHdrTypeListItems
+						}
+					}				
+					
+				}
+				,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width: 83
+					,renderer:{ type: StatusModifiedRenderer
+					,options: {
+							isSelect: false   // ⭐ 이걸로 구분
+						}
+					}
+				}  
+				,{header: '생성자' ,name: 'createdId' ,align: 'center',width: 100,hidden: true}
+				,{header: '생성일시' ,name: 'createdDate' ,align: 'center',width: 100,hidden: true}
+				,{header: '수정자' ,name: 'updatedId' ,align: 'center',width: 100,hidden: true}
+				,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',width: 100,hidden: true}
+		    
+		  ]
+		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+		  ,height:100
+		  ,columnOptions: {
+	    		resizable: true
+	  	  }
+		  ,pageOptions: {
+	    		useClient: true,
+	    		perPage: 20
+	  	  }
+});
+
 
 grid2.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
@@ -473,6 +570,7 @@ function bomDetailGridAllSearch() {
 			console.log("검색데이터GRID1:", data);
 			data.forEach(item => {
 				item.bomId = item[0];
+				item.useYn = item[1];
 			});
 			grid1.resetData(data);
 		})
@@ -596,7 +694,7 @@ function bomDetailMatTypeGridAllSearch(bomId) {
 }
 
 
-//bom그리드 전체조회
+//bom 정보 그리드 전체조회
 function bomGridAllSearch() {
 
 	const params = {
@@ -646,6 +744,55 @@ function bomGridAllSearch() {
 		});
 
 }
+// bom Hdr 그룹 전체조회
+function bomHdrGridAllSearch(){
+	const params = {
+			bomHdrId: document.getElementById("bomHdrId").value ?? "",
+			bomHdrType: document.getElementById("bomHdrType").value ?? ""
+		};
+		const queryString = new URLSearchParams(params).toString();
+		fetch(`/bom/bomHdrList?${queryString}`, {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+			
+		})
+		.then(res => {
+		    if (!res.ok) {
+		        throw new Error(`HTTP error! status: ${res.status}`);
+		    }
+		    
+		    // 💡 추가된 로직: 응답 본문이 비어 있는지 확인
+		    const contentType = res.headers.get("content-type");
+		    if (!contentType || !contentType.includes("application/json")) {
+		        // Content-Type이 JSON이 아니거나, 200 OK인데 본문이 비어있다면 (Empty)
+		        if (res.status === 204 || res.headers.get("Content-Length") === "0") {
+		             return []; // 빈 배열 반환하여 grid 오류 방지
+		        }
+		        // JSON이 아닌 다른 데이터(HTML 오류 등)가 있다면 텍스트로 읽어 오류 발생
+		        return res.text().then(text => {
+		            throw new Error(`Expected JSON but received: ${text.substring(0, 100)}...`);
+		        });
+		    }
+
+		    return res.json(); // 유효한 JSON일 때만 파싱 시도
+		})
+			.then(data => {
+				
+				console.log("검색데이터 grid8:", data);
+				//bomMstList
+				grid8.resetData(data);	
+			})
+			.catch(err => {
+				console.error("조회오류", err);
+				grid8.resetData([]);
+			
+			});
+	
+}
+
 //안전재고 그리드 전체조회
 function safetyStockGridAllSearch() {
 	const params = {
@@ -828,6 +975,41 @@ function bomUnitList(){
 	.catch(err => {
 		console.error('단위 드롭다운 데이터:', err);
 	});
+}
+
+// Bom 그룹 드롭다운
+function bomHdrTypeList() {
+	
+	fetch('/bom/hdrTypeLis', {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+		})
+		.then(res => {
+			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+			return res.json();
+		})
+		.then(data => {
+			console.log("단위 드롭다운 데이터:", data);
+
+			data.forEach(item => {
+				bomHdrTypeListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			});
+			console.log("bomHdrTypeListItems:", bomHdrTypeListItems);
+			// Dropdown editor의 listItems 업데이트
+			
+		})
+		.catch(err => {
+			console.error('단위 드롭다운 데이터:', err);
+		});
+	
+	
+	
 }
 
 //안전재고 품목종류 드롭다운

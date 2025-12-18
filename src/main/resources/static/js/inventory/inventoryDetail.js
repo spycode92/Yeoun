@@ -49,6 +49,7 @@ function openDetailModal(rowData, sameLotList = []) {
 			case 'RAW':  return '원자재';
 			case 'SUB':  return '부자재';
 			case 'FG':   return '완제품';
+			case 'PKG':   return '포장재';
 			default:     return type || '';
 		}
 	})(rowData.itemType);

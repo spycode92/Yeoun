@@ -116,13 +116,32 @@ public class OrderQueryService {
 	}
 	
 	// =======================================================
-	// 작업자 조회
-	public List<WorkerListDTO> loadAllWorkers() {
+	// 휴가를 떠나지 않은 작업자 조회 (생산팀/QC팀 공통)
+	public List<WorkerListDTO> loadAvailableWorkers(String dept) {
+		LocalDate today = LocalDate.now();			// 휴가여부 판단용
+		List<WorkerListDTO> list = orderMapper.selectWorkers(dept);
+		List<WorkerListDTO> result = new ArrayList<>();
+		
+		for (WorkerListDTO dto : list) {
+			boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual
+					(dto.getEmpId(), today, today);
+			
+			if (!isHoliday) {
+				result.add(dto);
+			}
+		}
+		
+		return result;
+	}
+	
+	// =======================================================
+	// 작업자 조회 (스케줄화면)
+	public List<WorkerListDTO> loadWorkersWithStatus() {
 		
 		LocalDate today = LocalDate.now();			// 휴가여부 판단용
 		LocalDateTime now = LocalDateTime.now();	// 작업여부 판단용
 		
-		List<WorkerListDTO> list = orderMapper.selectWorkers();
+		List<WorkerListDTO> list = orderMapper.selectWorkers("DEP003");
 		
 		for (WorkerListDTO dto : list) {
 			boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual
@@ -144,9 +163,6 @@ public class OrderQueryService {
 		return list;
 	}
 	
-	// =======================================================
-	// 품질검사팀 조회
-
 	// =======================================================
 	// 작업지시 상세 조회
 	public WorkOrderDetailDTO getDetailWorkOrder(String id) {

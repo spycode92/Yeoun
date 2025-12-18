@@ -26,6 +26,13 @@ const CODE_MAP = {
     'BOX': '박스',
     'UNIT_BOX': '박스',
 	
+	//bom 그룹 타입 유형
+	'STD':	'정규/양산 BOM',
+	'ALT':	'대체 BOM',
+	'SMP':	'샘플/시험 BOM',
+	'DEV':	'개발/연구 BOM',
+	'RWRK':	'재작업 BOM',
+	
 	//향수 유형
 	'LIQUID': '고체향수', 
 	'SOLID': '액체향수',
@@ -48,8 +55,7 @@ class StatusModifiedRenderer {
         this.render(props);
     }
 	
-	static getKoreanText(englishValue) {
-        // 분리된 PRD_STATUS_MAP을 참조합니다.
+    static getKoreanText(englishValue) {
         return CODE_MAP[englishValue] || englishValue; 
     }
 
@@ -57,25 +63,31 @@ class StatusModifiedRenderer {
         return this.el;
     }
 
-    formatStatusBadge(status) {
+    // ⭐ 수정: props를 인자로 받아 editor 유무를 확인합니다.
+    formatStatusBadge(status, hasEditor) {
         const map = {
             "Y": { text: "활성", cls: "status-badge bg-primary" },
             "N": { text: "비활성", cls: "status-badge bg-warning" },
         };
         const item = map[status] || { text: status, cls: "status-badge" };
         
-        // TOAST UI Grid의 html 유틸리티를 사용하여 안전하게 HTML 문자열 반환
-        return `<span class="${item.cls}" style="padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold;">${item.text}<span style="font-size:10px;opacity:0.6;pa">▼</span></span> `;
+        // editor 설정이 있을 때만 화살표 추가
+        const arrow = hasEditor ? `<span style="font-size:8px;opacity:0.6;padding-left:3px;">▼</span>` : '';
+        
+        return `<span class="${item.cls}" style="padding: 4px 8px; border-radius: 4px; color: white;">${item.text}${arrow}</span> `;
     }
 	
     render(props) {
         const value = props.value;
         const rowKey = props.rowKey;
+        const columnInfo = props.columnInfo;
+        
+        // ⭐ 1. Editor 설정 여부 확인 (핵심!)
+        const hasEditor = !!columnInfo.editor; 
         const isSelect = props.columnInfo.renderer?.options?.isSelect;
 
         const koreanText = StatusModifiedRenderer.getKoreanText(value);
 
-        // 신규 행 여부
         let isCreated = false;
         let isUpdated = false;
 
@@ -89,61 +101,35 @@ class StatusModifiedRenderer {
         const displayText = (!hasValue && isCreated) ? '' : koreanText;
 
         let contentHTML = '';
-        // UI
+        
         if (isSelect) {
+            // ⭐ 2. isSelect 모드일 때도 editor가 있을 때만 화살표 렌더링
+            const arrow = hasEditor ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
             contentHTML = `
-            <div style="
-                width:100%;
-                height:100%;
-                padding:0px 10px;
-                box-sizing:border-box;
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                background:transparent;
-                cursor:pointer;
-            ">
+            <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; background:transparent; cursor:pointer;">
                 <span>${displayText}</span>
-                <span style="font-size:10px;opacity:0.6;">▼</span>
+                ${arrow}
             </div>
             `;
         } else if (value === 'Y' || value === 'N') {
-            // ⭐ 2. Y/N 값일 때: 배지 HTML 할당
-            contentHTML = this.formatStatusBadge(value);
-            
+            // ⭐ 3. 배지 함수에 editor 여부 전달
+            contentHTML = this.formatStatusBadge(value, hasEditor);
         } else {
             contentHTML = koreanText;
         }
 
         this.el.innerHTML = contentHTML;
 
-        // 🎨 색상 조건 수정
+        // 하이라이트 로직 (기존과 동일)
         const shouldHighlight = isUpdated || (isCreated && hasValue);
-        
         const highlightClassName = 'modified-cell-highlight';
 
         if (shouldHighlight) {
-            // 하이라이트 클래스 추가
             this.el.classList.add(highlightClassName);
-            
-            // ⭐ 이전에 인라인으로 설정했던 색상 코드는 CSS 클래스 내부로 이동
-            // this.el.style.backgroundColor = '#c3f2ffff'; 
-            // this.el.style.color = '#007aff';
-            
         } else {
-            // 하이라이트 클래스 제거 (원래 스타일로 복원)
             this.el.classList.remove(highlightClassName);
-            
-            // this.el.style.backgroundColor = '';
-            // this.el.style.color = '';
         }
-        
-
-
-        
- 
     }
-
 }
 
 class NumberOnlyEditor {

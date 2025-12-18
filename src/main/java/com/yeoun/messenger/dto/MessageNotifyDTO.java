@@ -17,4 +17,5 @@ public class MessageNotifyDTO {
 	private String senderName;			// 보낸사람 이름 (토스트 알림에 사용 예정)
 	private String sentTime;			// 메시지 보낸 시간
 	private Integer unreadCount;		// 읽지 않은 메시지 갯수
+	private Integer profileImg;			// 프로필이미지 번호
 }

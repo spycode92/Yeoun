@@ -50,6 +50,11 @@
 	               BOM 정보
 				</button>
 	           </li>
+	           <li class="nav-item">
+	             <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-bomGroup-tab" aria-controls="navs-bomGroup-tab" aria-selected="false">
+	               BOM 그룹
+				</button>
+	           </li>
 	         </ul>
 	         <div class="tab-content" >
 	           <div class="tab-pane fade show active"  id="navs-bomDetail-tab" role="tabpanel">
@@ -103,6 +108,26 @@
 					</div>
 					<div id="bomGrid" style="display: grid;margin:10px;"></div>
 	           </div>
+	            <div class="tab-pane fade" id="navs-bomGroup-tab" role="tabpanel">
+				 <div class="d-flex justify-content-start">
+			        	<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
+				        	<input type="text" id="bomHdrId" name="bomHdrId" class="form-control"  placeholder="BOM그룹 Id">
+				        </div>
+						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+							<input type="text" id="bomHdrType" name="bomHdrType" class="form-control"  placeholder="bom 타입">
+						</div>
+				        
+			           	<button type="button" class="btn btn-primary" onclick="bomHdrGridAllSearch()" style="margin-left:5px;">조회</button>
+					</div>
+	             	<div class="d-flex justify-content-end" style="margin:10px;">
+	             		
+						<!--  <button id="addBomGroupRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>-->
+						<button id="saveBomGroupRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+						<!--  <button id="deleteGroupBomRowBtn" class="btn btn-danger" type="button">삭제</button> -->
+					</div>
+					<h8 style="margin-left:18px;color:red;">* BOM 정보를 등록 하시면 BOM 그룹이 자동 생성됩니다. 수정은 BOM그룹명, BOM그룹타입,사용여부 만 할수있습니다.</h8>
+					<div id="bomGroupGrid" style="display: grid;margin:10px;"></div>				
+	           </div>
 	         </div>
        	</div>
       
@@ -127,7 +152,7 @@
 		       	<div class="d-flex justify-content-end" style="margin:10px;">
 			  		<button id="addSafetyStockRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
 					<button id="saveSafetyStockRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger" type="button">빈행 삭제</button>
+			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger" type="button">신규행 삭제</button>
 				 </div>
 		         <div id="safetyStockGrid" style="display: grid;margin-right:5px;"></div>
 		      </div>

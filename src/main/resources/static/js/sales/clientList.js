@@ -72,8 +72,7 @@ function initClientGrid() {
 		               p.value === "SUPPLIER" ? "협력사" : p.value;
 		    }
         },
-
-        { headerName: "코드", field: "clientId", width: 180 },
+       
         { headerName: "거래처명", field: "clientName", flex: 1 },
         { headerName: "사업자번호", field: "businessNo", width: 150 },
         { headerName: "대표자명", field: "ceoName", width: 140 },

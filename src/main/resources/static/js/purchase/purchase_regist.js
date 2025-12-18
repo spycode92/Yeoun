@@ -318,6 +318,21 @@ const submitOrder = async () => {
 		});
 	});
 	
+	if (clientId.trim().length === 0) {
+		alert("거래처를 선택해주세요.");
+		return;
+	}
+	
+	if (items.length <= 0) {
+		alert("품목을 선택해주세요.");
+		return;
+	}
+	
+	if (dueDate.value === null || dueDate.value === "") {
+		alert("예상도착일을 입력해주세요.");
+		return;
+	}
+	
 	// body에 담아서 보낼 내용
 	const payload = {
 		clientId,

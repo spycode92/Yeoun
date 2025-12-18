@@ -8,6 +8,7 @@ import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
+import com.yeoun.messenger.support.RoomNameGenerator;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,8 @@ public class ChatService {
 	private final EmpRepository empRepository;
 	private final MsgRoomRepository msgRoomRepository;
 	private final MsgStatusRepository msgStatusRepository;
+	private final RoomNameGenerator roomNameGenerator;
+	private final RoomMemberQueryService roomMemberQueryService;
 
 	// 1) 메시지 전송 처리
 	// DB 저장 + 해당 방 참여자들에게 broadcast
@@ -90,6 +93,10 @@ public class ChatService {
 							.getEmpName())
 					.sentTime(event.getSentTime())
 					.unreadCount(unread)
+					.profileImg(msgStatusRepository.findById(event.getSenderId()).orElseThrow(() -> new RuntimeException("오류 발생"))
+							.getMsgProfile())
+					.groupName(roomNameGenerator.create(event.getRoomId(), event.getSenderName(),
+							roomMemberQueryService.getMembers(event.getRoomId())))
 					.build();
 			
 			// 메시지 전송 2) (외부를 대상으로)

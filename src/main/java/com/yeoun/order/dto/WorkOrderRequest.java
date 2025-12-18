@@ -52,6 +52,9 @@ public class WorkOrderRequest {
 
     @NotNull(message = "캡핑 작업자 선택은 필수입니다.")
     private String prcCap;
+    
+    @NotNull(message = "품질관리자 선택은 필수입니다.")
+    private String prcQc;
 
     @NotNull(message = "라벨링 작업자 선택은 필수입니다.")
     private String prcLbl;

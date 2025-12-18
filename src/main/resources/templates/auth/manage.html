@@ -94,32 +94,46 @@
                 </div>
               </div>
 
-              <div class="row g-2 mb-3 role-row">
-                <!-- 역할 목록 th:each -->
-                <div class="col-6 col-md-6"
-                     th:each="r : ${roleList}">
-                  <div class="form-check form-switch">
-                    <input class="form-check-input role-checkbox" type="checkbox"
-                           th:id="'role-' + ${r.roleCode}" name="roleCodes" th:value="${r.roleCode}">
-                    <label class="form-check-label" th:for="'role-' + ${r.roleCode}">
-                      <span th:text="${r.roleName}">HR 관리자</span>
-                      <span class="text-muted small"
-                            th:text="' (' + ${r.roleCode} + ')'">
-                        (ROLE_HR_ADMIN)
-                      </span>
-                    </label>
-                  </div>
-                </div>
+              <!-- ===== 일반 역할 (SYS_ADMIN 제외) ===== -->
+				<div class="row g-2 mb-3 role-row">
+				  <div class="col-6 col-md-6"
+				       th:each="r : ${roleList}"
+				       th:if="${r.roleCode != 'ROLE_SYS_ADMIN'}">
+				    <div class="form-check form-switch">
+				      <input class="form-check-input role-checkbox" type="checkbox"
+				             th:id="'role-' + ${r.roleCode}" name="roleCodes" th:value="${r.roleCode}">
+				      <label class="form-check-label" th:for="'role-' + ${r.roleCode}">
+				        <span th:text="${r.roleName}">역할명</span>
+				        <span class="text-muted small" th:text="' (' + ${r.roleCode} + ')'">(ROLE_...)</span>
+				      </label>
+				    </div>
+				  </div>
+				
+				  <div class="col-12" th:if="${#lists.isEmpty(roleList)}">
+				    <div class="text-muted small">등록된 역할이 없습니다. ROLE 테이블부터 확인해주세요.</div>
+				  </div>
+				</div>
+				
+				<!-- ===== SYS_ADMIN 별도 섹션 ===== -->
+				<div class="mt-2 p-3 border border-danger rounded bg-light">
+				  <div class="fw-semibold text-danger mb-1">최고 권한 (SYS_ADMIN)</div>
+				  <div class="text-muted small mb-2">
+				    SYS_ADMIN은 모든 시스템 권한을 가집니다. 신중히 부여하세요.
+				  </div>
+				
+				  <div th:each="r : ${roleList}" th:if="${r.roleCode == 'ROLE_SYS_ADMIN'}">
+				    <div class="form-check form-switch">
+				      <input class="form-check-input role-checkbox" type="checkbox"
+				             th:id="'role-' + ${r.roleCode}" name="roleCodes" th:value="${r.roleCode}">
+				      <label class="form-check-label" th:for="'role-' + ${r.roleCode}">
+				        <span th:text="${r.roleName}">시스템 관리자</span>
+				        <span class="text-muted small" th:text="' (' + ${r.roleCode} + ')'">(ROLE_SYS_ADMIN)</span>
+				      </label>
+				    </div>
+				  </div>
+				</div>
 
-                <!-- 역할 없음 -->
-                <div class="col-12" th:if="${#lists.isEmpty(roleList)}">
-                  <div class="text-muted small">
-                    등록된 역할이 없습니다. ROLE 테이블부터 확인해주세요.
-                  </div>
-                </div>
-              </div>
-
-              <div class="ard-footer d-flex justify-content-end gap-2">
+              <div class="ard-footer d-flex justify-content-end gap-3 pe-2 mt-3">
                 <a th:href="@{/auth/manage}" class="btn btn-outline-secondary">
                   취소
                 </a>
@@ -129,13 +143,102 @@
               </div>
               
             </form>
-
+            
           </div>
         </div>
       </div>
     </div>
   </div>
   
+<!-- ================== 관리자 비밀번호 확인 모달 ================== -->
+<div class="modal fade" id="adminPwModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">관리자 비밀번호 확인</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="alert alert-warning small mb-3">
+          권한 변경은 민감 작업입니다. 본인 확인을 위해 비밀번호를 다시 입력해주세요.
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold">비밀번호</label>
+          <div class="position-relative">
+            <input type="password" class="form-control pe-5" id="adminPassword" placeholder="현재 로그인 비밀번호">
+            <i class='bx bx-hide position-absolute top-50 end-0 translate-middle-y me-3'
+               style="font-size: 22px; cursor: pointer; color: #6c757d;"
+               onclick="togglePassword('adminPassword', this)"></i>
+          </div>
+
+          <div class="text-danger small mt-2 d-none" id="adminPwError">
+            비밀번호가 올바르지 않거나 확인 시간이 만료되었습니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary" id="btnVerifyAdminPw">확인</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================== 권한 저장 확인 모달 ================== -->
+<div class="modal fade" id="saveConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">권한 저장 확인</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-2">
+          <div class="text-muted small">사원</div>
+          <div class="fw-semibold" id="confirmEmpText">—</div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="mb-2 d-flex justify-content-between align-items-center">
+          <div class="fw-semibold">부여 권한</div>
+          <span class="badge bg-secondary" id="confirmRoleCount">0</span>
+        </div>
+
+        <!-- 권한 뱃지 표시 영역 -->
+        <div class="d-flex flex-wrap gap-2" id="confirmRoleBadges"></div>
+
+        <!-- SYS_ADMIN 경고 -->
+        <div class="alert alert-danger small mt-3 d-none" id="confirmSysWarn">
+          ⚠ SYS_ADMIN(최고 권한)이 포함되어 있습니다. 신중히 확인하세요.
+        </div>
+        
+        <!-- SYS_ADMIN 동의 체크 -->
+		<div class="form-check mt-2 d-none" id="confirmSysAgreeWrap">
+		  <input class="form-check-input" type="checkbox" id="confirmSysAgree">
+		  <label class="form-check-label" for="confirmSysAgree">
+		    SYS_ADMIN 권한 부여의 위험성을 이해했으며, 이에 동의합니다.
+		  </label>
+		</div>
+        
+        <!-- 권한 선택 없음 안내 -->
+        <div class="text-muted small mt-3 d-none" id="confirmNoRole">
+          선택된 권한이 없습니다. 저장 시 해당 사원의 모든 역할이 제거됩니다.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary" id="btnOpenPwModal">다음</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <th:block layout:fragment="myScript">
 	  <!-- 기존 권한 관리 JS -->
 	  <script th:src="@{/js/auth/manage.js}"></script>

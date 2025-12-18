@@ -368,6 +368,11 @@ const submitOutbound = async () => {
 		return;
 	}
 	
+	if (items.length <= 0) {
+		alert("출고할 물품이 없습니다.");
+		return;
+	}
+	
 	// body에 담아서 보낼 내용
 	const payload = {
 		workOrderId: workOrderId.value,

@@ -77,7 +77,32 @@
             <div th:text="${rootDetail.expectedEndDate}">2025-01-02</div>
           </div>
         </div>
+        
+        <div class="mb-3">
+		  <div class="text-muted small">출하 여부</div>
+		
+		  <span class="badge bg-light text-dark"
+		        th:if="${rootDetail.lotStatusLabel == '폐기'}">해당없음</span>
+		
+		  <span class="badge bg-success"
+		        th:if="${rootDetail.lotStatusLabel != '폐기' and rootDetail.shippedYn == 'Y'}">출하완료</span>
+		
+		  <span class="badge bg-secondary"
+		        th:if="${rootDetail.lotStatusLabel != '폐기' and rootDetail.shippedYn != 'Y'}">미출하</span>
+		</div>
 
+		<!-- 출하일 / 출하수량은 출하완료일 때만 보여주기 -->
+		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
+		  <div class="text-muted small">출하일자</div>
+		  <div th:text="${rootDetail.shippedAt != null ? #temporals.format(rootDetail.shippedAt, 'yyyy-MM-dd') : '-'}">-</div>
+		</div>
+		
+		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
+		  <div class="text-muted small">출하수량</div>
+		  <div>
+		    <span th:text="${rootDetail.shippedQty != null ? rootDetail.shippedQty : '-'}">-</span> EA
+		  </div>
+		</div>
       </div>
 
       <!-- 공정 상세 패널 -->
@@ -244,6 +269,8 @@
           </div>
         </div>
       </div>
+      
+      
 
     </th:block>
 
@@ -321,7 +348,10 @@
 
           <div class="mb-3">
             <div class="text-muted small">입고 수량</div>
-            <div th:text="${materialDetail.inboundAmount != null ? materialDetail.inboundAmount : '-'}">-</div>
+            <div>
+              <span th:text="${materialDetail.inboundAmount != null ? materialDetail.inboundAmount : '-'}">-</span>
+              <span th:text="${materialDetail.matUnit}">EA</span>
+            </div>
           </div>
 
           <div class="mb-3">
@@ -333,17 +363,17 @@
         <div class="col-sm-6">
           <div class="mb-3">
             <div class="text-muted small">제조일</div>
-            <div th:text="${materialDetail.manufactureDate != null ? materialDetail.manufactureDate : '-'}">-</div>
+            <div th:text="${materialDetail.manufactureDate != null ? #temporals.format(materialDetail.manufactureDate, 'yyyy-MM-dd') : '-'}">-</div>
           </div>
 
           <div class="mb-3">
             <div class="text-muted small">유통기한</div>
-            <div th:text="${materialDetail.expirationDate != null ? materialDetail.expirationDate : '-'}">-</div>
+            <div th:text="${materialDetail.expirationDate != null ? #temporals.format(materialDetail.expirationDate, 'yyyy-MM-dd') : '-'}">-</div>
           </div>
 
           <div class="mb-3">
             <div class="text-muted small">입고일</div>
-            <div th:text="${materialDetail.ibDate != null ? #temporals.format(materialDetail.ibDate, 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+            <div th:text="${materialDetail.ibDate != null ? #temporals.format(materialDetail.ibDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</div>
           </div>
         </div>
       </div>
@@ -352,19 +382,37 @@
 
       <!-- 재고 정보 -->
       <h6 class="fw-semibold mb-3">재고 정보</h6>
-      <div class="row gx-4 mb-4">
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">재고 상태</div>
-            <div th:text="${materialDetail.ivStatus != null ? materialDetail.ivStatus : '-'}">-</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">재고 위치</div>
-            <div th:text="${materialDetail.inventoryLocationId != null ? materialDetail.inventoryLocationId : '-'}">-</div>
-          </div>
-        </div>
-      </div>
+      <th:block th:if="${materialDetail.ivAmount != null}">
+	      <div class="row gx-4 mb-4">
+	        <div class="col-sm-6">
+	       	  <div class="mb-3">
+			    <div class="text-muted small">재고 수량</div>
+			    <div>
+			      <span th:text="${materialDetail.ivAmount != null ? materialDetail.ivAmount : '-'}">-</span>
+			      <span th:text="${materialDetail.matUnit}">EA</span>
+			    </div>
+			  </div>
+	
+	          <div class="mb-3">
+	            <div class="text-muted small">재고 위치</div>
+	            <div th:text="${materialDetail.inventoryLocationId != null ? materialDetail.inventoryLocationId : '-'}">-</div>
+	          </div>
+	        </div>
+	        
+	        <div class="col-sm-6">
+	          <div class="mb-3">
+	            <div class="text-muted small">재고 상태</div>
+	            <div th:text="${materialDetail.ivStatus != null ? materialDetail.ivStatus : '-'}">-</div>
+	          </div>
+	        </div>
+	      </div>
+      </th:block>
+      
+      <th:block th:if="${materialDetail.ivAmount == null}">
+		  <div class="d-flex align-items-center gap-2">
+			 <span class="badge bg-dark">소진완료</span>
+		  </div>
+	  </th:block>
 
       <hr class="my-4"/>
 

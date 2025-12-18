@@ -41,6 +41,20 @@
 	    from {width: 0; margin-left: 50%;}
 	    to {width: 100%; margin-left: 0;}
 	  }
+	  
+	  #detailLoadingOverlay{
+	  	position: absolute;
+	  	inset: 0;
+	  	background: rgba(255,255,255,.6);
+	  	z-index: 50;
+	  	display: flex;
+	  	align-items: center;
+	  	justify-content: center;
+	  	pointer-events:auto;
+	  }
+	  #detailLoadingOverlay.d-none{
+	    display: none !important;
+	  }
 	</style>
 
   <div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -75,11 +89,20 @@
 	  <div class="modal fade" id="detailModal" tabindex="-1">
 	    <div class="modal-dialog modal-xl modal-dialog-scrollable">
 	      <div class="modal-content">
+	        <div class="modal-body position-relative">
+	        
+			  <div id="detailLoadingOverlay" class="d-none">
+			    <div class="text-center">
+			      <div class="spinner-border text-primary" role="status"></div>
+			      <div class="mt-2 text-muted small">처리 중...</div>
+			    </div>
+			  </div>
+			  
 	        <div class="modal-header">
 	          <h5 class="modal-title">작업지시 공정 상세</h5>
 	          <button class="btn-close" data-bs-dismiss="modal"></button>
 	        </div>
-	        <div class="modal-body">
+	        
 	          <div class="row g-2 mb-3 small" id="summaryGrid"></div>
 	
 	          <div class="table-responsive small">

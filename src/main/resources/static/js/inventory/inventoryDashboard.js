@@ -488,7 +488,7 @@ async function renderOrderGrid() {
 	      		  }	
 				},
 				{ header: '출고등록',      name: "btn", width: 100, align: "center",
-				  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >출고등록</button>"
+				  formatter: (cellInfo) => "<button type='button' class='btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >출고등록</button>"
 				}
 	        ],
 	        data: outboundNList

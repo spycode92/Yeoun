@@ -39,6 +39,10 @@ const grid = new tui.Grid({
 			header: "복귀시간",
 			name : "returnTime"
 		},
+		{
+			header: "상태",
+			name : "accessType"
+		}
 	],
 	bodyHeight: 500,
 	columnOptions: {
@@ -69,6 +73,17 @@ async function loadAttendanceList(startDate, endDate) {
 		}
 		
 		let data = await res.json();
+		
+		const statusMap = {
+			OUT: "외출",
+			IN: "복귀",
+			OUTWORK: "외근"
+		}
+		
+		data = data.map(item => ({
+			...item,
+			accessType: statusMap[item.accessType] || item.accessType
+		}));
 		
 		// 데이터가 없을 경우 빈배열 반환
 		if (!data || data.length === 0) {

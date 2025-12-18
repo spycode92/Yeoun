@@ -204,7 +204,7 @@ function receiveNewMessage(req){
             
             <div class="chat-center">
                 <p class="mb-0 fw-bold">${req.groupName}</p>
-                <small class="text-muted">${req.preview}</p>
+                <small class="text-muted">${req.preview}</small>
             </div>
             
             <div class="chat-right">

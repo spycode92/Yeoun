@@ -48,7 +48,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 public class Attendance {
 	@Id 
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ATTENDANCE_SEQ_GENERATOR")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ATTENDANCE_SEQ_GENERATOR")
 	private Long attendanceId;
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

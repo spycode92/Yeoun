@@ -208,7 +208,7 @@
 
 			
 			<!-- 테이블 -->
-			<div class="table-responsive">
+			<div class="table-responsive" th:if="${not #lists.isEmpty(heatmapRows)}">
 				<table class="table align-middle text-center mb-0">
 					<thead>
 						<tr>
@@ -247,21 +247,35 @@
 								                                     ' border border-success bg-success-subtle')
 								            : ''}">
 								
-								  <!-- 체류 시간 -->
-								  <div class="big-mid"
-								       th:data-stay="${cell.stayMin}"
-								       th:data-active="${activeCnt}"
-								       th:text="${activeCnt > 0 ? cell.stayMin + '분'
-								              : (cell.startableCnt > 0 ? '시작대기'
-								              : (cell.hasReady ? '대기' : ''))}">
-								  </div>
-								
-								  <!-- 상태 문구 -->
-								  <div class="small-bot text-muted"
-									   th:if="${cell.startTime != null}"
-									   th:text="${#temporals.format(cell.startTime,'HH:mm') + (cell.endTime!=null ? ' ~ ' + #temporals.format(cell.endTime,'HH:mm') : '')}">
-								  </div>
-
+									<!-- 체류 시간 -->
+									<div class="big-mid"
+									     th:data-stay="${cell.stayMin}"
+									     th:data-active="${activeCnt}"
+									     th:with="isQcStep=${cell.stepSeq == 5}, isQcPending=${cell.qcPendingCnt > 0}"
+									     th:text="${
+									        activeCnt > 0
+									          ? (isQcStep and isQcPending
+									              ? 'QC대기 ' + cell.stayMin + '분'
+									              : cell.stayMin + '분')
+									          : (cell.startableCnt > 0
+									              ? (isQcStep ? 'QC대기' : '시작대기')
+									              : (cell.hasReady ? '대기' : ''))
+									     }">
+									</div>
+	
+	
+									<!-- 상태 문구 -->
+									<!-- QC 대기인 경우: 대기 시작시간만 표시 -->
+									<div class="small-bot text-muted"
+										 th:if="${cell.stepSeq == 5 and cell.qcPendingCnt > 0 and cell.startTime != null}"
+										 th:text="${'대기 시작 ' + #temporals.format(cell.startTime,'HH:mm')}">
+									</div>
+										
+									<!-- 일반 공정: 시작~종료 표시 -->
+									<div class="small-bot text-muted"
+										 th:if="${not (cell.stepSeq == 5 and cell.qcPendingCnt > 0) and cell.startTime != null}"
+										 th:text="${#temporals.format(cell.startTime,'HH:mm') + (cell.endTime!=null ? ' ~ ' + #temporals.format(cell.endTime,'HH:mm') : '')}">
+									</div>
 
 								</div>
 							</td>

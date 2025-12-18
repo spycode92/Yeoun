@@ -26,7 +26,7 @@ public interface OrderMapper {
 	List<WorkOrderListDTO> selectOrderList (WorkOrderSearchDTO dto);
 	
 	// 작업자 리스트
-	List<WorkerListDTO> selectWorkers ();
+	List<WorkerListDTO> selectWorkers (String dept);
 	
 	// 제품수량에 따른 필요한 자재량 체크
 	List<MaterialAvailabilityDTO> selectMaterials (@Param("prdId")String prdId, @Param("planQty")Integer planQty);

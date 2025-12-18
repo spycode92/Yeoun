@@ -66,7 +66,7 @@ const grid = new tui.Grid({
 			}
 		},
 	],
-	bodyHeight: 500,	
+	bodyHeight: 417,	
 	columnOptions: {
 		resizable: true
 	},

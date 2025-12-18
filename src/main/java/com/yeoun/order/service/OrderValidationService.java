@@ -28,6 +28,14 @@ public class OrderValidationService {
 
 	// 작업지시 등록 전 유효성 검증
 	public WorkOrderValidationResult validateAll (WorkOrderValidateRequest req) {
+		
+		// 0) 필수 입력값 먼저 검사
+		if (req.getStartTime() == null || req.getEndTime() == null) {
+		    return WorkOrderValidationResult.builder()
+		    		.valid(false)
+		    		.message("시작 시간과 종료 시간을 입력해주세요.")
+		    		.build();
+		}
 
 		// 1) 작업자 중복 (입력 무결성)
 		if (!validateWorkerDuplicate(req)){
@@ -73,6 +81,7 @@ public class OrderValidationService {
 
 	// 작업지시 등록 전 유효성 검증(시간)
 	public boolean validateWorkTime (WorkOrderValidateRequest req) {
+		
 		LocalTime start = req.getStartTime().toLocalTime();
 		LocalTime end 	= req.getEndTime().toLocalTime();
 
@@ -144,8 +153,12 @@ public class OrderValidationService {
 
 	// 작업 가능 작업자 제안
 	private List<String> suggestAvailableWorkers(WorkOrderValidateRequest req) {
+		
+		if (req.getStartTime() == null || req.getEndTime() == null) {
+		    return List.of(); // 추천 불가
+		}
 
-		List<WorkerListDTO> workers = orderMapper.selectWorkers();
+		List<WorkerListDTO> workers = orderMapper.selectWorkers("DEP003");
 		List<String> workerIds = new ArrayList<>();
 
 		for (WorkerListDTO worker : workers) {

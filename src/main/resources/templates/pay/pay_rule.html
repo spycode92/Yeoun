@@ -310,16 +310,16 @@
                   <h6 class="mb-3 mt-4 text-secondary">기타 정보</h6>
                   <div class="row g-3">
                     <div class="col-md-4">
-                      <label class="form-label">STATUS</label>
+                      <label class="form-label">상태</label>
                       <select class="form-select" th:field="*{status}" required>
                         <option value="">-- 선택 --</option>
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
+                        <option value="ACTIVE">활성</option>
+                        <option value="INACTIVE">비활성</option>
                       </select>
                       <div class="invalid-feedback">값을 입력하세요</div>
                     </div>
                     <div class="col-12">
-                      <label class="form-label">REMARK</label>
+                      <label class="form-label">메모</label>
                       <textarea class="form-control" th:field="*{remark}" rows="2" placeholder="메모..."></textarea>
                     </div>
                   </div>
@@ -478,15 +478,15 @@
                     <h6 class="mb-3 mt-4 text-secondary">기타 정보</h6>
                     <div class="row g-3">
                       <div class="col-md-4">
-                        <label class="form-label">STATUS</label>
+                        <label class="form-label">상태</label>
                         <select name="status" class="form-select" required>
-                          <option value="ACTIVE" th:selected="${r.status.name() == 'ACTIVE'}">ACTIVE</option>
-                          <option value="INACTIVE" th:selected="${r.status.name() == 'INACTIVE'}">INACTIVE</option>
+                          <option value="ACTIVE" th:selected="${r.status.name() == 'ACTIVE'}">활성</option>
+                          <option value="INACTIVE" th:selected="${r.status.name() == 'INACTIVE'}">비활성</option>
                         </select>
                         <div class="invalid-feedback">값을 입력하세요</div>
                       </div>
                       <div class="col-12">
-                        <label class="form-label">REMARK</label>
+                        <label class="form-label">메모</label>
                         <textarea name="remark" class="form-control" rows="2" th:text="${r.remark}"></textarea>
                       </div>
                     </div>

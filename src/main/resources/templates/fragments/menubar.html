@@ -217,7 +217,7 @@
                 </ul>
             </li>
               
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('SALES_ADMIN','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Sales management">영업관리</div>
                 </a>
@@ -286,7 +286,7 @@
             </li>
             
             <!-- 공정 관리 -->              
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Process management">공정관리</div>
                 </a>
@@ -312,7 +312,7 @@
             </li>
             
             <!-- 품질 관리 -->
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('QC_USER','QC_ADMIN','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Qc management">품질관리</div>
                 </a>

@@ -106,9 +106,6 @@ public class LotHistory {
 	// 등록일시
 	@CreatedDate
     @Column(name = "CREATED_DATE", nullable = false)
-    private LocalDate createdDate;
-	
-	
-	
+    private LocalDateTime createdDate;
 
 }

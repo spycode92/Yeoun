@@ -12,11 +12,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.common.dto.AlarmDTO;
 import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.service.AlarmService;
-import com.yeoun.emp.entity.Emp;
-import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.service.InboundService;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
@@ -239,7 +236,7 @@ public class WorkOrderProcessService {
             }
         }
 
-        int progressRate = calculateProgressRate(processes);
+        int progressRate = calculateProgressRateHybrid(processes);
         String currentProcess = resolveCurrentProcess(processes);
         LocalDateTime endAt = null;
 
@@ -288,17 +285,30 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 진행률 계산 (DONE + QC_PENDING 단계 수 / 전체 단계 수 * 100)
+     * 진행률(완료율) 계산
+     * - DONE만 완료로 인정
+     * - IN_PROGRESS/QC_PENDING/READY는 미완료
      */
-    private int calculateProgressRate(List<WorkOrderProcess> processes) {
-    	int totalSteps = processes.size();
-        if (totalSteps == 0) return 0;
+    private int calculateProgressRateHybrid(List<WorkOrderProcess> processes) {
+        if (processes == null || processes.isEmpty()) return 0;
+
+        int totalSteps = processes.size();
 
         long doneCount = processes.stream()
-                .filter(p -> "DONE".equals(p.getStatus()))
-                .count();
+            .filter(p -> "DONE".equalsIgnoreCase(p.getStatus()))
+            .count();
 
-        return (int) Math.round(doneCount * 100.0 / totalSteps);
+        boolean hasInProgress = processes.stream()
+            .anyMatch(p -> "IN_PROGRESS".equalsIgnoreCase(p.getStatus())
+                        || "QC_PENDING".equalsIgnoreCase(p.getStatus()));
+
+        double progress = doneCount * 100.0 / totalSteps;
+
+        if (hasInProgress && doneCount < totalSteps) {
+            progress += (100.0 / totalSteps) * 0.5;
+        }
+
+        return (int) Math.round(Math.min(progress, 99));
     }
 
     /**
@@ -534,6 +544,27 @@ public class WorkOrderProcessService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+        
+	     // standardQty를 "이전 공정 양품" 기준으로 재설정
+	     for (int i = 1; i < stepDTOs.size(); i++) {
+	
+	         WorkOrderProcessStepDTO curr = stepDTOs.get(i);
+	         WorkOrderProcessStepDTO prev = stepDTOs.get(i - 1);
+	
+	         // 여과(PRC-FLT)만: 1단계 배합량(ml)을 이어받아 표준값 표시
+	         if ("PRC-FLT".equals(curr.getProcessId())) {
+
+        	    String prevStatus = (prev.getStatus() == null) ? "" : prev.getStatus().trim().toUpperCase();
+        	    Integer prevGood  = prev.getGoodQty();
+
+        	    if ("DONE".equals(prevStatus) && prevGood != null) {
+        	        curr.setStandardQty(prevGood.doubleValue());   // 1단계 양품으로!
+        	    } else {
+        	        curr.setStandardQty(prev.getStandardQty());    // fallback: 1단계 기준배합량
+        	    }
+        	    continue;
+        	}
+	     }
 
         // 2) 공정 시작/종료 버튼 활성화 여부 계산
         for (int i = 0; i < stepDTOs.size(); i++) {
@@ -592,7 +623,6 @@ public class WorkOrderProcessService {
     private Double calculateFilterStandardQty(WorkOrder workOrder) {
         return calculateBlendStandardQty(workOrder);
     }
-
 
     // =========================================================================
     // 3. 공정 단계 시작

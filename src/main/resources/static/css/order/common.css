@@ -1,0 +1,139 @@
+
+body {
+  background: #f4f3fb;
+  font-family:
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    "Segoe UI",
+    Roboto,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    "Malgun Gothic",
+    Arial,
+    sans-serif;
+  color: #2f2b43;
+}
+
+/* Toast UI 공통 폰트 */
+.toastui-calendar *,
+.tui-grid-container *,
+.tui-grid-table * {
+  font-family: "Pretendard", sans-serif !important;
+}
+
+/* Title */
+.title {
+  font-size: 1.8em;
+  margin-bottom: 1.8rem;
+  color: #697a8d;
+  font-weight: 500;
+}
+
+/* 카드 */
+.order-card {
+  border-radius: 12px;
+  border: 1px solid #e2e1f3;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(80, 72, 180, 0.08);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* 버튼 */
+.btn-yeoun-primary {
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #6f5cec, #9479ff);
+  color: white;
+}
+
+.btn-yeoun-primary:hover {
+  background: linear-gradient(135deg, #b8b3ff, #d9d4ff);
+  color: #5c4ac7 !important;
+}
+
+.btn-yeoun-outline {
+  border-radius: 999px;
+  border: 1px solid #c9c6f3;
+  background: #fff;
+  color: #655dc0;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+
+/* ===== Form ===== */
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #514d7a;
+  margin-bottom: 4px;
+}
+
+.form-control,
+.form-select {
+  font-size: 13px;
+  border-radius: 8px;
+  border-color: #d9d8f2;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #6f5cec;
+  box-shadow: 0 0 0 0.15rem rgba(111, 92, 236, 0.2);
+}
+
+.form-text {
+  font-size: 11px;
+  color: #9a96c0;
+}
+
+
+/* ===== Table / Grid ===== */
+.yeoun-table thead {
+  background: #f5f3ff;
+  color: #5b53a1;
+}
+
+.yeoun-table td {
+  font-size: 13px;
+}
+
+
+/* ===== Search ===== */
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: end;
+  }
+
+  .search-row .form-control,
+  .search-row .form-select {
+    font-size: 12px;
+    height: 32px;
+    padding: 4px 10px;
+  }
+  
+  
+  .status-badge {
+    width: 90px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    padding: 0.52em 0.593em;
+    color: white !important;
+  }

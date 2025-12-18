@@ -41,7 +41,9 @@ public class OrderController {
     	model.addAttribute("prods", orderService.loadAllProducts());	// 품목 조회
     	model.addAttribute("lines", orderService.loadAllLines());		// 라인 조회
         model.addAttribute("workers", 
-        						orderService.loadAllWorkers());	// 작업자 조회(작업자)
+        		orderService.loadAvailableWorkers("DEP003"));	// 작업자 조회(작업자)
+        model.addAttribute("qcWorkers", 
+        		orderService.loadAvailableWorkers("DEP102"));	// 작업자 조회(품질관리팀)
         model.addAttribute("plansLength", plans.size());
     	return "/order/list";
     }
@@ -119,7 +121,7 @@ public class OrderController {
     @GetMapping("/workers/data")
     @ResponseBody
     public List<WorkerListDTO> workerData() {
-    	return orderService.loadAllWorkers();
+    	return orderService.loadWorkersWithStatus();
     }
 
     // =====================================================

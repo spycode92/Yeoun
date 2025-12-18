@@ -4,6 +4,8 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +20,11 @@ public class WebSecurityConfig {
 	
 	private final CustomUserDetailsService customuserDetailsService;
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+	
+	@Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 	
 	// ====================================================================
 	// 스프링 시큐리티 보안 필터 설정
@@ -90,6 +97,14 @@ public class WebSecurityConfig {
 						.permitAll()
 						.requestMatchers("/equipment/**")
 						.permitAll()
+						
+					// ================== MES (생산부) ==================
+					.requestMatchers("/production/**", "/process/**", "/lot/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "MES_MANAGER")
+
+					// ================== 품질관리 ==================
+					.requestMatchers("/qc/**")
+					.hasAnyRole("SYS_ADMIN", "QC_USER", "QC_ADMIN")
 
 					// 물류관리부
 					// 대시보드
@@ -114,7 +129,7 @@ public class WebSecurityConfig {
 					//영업관리
 					.requestMatchers("/sales/**")
 					.hasAnyRole("SYS_ADMIN", "SALES_ADMIN")
-						
+					
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()
 	                

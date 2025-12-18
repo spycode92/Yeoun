@@ -8,6 +8,23 @@
 
 
 
+-- 확인 및 검증용 쿼리
+-- 내가 만든 모든  프로시저와 트리거
+SELECT 
+    OBJECT_NAME AS "이름", 
+    OBJECT_TYPE AS "유형", 
+    TIMESTAMP   AS "생성시간", 
+    STATUS      AS "상태"
+FROM USER_OBJECTS
+WHERE OBJECT_TYPE IN ('PROCEDURE', 'TRIGGER')
+ORDER BY OBJECT_TYPE, OBJECT_NAME;
+
+  
+-- 특정 프로시저 쿼리
+SELECT text
+FROM user_source
+WHERE name = 'SP_SYNC_BOM_STATUS' -- OBJECT_NAME
+ORDER BY line;
 
 -- BOM_HDR 테이블의 BOM_HDR_ID 자동 생성 및 관리
 -- 캐싱의 의미
@@ -92,25 +109,132 @@ CREATE OR REPLACE TRIGGER TRG_BOM_MST_HDR_INSERT
 AFTER INSERT ON BOM_MST
 FOR EACH ROW
 DECLARE
-    -- BOM_HDR 초기값 정의
+    v_count NUMBER;
     v_hdr_name VARCHAR2(100) := :NEW.BOM_ID || '표준 헤더';
     v_hdr_type VARCHAR2(10) := 'STD';
     v_use_yn CHAR(1) := 'Y';
 BEGIN
-    INSERT INTO BOM_HDR (
-        BOM_ID, 
-        BOM_HDR_NAME, 
-        BOM_HDR_TYPE, 
-        USE_YN, 
-        BOM_HDR_DATE 
-        -- BOM_HDR_ID는 자동 생성되므로 생략
-    )
-    VALUES (
-        :NEW.BOM_ID,
-        v_hdr_name,
-        v_hdr_type,
-        v_use_yn,
-        SYSDATE
-    );
+    -- 1. 이미 해당 BOM_ID가 헤더 테이블에 있는지 확인
+    SELECT COUNT(*)
+      INTO v_count
+      FROM BOM_HDR
+     WHERE BOM_ID = :NEW.BOM_ID;
+
+    -- 2. 존재하지 않을 때만 INSERT 실행
+    IF v_count = 0 THEN
+        INSERT INTO BOM_HDR (
+            BOM_ID, 
+            BOM_HDR_NAME, 
+            BOM_HDR_TYPE, 
+            USE_YN, 
+            BOM_HDR_DATE 
+        )
+        VALUES (
+            :NEW.BOM_ID,
+            v_hdr_name,
+            v_hdr_type,
+            v_use_yn,
+            SYSDATE
+        );
+    END IF;
+END;
+/
+
+-- mat use_yn 프로시저
+-- 자재(N) -> BOM_MST(N) -> BOM_HDR(N) -> BOM_HDR_ID 그룹(N)
+-- 자재(모두 Y) -> BOM_MST(Y) ->BOM_HDR(Y) -> BOM_HDR_ID 그룹(Y)
+
+CREATE OR REPLACE PROCEDURE SP_SYNC_BOM_STATUS (
+    p_bom_id IN VARCHAR2, 
+    p_use_yn IN VARCHAR2
+)
+IS
+    V_BOM_HDR_ID    VARCHAR2(50);
+    V_HDR_N_COUNT   NUMBER;
+    V_OTHER_N_COUNT NUMBER;
+    PRAGMA AUTONOMOUS_TRANSACTION; 
+BEGIN
+    -- [1단계] N으로 바뀔 때는 즉시 처리
+    IF p_use_yn = 'N' THEN
+        UPDATE BOM_HDR
+        SET USE_YN = 'N',
+            UPDATED_DATE = SYSDATE,
+            UPDATED_ID = 'SYS_SYN'
+        WHERE BOM_ID = p_bom_id AND USE_YN != 'N'
+        RETURNING BOM_HDR_ID INTO V_BOM_HDR_ID;
+
+    -- [2단계] Y로 복구될 때
+    ELSIF p_use_yn = 'Y' THEN
+        -- [수정 핵심] 
+        -- 현재 트리거를 일으킨 데이터(세션 내 수정분)는 무시하고, 
+        -- 이미 DB에 'N'으로 박혀있는 '다른' 자재들이 있는지 확인합니다.
+        SELECT COUNT(*) 
+        INTO V_OTHER_N_COUNT 
+        FROM BOM_MST
+        WHERE BOM_ID = p_bom_id 
+          AND USE_YN = 'N'
+          AND ROWNUM <= 1;
+
+        -- 만약 V_OTHER_N_COUNT가 1이라면, 그 1개가 '나 자신'일 가능성이 큽니다.
+        -- 자율 트랜잭션은 나의 'Y' 변경을 못 보고 여전히 'N'으로 보기 때문입니다.
+        -- 따라서 'N'인 개수가 1개 이하(즉, 나를 제외하면 0개)라면 'Y'로 업데이트합니다.
+        IF V_OTHER_N_COUNT <= 1 THEN 
+             UPDATE BOM_HDR
+             SET USE_YN = 'Y',
+                 UPDATED_DATE = SYSDATE,
+                 UPDATED_ID = 'SYS_SYN'
+             WHERE BOM_ID = p_bom_id AND USE_YN != 'Y'
+             RETURNING BOM_HDR_ID INTO V_BOM_HDR_ID;
+        END IF;
+    END IF;
+
+    -- [3단계] 제품 그룹 전파
+    -- V_BOM_HDR_ID가 NULL이 아닐 때만 실행 (상태 변화가 있을 때만)
+    IF V_BOM_HDR_ID IS NOT NULL THEN
+        -- 여기도 마찬가지로 자율 트랜잭션의 한계가 있을 수 있으므로 
+        -- 결과가 즉시 반영되지 않으면 'N'의 개수를 세는 로직을 주의해야 합니다.
+        SELECT COUNT(*) INTO V_HDR_N_COUNT 
+        FROM BOM_HDR 
+        WHERE BOM_HDR_ID = V_BOM_HDR_ID AND USE_YN = 'N';
+
+        IF V_HDR_N_COUNT > 0 THEN
+            UPDATE BOM_HDR SET USE_YN = 'N', UPDATED_DATE = SYSDATE, UPDATED_ID = 'SYS_SYN'
+            WHERE BOM_HDR_ID = V_BOM_HDR_ID AND USE_YN != 'N';
+        ELSE
+            UPDATE BOM_HDR SET USE_YN = 'Y', UPDATED_DATE = SYSDATE, UPDATED_ID = 'SYS_SYN'
+            WHERE BOM_HDR_ID = V_BOM_HDR_ID AND USE_YN != 'Y';
+        END IF;
+    END IF;
+
+    COMMIT; 
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+-- 1.BOM_MST에서 USE_YN 을 변경 했을때 사용하는 트리거 
+-- 2.BOM_MST -> MATERIAL_MST (영향없음)
+CREATE OR REPLACE TRIGGER TRG_CALL_SYNC_MST
+AFTER UPDATE OF USE_YN ON BOM_MST
+FOR EACH ROW
+BEGIN
+    -- 반드시 파라미터 2개(BOM_ID, USE_YN)만 넘겨야 합니다.
+    SP_SYNC_BOM_STATUS(:NEW.BOM_ID, :NEW.USE_YN);
+END;
+/
+
+-- 1.MATERIAL_MST에서 USE_YN을 변경했을때 사용하는 트리거 
+CREATE OR REPLACE TRIGGER TRG_SYNC_MAT_TO_BOM_MST
+AFTER UPDATE OF USE_YN ON MATERIAL_MST -- 자재 마스터의 사용여부가 바뀔 때
+FOR EACH ROW
+BEGIN
+    -- 자재 마스터의 MAT_ID와 동일한 모든 BOM 상세 내역을 업데이트
+    UPDATE BOM_MST
+    SET USE_YN = :NEW.USE_YN,
+        UPDATED_DATE = SYSDATE,
+        UPDATED_ID = 'SYS_MAT'
+    WHERE MAT_ID = :NEW.MAT_ID;
 END;
 /

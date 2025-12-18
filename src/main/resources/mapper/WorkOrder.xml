@@ -5,64 +5,66 @@
 	<select id="selectOrderList"
 			parameterType="com.yeoun.order.dto.WorkOrderSearchDTO"
 			resultType="com.yeoun.order.dto.WorkOrderListDTO">
-		select
-			distinct
-			w.order_id,
-			pp.plan_id,
-			ppi.prd_id,
-			m.prd_name,
-			w.plan_qty,
-			w.plan_start_date as start_date,
-			w.plan_end_date as end_date,
-			w.status,
-			w.outbound_yn,
-			w.created_date,
-			w.remark
-		from work_order w
-		join production_plan pp
-			on w.plan_id = pp.plan_id
-		join production_plan_item ppi
-			on w.plan_id = ppi.plan_id
-		join product_mst m
-			on w.prd_id = m.prd_id
+		SELECT
+			DISTINCT
+			w.ORDER_ID,
+			pp.PLAN_ID,
+			ppi.PRD_ID,
+			m.PRD_NAME,
+			w.PLAN_QTY,
+			w.PLAN_START_DATE AS START_DATE,
+			w.PLAN_END_DATE AS END_DATE,
+			w.STATUS,
+			w.OUTBOUND_YN,
+			w.CREATED_DATE,
+			w.REMARK
+		FROM WORK_ORDER w
+		JOIN PRODUCTION_PLAN pp
+			ON w.PLAN_ID = pp.PLAN_ID
+		JOIN PRODUCTION_PLAN_ITEM ppi
+			ON w.PLAN_ID = ppi.PLAN_ID
+		JOIN PRODUCT_MST m
+			ON w.PRD_ID = m.PRD_ID
 		<where>
 			<!-- 키워드(품명 or 작업지시번호) -->
 			<if test="keyword != null and keyword != ''">
 				AND (
-				m.prd_name like '%' || #{keyword} || '%'
-				OR w.order_id like '%' || #{keyword} || '%'
-				OR ppi.prd_id like '%' || #{keyword} || '%'
+				m.PRD_NAME LIKE '%' || #{keyword} || '%'
+				OR w.ORDER_ID LIKE '%' || #{keyword} || '%'
+				OR ppi.PRD_ID LIKE '%' || #{keyword} || '%'
 				)
 			</if>
 
 			<!-- 상태 검색 -->
 			<if test="status != null and status != '' and status != 'ALL'">
-				AND w.status = #{status}
+				AND w.STATUS = #{status}
 			</if>
 
 			<!-- 시작일자 FROM -->
 			<if test="startDateFrom != null and startDateFrom != ''">
-				AND TO_CHAR(w.plan_start_date, 'YYYY-MM-DD') = #{startDateFrom}
+				AND TO_CHAR(w.PLAN_START_DATE, 'YYYY-MM-DD') = #{startDateFrom}
 			</if>
 		</where>
-		order by w.order_id desc
+		ORDER BY w.ORDER_ID DESC
 	</select>
 	
 	<select id="selectWorkers" resultType="com.yeoun.order.dto.WorkerListDTO">
-		select
-			e.emp_id,
-			e.emp_name,
-			d.dept_name,
-			p.pos_name
-		from emp e
-		join dept d
-			on e.dept_id = d.dept_id
-		join position p
-			on e.pos_code = p.pos_code
-		where d.dept_id = 'DEP003'
-			and p.pos_code = 'POS001'
-			and e.status = 'ACTIVE'
-		order by e.emp_name asc
+		SELECT
+			e.EMP_ID,
+			e.EMP_NAME,
+			d.DEPT_NAME,
+			p.POS_NAME
+		FROM EMP e
+		JOIN DEPT d
+			ON e.DEPT_ID = d.DEPT_ID
+		JOIN POSITION p
+			ON e.POS_CODE = p.POS_CODE
+		WHERE d.DEPT_ID = #{dept}
+		<if test="dept != null and dept == 'DEP003'">
+			AND p.POS_CODE = 'POS001'
+		</if>
+			AND e.STATUS = 'ACTIVE'
+		ORDER BY e.EMP_NAME ASC
 	</select>
 	
 	<select id="selectMaterials" resultType="com.yeoun.order.dto.MaterialAvailabilityDTO">
@@ -148,7 +150,7 @@
 			FROM WORK_ORDER w
 			JOIN WORK_SCHEDULE s  ON w.ORDER_ID = s.WORK_ID
 			JOIN WORKER_PROCESS p ON s.SCHEDULE_ID = p.SCHEDULE_ID
-		WHERE s.WORKER_ID = #{workerId}
+		WHERE p.WORKER_ID = #{workerId}
 		AND w.STATUS IN ('CREATED', 'RELEASED', 'IN_PROGRESS')
 		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
 		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}

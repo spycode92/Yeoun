@@ -230,6 +230,7 @@ public class EquipmentController {
     // ===================================================
     // 설비 비가동 이력
     @GetMapping("/history/data")
+    @ResponseBody
     public List<EquipDowntimeDTO> historyData(HistorySearchDTO dto) {
     	return equipmentService.loadAllEquipDowntimeHistory(dto);
     }

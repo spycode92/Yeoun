@@ -15,6 +15,7 @@ import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgRoomRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
+import com.yeoun.messenger.support.HighlightGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,17 +54,9 @@ public class MessengerService {
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 	private final FileAttachRepository fileAttachRepository;
+	private final HighlightGenerator highlightGenerator;
 
-	// ====================================================
-	// 하이라이트 처리 관련 유틸 함수
-	private String highlight(String text, String keyword) {
-		if (text == null || keyword == null) return text;
 
-		// (?i)는 대소문자 무시
-		return text.replaceAll("(?i)" + Pattern.quote(keyword),
-				"<mark>$0</mark>");
-	}
-	
 	// ====================================================
 	// 친구 목록을 불러오는 서비스
 	public List<MsgStatusDTO> getUsers(String username) {
@@ -198,7 +191,10 @@ public class MessengerService {
 		msgRoomRepository.save(newRoom);
 
 		// 2) 참여자 relations 저장
-		for (String empId : roomCreateRequestDTO.getMembers()) {
+		Set<String> memberIds = new HashSet<>(roomCreateRequestDTO.getMembers());
+		memberIds.add(roomCreateRequestDTO.getCreatedUser());
+
+		for (String empId : memberIds) {
 			MsgRelation relation = new MsgRelation();
 			relation.setRoomId(newRoom);
 			relation.setEmpId(empRepository.getReferenceById(empId));
@@ -246,24 +242,7 @@ public class MessengerService {
 		Long lastMsgId = lastMsg.getMsgId();
 		msgRelationRepository.updateLastRead(dto.getReaderId(), dto.getRoomId(), lastMsgId);
 	}
-	
-	// ========================================================
-	// 방 내 인원 정보 조회
-	public RoomMemberDTO buildRoomMember (String empId) {
-		Emp emp = empRepository.findById(empId)
-				.orElseThrow(() -> new RuntimeException("사용자 없음"));
-		
-		MsgStatus msgStatus = msgStatusRepository.findById(empId)
-				.orElseThrow(() -> new RuntimeException("사용자 프로필 없음"));
-		
-		String posName = positionRepository.findById(emp.getPosition().getPosCode())
-				.map(Position::getPosName).orElse("미정");
-				
-		String deptName = deptRepository.findById(emp.getDept().getDeptId())
-				.map(Dept::getDeptName).orElse("미정");
-		
-		return RoomMemberDTO.of(emp, msgStatus, posName, deptName);
-	}
+
 
 	// ========================================================
 	// 내 상태 실시간 변경
@@ -341,7 +320,7 @@ public class MessengerService {
 
 			// 검색어가 있을 경우 해당 메시지를 보여주고 하이라이트 처리
 			if (message != null) {
-				room.setPreviewMessage(highlight(message, keyword));
+				room.setPreviewMessage(highlightGenerator.create(message, keyword));
 			}
 
 			// c) 이름/그룹명에서 매칭되는 결과에 하이라이트 처리
@@ -403,49 +382,6 @@ public class MessengerService {
 		}
 		return dtoList;
 	}
-	
-	// ========================================================
-	// 소속 멤버 가져오기
-	public List<RoomMemberDTO> getMembers(Long roomId){
-		List<MsgRelation> relationList = msgRelationRepository.findByRoomId_RoomId(roomId);
-		List<RoomMemberDTO> memberList = relationList.stream()
-				.map(relation -> buildRoomMember(relation.getEmpId().getEmpId()))
-				.toList();
 
-		return memberList;
-	}
-
-	// ========================================================
-	// 렌더링할 방 이름 정하기
-	public String resolveRoomName(Long roomId, String name) {
-
-		MsgRoom room = msgRoomRepository.findById(roomId).get();
-		String groupName = room.getGroupName();
-		String groupYn = room.getGroupYn();
-		
-		List<RoomMemberDTO> members = getMembers(roomId);
-
-		// 방 이름이 있는 경우
-		if (groupName != null && !groupName.isBlank()) {
-			return groupName;
-		}
-		
-		// 방 이름이 없고, 그룹채팅(Y)인 경우
-		else if ("Y".equals(groupYn)) {
-			return members.get(0).getEmpName() + "의 그룹채팅(" + members.toArray().length + ")";
-		}
-
-		// 방 이름 없고, 1:1인 경우
-		RoomMemberDTO opponent = members.stream()
-				.filter(m -> !m.getEmpId().equals(name))
-				.findFirst()
-				.orElse(null);
-
-		if (opponent != null) {
-			return opponent.getEmpName() + " " + opponent.getPosition();
-		}
-
-		return "알 수 없음";
-	}
 
 }

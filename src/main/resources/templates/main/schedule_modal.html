@@ -3,7 +3,7 @@
 	layout:fragment="schedule_modal">
 <!-- 일정등록 모달 -->
 <div class="modal" id="add-schedule-modal" tabindex="-1" style="display: none; width:100%" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered h-100" role="document" style="max-width:600px; width:100%;">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width:600px; width:100%;">
 		<div class="modal-content h-75">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalCenterTitle">일정등록</h5>
@@ -15,14 +15,6 @@
 						<input type="hidden" id="schedule-id" name="scheduleId" value="">
 						<label for="scheduleTitle" class="form-label">제목</label>
 						<input type="text" id="scheduleTitle" class="form-control" name="scheduleTitle"/>
-					</div>
-					<div class="col mb-6">
-						<label for="scheduleTitle" class="form-label">작성자</label>
-						<input type="text" class="form-control" readonly
-							th:value="${currentUserName}" id="createdUserName">
-						
-						<input type="hidden" id="schedule-writer" class="form-control" 
-							th:value="${currentUserId}" name="createdUser" readonly/>
 					</div>
 					<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 						<div>
@@ -52,6 +44,14 @@
 							<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="Y"/>
 							<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
 						</div>
+					</div>
+					<div class="col mb-6">
+						<label for="scheduleTitle" class="form-label">작성자</label>
+						<input type="text" class="form-control" readonly
+							th:value="${currentUserName}" id="createdUserName">
+						
+						<input type="hidden" id="schedule-writer" class="form-control" 
+							th:value="${currentUserId}" name="createdUser" readonly/>
 					</div>
 
 					<div class="col mb-6" id="shareField">

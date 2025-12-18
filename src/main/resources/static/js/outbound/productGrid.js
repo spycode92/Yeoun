@@ -339,6 +339,16 @@ const submitPrdOutbound = async () => {
 		
 	}
 	
+	if (shipmentId.value === "" || shipmentId.value === null) {
+		alert("출하지시서를 선택해주세요.");
+		return;
+	}
+	
+	if (items.length <= 0) {
+		alert("등록할 물품이 없습니다.");
+		return;
+	}
+	
 	// body에 담아서 보낼 내용
 	const payload = {
 		shipmentId : shipmentId.value,

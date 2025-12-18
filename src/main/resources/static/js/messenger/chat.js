@@ -113,7 +113,9 @@ function renderMyMessage(eventDTO) {
 	const chatBody = document.getElementById("chat-body");
 	if (!chatBody) return;
 
-	const isMe = (eventDTO.senderId === senderId);
+	const isMe = eventDTO.senderId === senderId ||
+				eventDTO.senderId === null ||
+				eventDTO.senderId === undefined;
 	const time = formatTimeFull();
 
 	// SYSTEM 메시지 따로 처리 분기점 ===================================
@@ -185,11 +187,12 @@ function renderMyMessage(eventDTO) {
 	}
 
 	// 텍스트 메시지
-	if (eventDTO.msgType === "TEXT" && eventDTO.msgContent) {
+	if (eventDTO.msgType === "TEXT") {
+		const content = eventDTO.msgContent ?? eventDTO.preview ?? "";
 		if (isMe) {
-			bubbleHtml += `<div class="msg-bubble msg-right">${eventDTO.msgContent}</div>`;
+			bubbleHtml += `<div class="msg-bubble msg-right">${content}</div>`;
 		} else {
-			bubbleHtml += `<div class="msg-bubble msg-left">${eventDTO.msgContent}</div>`;
+			bubbleHtml += `<div class="msg-bubble msg-left">${content}</div>`;
 		}
 	}
 
@@ -220,6 +223,12 @@ function renderMyMessage(eventDTO) {
 
 	chatBody.appendChild(row);
 	chatBody.scrollTop = chatBody.scrollHeight;
+
+	if (!bubbleHtml) {
+		console.warn("빈 메시지 렌더링 방지", eventDTO);
+		return;
+	}
+
 }
 
 // ===============================
@@ -501,8 +510,17 @@ async function sendChatMessage() {
 
 		subscribeRoom(roomId);
 
-		// 실제 첫 메시지도 서버에서 broadcast되므로,
-		// 여기서는 따로 render 호출 안 하고 STOMP 이벤트만 믿는다.
+		// 첫 메시지 직접 렌더
+		renderMyMessage({
+			msgId: data.firstMsgId ?? null,
+			roomId: roomId,
+			senderId: senderId,
+			senderName: "나",
+			msgType: "TEXT",
+			msgContent: text,
+			sentTime: formatTimeFull()
+		});
+
 		messageTextarea.value = "";
 		return;
 	}

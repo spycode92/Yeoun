@@ -15,7 +15,6 @@ import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
 import com.yeoun.lot.dto.LotRootDetailDTO;
 import com.yeoun.lot.dto.LotUsedProductNodeDTO;
-import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.service.LotTraceService;
 
 import lombok.RequiredArgsConstructor;
@@ -55,23 +54,37 @@ public class LotTraceController {
 					   @RequestParam(name = "keyword", required = false) String keyword,
 					   @RequestParam(name="status", required=false) String status,
 					   @RequestParam(name="type", required=false) String type,
+					   @RequestParam(name = "page", defaultValue = "1") int page,
+				       @RequestParam(name = "size", defaultValue = "20") int size,
 					   Model model) {
 		
 		// mode 정규화
         String m = (mode == null) ? "PRODUCT" : mode.trim().toUpperCase();
 		
-        List<LotRootDTO> lotList;
+        List<LotRootDTO> allList;
         if ("MATERIAL".equals(m)) {
             // 자재 ROOT (RAW/SUB/PKG)
-            lotList = lotTraceService.getMaterialRootLots(keyword, status, type);
+        	allList = lotTraceService.getMaterialRootLots(keyword, status, type);
         } else {
             // 기존 완제품(WIP/FIN)
-            lotList = lotTraceService.getFinishedLots(keyword, status, type);
+        	allList = lotTraceService.getFinishedLots(keyword, status, type);
             m = "PRODUCT";
         }
+        
+        int totalCount = allList.size();
+        int fromIndex = Math.min((page - 1) * size, totalCount);
+        int toIndex   = Math.min(fromIndex + size, totalCount);
+        
+        List<LotRootDTO> lotList = allList.subList(fromIndex, toIndex);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
 
         model.addAttribute("mode", m);
         model.addAttribute("lotList", lotList);
+        
+        model.addAttribute("page", page);                 
+        model.addAttribute("size", size);                
+        model.addAttribute("totalPages", totalPages);     
+        model.addAttribute("totalCount", totalCount);     
 
         // 검색어 유지
         model.addAttribute("keyword", keyword);

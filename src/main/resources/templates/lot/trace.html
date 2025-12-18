@@ -7,7 +7,7 @@
     <style>
     /* 왼쪽 LOT 목록만 스크롤 */
     #lotTree {
-      max-height: 1000px;
+      max-height: 700px;
       overflow-y: auto;
     }
     
@@ -96,17 +96,17 @@
         <ul class="nav pay-tabs mb-3">
 		  <li class="nav-item">
 		    <a class="nav-link"
-		       th:href="@{/lot/trace(mode='PRODUCT', keyword=${keyword}, status=${status}, type=${type})}"
-		       th:classappend="${mode}=='PRODUCT' ? ' active'">
-		      완제품 LOT 기준
-		    </a>
+			   th:href="@{/lot/trace(mode='PRODUCT', keyword=${keyword})}"
+			   th:classappend="${mode}=='PRODUCT' ? ' active'">
+			  완제품 LOT 기준
+			</a>
 		  </li>
 		  <li class="nav-item">
 		    <a class="nav-link"
-		       th:href="@{/lot/trace(mode='MATERIAL', keyword=${keyword}, status=${status}, type=${type})}"
-		       th:classappend="${mode}=='MATERIAL' ? ' active'">
-		      자재 LOT 기준
-		    </a>
+			   th:href="@{/lot/trace(mode='MATERIAL', keyword=${keyword})}"
+			   th:classappend="${mode}=='MATERIAL' ? ' active'">
+			  자재 LOT 기준
+			</a>
 		  </li>
 		</ul>
       </div>
@@ -118,46 +118,71 @@
           	<input type="hidden" name="mode" th:value="${mode}">
             <div class="row gx-3 gy-2 align-items-end">
 
+			  <!-- 공통 : 검색어 -->
               <div class="col-md-4">
                 <label class="form-label" for="searchKeyword">검색어</label>
                 <input type="text"
                        class="form-control"
                        id="searchKeyword"
                        name="keyword"
-                       placeholder="LOT 번호 / 제품명"
+                       th:placeholder="${mode}=='PRODUCT' ? 'LOT 번호 / 제품명' : 'LOT 번호 / 자재명'"
                        th:value="${keyword}">
               </div>
 
-              <div class="col-md-3">
-                <label class="form-label" for="searchProductStatus">생산 상태</label>
-				<select class="form-select" id="searchProductStatus" name="status">
-				  <option value="" th:selected="${status == null || status == ''}">전체</option>
-				  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
-				  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
-				  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
-				</select>
-              </div>
-
-              <div class="col-md-3">
-                <label class="form-label" for="searchProductType">제품 유형</label>
-                <select class="form-select" id="searchProductType" name="type">
-				  <option value="" th:selected="${type == null || type == ''}">전체</option>
-				  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
-				  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
-				</select>
-              </div>
+			  <!-- PRODUCT 모드 필터 -->
+			  <th:block th:if="${mode}=='PRODUCT'">
+	              <div class="col-md-3">
+	                <label class="form-label" for="pStatus">생산 상태</label>
+					<select class="form-select" id="pStatus" name="status">
+					  <option value="" th:selected="${status == null || status == ''}">전체</option>
+					  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
+					  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
+					  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
+					</select>
+	              </div>
+	
+	              <div class="col-md-3">
+	                <label class="form-label" for="pType">제품 유형</label>
+	                <select class="form-select" id="pType" name="type">
+					  <option value="" th:selected="${type == null || type == ''}">전체</option>
+					  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
+					  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
+					</select>
+	              </div>
+              </th:block>
+              
+			  <!-- MATERIAL 모드 필터 -->
+			  <th:block th:if="${mode}=='MATERIAL'">
+	              <div class="col-md-3">
+	                <label class="form-label" for="mStatus">재고 상태</label>
+					<select class="form-select" id="mStatus" name="status">
+					  <option value="" th:selected="${status == null || status == ''}">전체</option>
+					  <option value="NORMAL" th:selected="${status == 'NORMAL'}">정상</option>
+					  <option value="DISPOSAL_WAIT"  th:selected="${status == 'DISPOSAL_WAIT'}">임박</option>
+					  <option value="DISPOSAL"   th:selected="${status == 'DISPOSAL'}">폐기</option>
+					  <option value="SOLD_OUT"   th:selected="${status == 'SOLD_OUT'}">소진완료</option>
+					</select>
+	              </div>
+	
+	              <div class="col-md-3">
+	                <label class="form-label" for="mType">자재 유형</label>
+	                <select class="form-select" id="mType" name="type">
+					  <option value="" th:selected="${type == null || type == ''}">전체</option>
+					  <option value="RAW" th:selected="${type == 'RAW'}">원재료</option>
+					  <option value="SUB" th:selected="${type == 'SUB'}">부자재</option>
+					  <option value="PKG" th:selected="${type == 'PKG'}">포장재</option>
+					</select>
+	              </div>
+              </th:block>
 
               <div class="col-md-1">
-                <button type="submit"
-                        class="btn btn-outline-primary w-100"
-                        id="btnSearch">
+                <button type="submit" class="btn btn-outline-primary w-100" id="btnSearch">
                   검색
                 </button>
               </div>
               
               <div class="col-md-1">
-				 <a th:href="@{/lot/trace(mode=${mode})}"
-				    class="btn btn-outline-secondary w-100">
+				 <a th:href="@{/lot/trace(mode=${mode})}" class="btn btn-outline-secondary w-100">
 				    초기화
 				 </a>
 			  </div>
@@ -193,14 +218,20 @@
 				    <span th:text="' / ' + ${lot.displayName}"> / 제품명</span>
 				
 				    <!-- 상태만 색상 -->
-				    <span class="ms-1 fw-semibold"
-				          th:text="' / ' + ${lot.status}"
-				          th:classappend="
-				            ${lot.status}=='공정 진행 중' ? ' lot-status-in' :
-				            (${lot.status}=='생산 완료' ? ' lot-status-done' :
-				            (${lot.status}=='폐기' ? ' lot-status-scrap' : ' lot-status-etc'))">
-				      / 상태
-				    </span>
+					<span class="ms-1 fw-semibold"
+					      th:text="' / ' + ${lot.status}"
+					      th:classappend="
+					        ${mode}=='PRODUCT' ?
+					          (${lot.status}=='공정 진행 중' ? ' lot-status-in' :
+					           (${lot.status}=='생산 완료' ? ' lot-status-done' :
+					            (${lot.status}=='폐기' ? ' lot-status-scrap' : ' lot-status-etc')))
+					        :
+					          (${lot.status}=='정상' ? ' lot-status-done' :
+					           (${lot.status}=='임박' ? ' lot-status-in' :
+					            (${lot.status}=='폐기' ? ' lot-status-scrap' :
+					             (${lot.status}=='소진완료' ? ' lot-status-etc' : ' lot-status-etc'))))">
+					  / 상태
+					</span>
 				  </a>
 
 		
@@ -275,9 +306,58 @@
 		           th:if="${lotList == null or #lists.isEmpty(lotList)}">
 		        조회된 LOT가 없습니다.
 		      </div>
-		
-		    </div>
 		    
+           	<!-- LOT 페이징 (Bootstrap 5) -->
+			<nav class="d-flex justify-content-center mt-3"
+			     th:if="${totalPages != null and totalPages > 1}"
+			     aria-label="LOT pagination">
+			
+			  <ul class="pagination pagination-sm mb-0">
+			
+			    <!-- 첫 페이지 -->
+			    <li class="page-item" th:classappend="${page == 1} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=1, size=${size})}"
+			         aria-label="First">&laquo;&laquo;</a>
+			    </li>
+			
+			    <!-- 이전 -->
+			    <li class="page-item" th:classappend="${page == 1} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${page-1}, size=${size})}"
+			         aria-label="Previous">&laquo;</a>
+			    </li>
+			
+			    <!-- 페이지 번호: 현재 기준 앞뒤 2개씩(총 5개) -->
+			    <li class="page-item"
+			        th:each="p : ${#numbers.sequence( (page-2 < 1 ? 1 : page-2),
+			                                         (page+2 > totalPages ? totalPages : page+2) )}"
+			        th:classappend="${p == page} ? ' active'">
+			      <a class="page-link"
+			         th:text="${p}"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${p}, size=${size})}">
+			        1
+			      </a>
+			    </li>
+			
+			    <!-- 다음 -->
+			    <li class="page-item" th:classappend="${page == totalPages} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${page+1}, size=${size})}"
+			         aria-label="Next">&raquo;</a>
+			    </li>
+			
+			    <!-- 마지막 -->
+			    <li class="page-item" th:classappend="${page == totalPages} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${totalPages}, size=${size})}"
+			         aria-label="Last">&raquo;&raquo;</a>
+			    </li>
+			
+			  </ul>
+			</nav>
+		    
+		    </div>
 		    <th:block th:replace="qc/qc_view_modal :: qcViewModal"></th:block>
 		  </div>
 		</div>
