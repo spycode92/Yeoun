@@ -38,6 +38,7 @@ phases:
         # 파일 업로드 경로
         # 1) 업로드 기본 경로
         file.uploadBaseLocation=/usr/local/tomcat/upload
+
         # [ 하이버네이트(JPA) 설정 ]
         # 애플리케이션 시작(또는 재시작) 시 테이블 자동 생성
         #spring.jpa.hibernate.ddl-auto=create
@@ -51,16 +52,6 @@ phases:
         spring.jpa.defer-datasource-initialization=true
         
         
-        # JPA(하이버네이트) 를 통해 실행(전송)되는 쿼리 콘솔에서 확인
-        # ex) Hibernate: create table member (id bigint not null, name varchar(16) not null, primary key (id))
-        spring.jpa.show-sql=true
-        
-        # 하이버네이트 로그를 콘솔에 출력할 때 구문의 줄바꿈을 수행하는 옵션
-        spring.jpa.properties.hibernate.format-sql=true
-        
-        # 타임리프 캐싱 기능 끄기
-        spring.thymeleaf.cache=false
-        
         # =================================================
         # GET, POST 방식 외에 PUT, PATCH, DELETE 등의 요청 시 form 태그의 히든 파라미터로 "_method" 전송할 경우
         # 스프링에서 해당 파라미터를 요청 방식으로 인식하려면 히든 메서드 필터링 설정 추가
@@ -71,13 +62,10 @@ phases:
         # Mapper XML 파일 위치 설정
         mybatis.mapper-locations=classpath:mapper/*.xml
         mybatis.configuration.map-underscore-to-camel-case=true
-        logging.level.com.yeoun.approval.mapper=DEBUG
         
         #=====================================================
         #잭슨 설정 
         spring.jackson.serialization.fail-on-empty-beans=false
-        # spa 한국시간 설정
-        spring.jpa.properties.hibernate.jdbc.time_zone=Asia/Seoul
         EOF
   build:
     commands:
@@ -90,4 +78,5 @@ artifacts:
     - myapp.war
     - appspec.yml
     - scripts/*
+
 
