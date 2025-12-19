@@ -119,7 +119,7 @@
 					<tbody>
 						<tr th:each="item : ${materialOrderDTO.items}">
 							<td class="text-center" th:text="${item.matName}"></td>
-							<td class="text-center" th:text="${#numbers.formatInteger(item.orderAmount, 3, 'COMMA')}"></td>
+							<td class="text-center" th:text="${#numbers.formatInteger(item.orderAmount, 0, 'COMMA')}"></td>
 							<td class="text-end" th:text="${#numbers.formatInteger(item.unitPrice, 3, 'COMMA')}"></td>
 							<td class="text-end" th:text="${#numbers.formatInteger(item.supplyAmount, 3, 'COMMA')}"></td>
 	                        <td class="text-end" th:text="${#numbers.formatInteger(item.VAT, 3, 'COMMA')}"></td>

@@ -25,6 +25,7 @@ function resetDetailModal() {
 	document.getElementById('detailLocation').value = '';
 	document.getElementById('detailExpiry').value = '';
 	document.getElementById('sameLotTableBody').innerHTML = '';
+	document.getElementById('detailStatus').value = '';
 }
 
 
@@ -53,6 +54,15 @@ function openDetailModal(rowData, sameLotList = []) {
 			default:     return type || '';
 		}
 	})(rowData.itemType);
+	
+	document.getElementById('detailStatus').value = (function(status) {
+		switch (status) {
+			case 'NORMAL': return '정상';
+			case 'DISPOSAL WAITING' : return '임박';
+			case 'EXPIRED' : return '만료';
+			default : return status || '';
+		}
+	})(rowData.status);
 
 	document.getElementById('detailProdName').value = rowData.prodName || '';
 	document.getElementById('detailAmount').value = rowData.ivAmount ?? '';
