@@ -59,7 +59,7 @@ public class ProcessMstController {
     // 공정단계 조회
     @ResponseBody
     @GetMapping("/processStep/list")
-    public List<RouteStep> processStepList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+    public List<Map<String, Object>> processStepList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
             @RequestParam("routeId") String routeId) {
         log.info("processStepList controller - {}", routeId);
         return processMstService.getProcessStepList(routeId);

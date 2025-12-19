@@ -32,10 +32,26 @@ public class QcItemController {
 	//품질항목관리 연결페이지(검사 X)
   	@GetMapping("/qc_item")
   	public String qcItem(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		model.addAttribute("qcIdList", qcItemService.qcIdList());//기안자 목록 불러오기
+		model.addAttribute("qcIdList", qcItemService.qcIdList());
+		model.addAttribute("targetTypeList", qcItemService.targetTypeList());
+		model.addAttribute("unitTypeList", qcItemService.unitTypeList());
 		return "masterData/qc_item";
  	}
-    
+
+	// //대상구분 드롭다운
+	// @ResponseBody
+	// @GetMapping("/qcItem/targetTypeList")
+	// public List<Map<String, Object>> targetTypeList() {
+	// 	return qcItemService.targetTypeList();
+	// }
+
+	// //품질단위 드롭다운
+	// @ResponseBody
+	// @GetMapping("/qcItem/unitTypeList")
+	// public List<Map<String, Object>> unitTypeList() {
+	// 	return qcItemService.unitTypeList();
+	// }
+
   	//품질의기준 조회
   	@ResponseBody
   	@GetMapping("/qc_item/list")

@@ -85,6 +85,8 @@
 		        OR UPPER(NVL(oi.LOT_NO, ' '))  LIKE '%' || #{keyword} || '%'
 		        OR o.WORK_ORDER_ID LIKE '%' || #{keyword} || '%'
 		        OR o.SHIPMENT_ID LIKE '%' || #{keyword} || '%'
+		        OR o.SHIPMENT_ID LIKE '%' || #{keyword} || '%'
+		        OR s.CLIENT_NAME LIKE '%' || #{keyword} || '%'
     		)
 		</if>
 		ORDER BY

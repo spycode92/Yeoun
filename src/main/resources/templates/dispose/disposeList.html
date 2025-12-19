@@ -37,7 +37,7 @@
         <!-- Search Filter -->
         <div class="card mb-4">
             <div class="card-body">
-                <form id="historySearchForm">
+                <form id="historySearchForm" onsubmit="return false;">
 				    <div class="d-flex flex-row align-items-center gap-3">
 						<div>
 							<label class="form-label" for="startDate">기간</label>
@@ -53,7 +53,7 @@
 							    <option value="">전체</option>
 							    <option value="INBOUND">입고</option>
 							    <option value="INVENTORY">재고</option>
-							    <option value="MANUFACTURE">생산</option>
+							    <option value="QC_FAIL">QC실패</option>
 							</select>
 						</div>
 <!-- 						<div style="min-width: 120px;"> -->

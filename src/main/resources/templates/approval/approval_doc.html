@@ -50,12 +50,15 @@
 				</div>
 			</div>
 			<div class="d-flex justify-content-end">
-				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-					<input id="searchStartDate" type="date" name="startDate" class="form-control">
-				</div>
-				~
-				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-					<input id="searchEndDate" type="date" name="endDate" class="form-control">
+				<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+			
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<input id="searchStartDate" type="date" name="startDate" class="form-control">
+					</div>
+					<span>~</span>
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<input id="searchEndDate" type="date" name="endDate" class="form-control">
+					</div>
 				</div>
 					<input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;margin-left:5px;">
 				<div style="margin-left:5px;">
@@ -95,23 +98,23 @@
             </ul>
             <div class="tab-content" style="height: 700px;">
               <div class="tab-pane fade show active"  id="nav-approval-tab" role="tabpanel">
-                <h2>결재사항</h2>
+                <!--<h2>결재사항</h2>-->
 			  	<div id="approvalGrid" ></div>
               </div>
               <div class="tab-pane fade" id="navs-all-tab" role="tabpanel">
-                <h2>전체결재</h2>
+                <!--<h2>전체결재</h2>-->
 			  	<div id="allApprovalGrid"></div>
               </div>
               <div class="tab-pane fade" id="navs-my-tab" role="tabpanel">
-                <h2>내 결재목록</h2>
+                <!--<h2>내 결재목록</h2>-->
 			  	<div id="myApprovalGrid"></div>
               </div>
 			  <div class="tab-pane fade" id="navs-waiting-tab" role="tabpanel">
-                <h2>결재대기</h2>
+                <!--<h2>결재대기</h2>-->
 				<div id="waitingApprovalGrid" ></div>
               </div>
 			  <div class="tab-pane fade" id="navs-done-tab" role="tabpanel">
-                <h2>결재완료</h2>
+                <!--<h2>결재완료</h2>-->
 				<div id="doneApprovalGrid"></div>
               </div>
             </div>
@@ -159,7 +162,17 @@
 					</h5>
 					<h5 class="d-flex">
 						<label class="p-1 required-field" style="width: 200px;">결재완료기간</label>
-						<div class="row flex-nowrap">
+						
+						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+								<input id="create-date" type="date" name="createdDate" class="form-control" required>
+							</div>
+							<span>~</span>
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+								<input id="finish-date" type="date" name="finishDate" class="form-control" required>
+							</div>
+						</div>
+					<!-- 	<div class="row flex-nowrap">
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 								<input type="date" name="createdDate" id="create-date" class="form-control" required>
 							</div>
@@ -168,11 +181,20 @@
 								<input type="date" name="finishDate"  id="finish-date" class="form-control" required>
 							</div>
 						</div>
-					</h5>
+					</h5> -->
 					
 					<h5 id="leavePeriodForm" style="display:none;">
 						<label class="p-1 required-field" style="width: 200px;">휴가기간</label>
-						<div class="row flex-nowrap">
+						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+								<input id="start-date" type="date" name="startDate" class="form-control" >
+							</div>
+							<span>~</span>
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+								<input id="end-date" type="date" name="endDate" class="form-control" >
+							</div>
+						</div>
+						<!-- <div class="row flex-nowrap">
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 								<input type="date" name="startDate"  id="start-date" class="form-control">
 							</div>
@@ -180,7 +202,7 @@
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 								<input type="date" name="endDate"  id="end-date" class="form-control">
 							</div>
-						</div>
+						</div> -->
 					</h5>
 				
 					<h5 id="leaveTypeForm" style="display: none;">
@@ -255,27 +277,35 @@
 						</div>	
 						
 						<!-- 전결자 클릭시 추가 태그 -->
-						<div id="jeongyeolja" style="display:none;border:1px solid red;border-radius: 6px;padding: 12px;">
+						<div id="jeongyeolja" style="display:none;border: 1px solid #D9DEE5;border-radius: 6px;padding: 12px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
 						
-							<div id="jeongyeolja-content">
-							<label class="form-check-label" for="radioDefault1">
-								없음 
-							</label>
-							<input class="form-check-input" type="radio" name="radioJeongyeolja" value="N" checked>
-							<label class="form-check-label" for="radioDefault1">
-								전결  
-							</label>
-							<input class="form-check-input" type="radio" name="radioJeongyeolja" value="전결">
-							<label class="form-check-label" for="radioDefault2">
-								대결  
-							</label>
-							<input class="form-check-input" type="radio" name="radioJeongyeolja" value="대결">
-							<label class="form-check-label" for="radioDefault2">
-								선결  
-							</label>
-							<input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
-							<div>
-								<h5>전결자 지정 </h5>
+							<div id="jeongyeolja-content" class="d-flex">
+							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);width:15px;">
+								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="N" checked>
+								<label class="form-check-label" for="radioDefault1" style="margin-left:5px;">
+									없음 
+								</label>
+							</span>
+							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
+								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="전결">
+								<label class="form-check-label" for="radioDefault2" style="margin-left:5px;">
+									전결  
+								</label>
+							</span>
+							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
+								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="대결">
+								<label class="form-check-label" for="radioDefault3" style="margin-left:5px;">
+									대결  
+								</label>
+								</span>
+							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
+								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
+								<label class="form-check-label" for="radioDefault4" style="margin-left:5px;">
+									선결  
+								</label>
+							</span>
+							<div style="margin:13px;">
+								<h6>전결자 지정 </h6>
 								<select id="delegetedApprover" name="delegetedApprover" class="form-select" aria-label="Default select example" style="display:none;">
 								<option selected></option>
 								<option th:each="item, iterStat : ${empList}" 

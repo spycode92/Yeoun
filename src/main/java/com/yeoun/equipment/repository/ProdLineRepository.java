@@ -10,7 +10,7 @@ import com.yeoun.equipment.entity.ProdLine;
 
 @Repository
 public interface ProdLineRepository extends JpaRepository<ProdLine, String> {
-
+	
 	// 사용중(Y) 라인만 정렬 조회
     List<ProdLine> findByUseYnOrderByLineIdAsc(String useYn);
 

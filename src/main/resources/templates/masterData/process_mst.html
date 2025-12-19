@@ -47,7 +47,7 @@
 					<div class="d-flex justify-content-start">
 			            <div class="mb-6 mb-0" style="width: 260px;">
 				        	<select  id="processprdId" class="form-select">
-				        	    <option value="" selected disabled hidden>제품명(제품코드)</option>
+				        	    <option value="" selected>제품명(제품코드)</option>
 			        	    	<option th:each="item, iterStat : ${prdMstList}" 
 										th:value="${item.prdId}" 
 										th:text="${item.prdName} +' (' + ${item.prdId} + ')'"
@@ -135,8 +135,8 @@
 	            <div class="col-md-2">
 	              <label class="form-label">사용여부</label>
 	              <select class="form-select" id="modalRouteUseYn">
-	                <option value="Y">Y</option>
-	                <option value="N">N</option>
+	                <option value="Y">활성</option>
+	                <option value="N">비활성</option>
 	              </select>
 	            </div>
 	            <div class="col-md-12">
@@ -166,8 +166,11 @@
 	        </div>
 	
 	        <!-- 라우트 단계 정의 헤더 (공정코드 조회 버튼 + 단계 추가) -->
+			<h6 class="mb-0">공정 단계</h6>
 	        <div class="d-flex justify-content-between align-items-center mb-2">
-	          <h6 class="mb-0">공정 단계</h6>
+				<p class="text-muted mb-2" style="font-size: 0.75rem;">
+					* 라우트단계id는 라우트 id, 공정id을 입력하면 필요데이터가 있을경우 자동생성됩니다.
+				</p>
 	          <div>
 	            <button class="btn btn-outline-secondary btn-sm me-1" type="button" 
 	                    onclick="openProcessLookupModal()">
@@ -177,8 +180,7 @@
 	                    onclick="addRouteStepRow()">
 	              + 단계 추가
 	            </button>
-				<button class="btn btn-outline-primary btn-sm" type="button"
-	                    onclick="deleteRouteStepRow()">
+				<button id = "deleteRouteStepRowBtn" class="btn btn-outline-primary btn-sm" type="button">
 	              - 단계 삭제
 	            </button>
 	          </div>

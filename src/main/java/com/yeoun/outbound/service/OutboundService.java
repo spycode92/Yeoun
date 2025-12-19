@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -93,6 +96,23 @@ public class OutboundService {
 				.expectOutboundDate(outboundOrderDTO.getStartDate())
 				.build();
 		
+		// 출고 대상 itemId 수집
+		Set<String> itemsId = outboundOrderDTO.getItems().stream()
+				.map(item -> "MAT".equals(outboundOrderDTO.getType()) ? item.getMatId() : item.getPrdId())
+				.collect(Collectors.toSet());
+		
+		// 재고 조회
+		List<Inventory> inventories = inventoryRepository.findByItemIdAndIvStatusNot(itemsId, "EXPIRED");
+		
+		if (inventories.isEmpty()) {
+			throw new IllegalArgumentException("재고가 없습니다.");
+		}
+		
+		// itemId 기준으로 재고 그룹핑
+		Map<String, List<Inventory>> inventoryMap =
+				inventories.stream()
+				.collect(Collectors.groupingBy(Inventory::getItemId));
+		
 		// 출고 품목 지정할 변수
 		List<OutboundItemDTO> items = new ArrayList<>();
 		
@@ -108,16 +128,12 @@ public class OutboundService {
 			Long requireQty = item.getOutboundQty();
 			
 			// 재고 조회
-			List<Inventory> inventoryList = inventoryRepository.findByItemIdAndIvStatusNot(itemId, "EXPIRED");
-			
-			if (inventoryList.isEmpty()) {
-				throw new IllegalArgumentException("재고가 없습니다.");
-			}
+			 List<Inventory> stockList = inventoryMap.get(itemId);
 			
 			// FIFO 
 			Long remaining = requireQty;
 			
-			for (Inventory stock : inventoryList) {
+			for (Inventory stock : stockList) {
 				if (remaining <= 0) break;
 				
 				// 기존 예정 수량

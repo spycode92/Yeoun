@@ -31,7 +31,10 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 
 	// 퇴사안한 사원목록 조회
 	@Query(value ="""
-			 SELECT emp_id,emp_name FROM emp WHERE status='ACTIVE'
+			 SELECT emp_id,emp_name 
+			 FROM emp 
+			 WHERE status='ACTIVE'
+			 ORDER BY emp_name
 			""",nativeQuery = true)
     List<Object[]> findAllMember2();
 

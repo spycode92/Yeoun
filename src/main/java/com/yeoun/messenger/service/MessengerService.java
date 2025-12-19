@@ -253,14 +253,23 @@ public class MessengerService {
 		
 		if (statusChangeRequest.getAvlbStat() != null) {
 			msgStatus.setAvlbStat(statusChangeRequest.getAvlbStat());
+			msgStatus.setAvlbUpdated(LocalDateTime.now());
+
+			if ("OFFLINE".equals(statusChangeRequest.getAvlbStat())){
+				msgStatus.setOnlineYn("N");
+			} else {
+				msgStatus.setOnlineYn("Y");
+			}
 		}
 		
 		if (statusChangeRequest.getWorkStat() != null) {
 			msgStatus.setManualWorkStat(statusChangeRequest.getWorkStat());
 			msgStatus.setWorkStatSource("MANUAL");
+			msgStatus.setWorkStatUpdated(LocalDateTime.now());
 		}
 		
 		msgStatus.setWorkStatUpdated(LocalDateTime.now());
+		msgStatusRepository.save(msgStatus);
 	}
 
 	// ========================================================

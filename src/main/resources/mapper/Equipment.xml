@@ -54,5 +54,18 @@
     	</where>
     	ORDER BY d.START_TIME DESC
     </select>
+    
+    <select id="countRunningEquipments" resultType="Integer">
+    SELECT COUNT(DISTINCT pe.equip_id)
+	FROM prod_equip pe
+	JOIN equipment p
+	  ON pe.equip_code = p.equip_id
+	JOIN work_order_process wop
+	  ON p.process_id = wop.process_id
+	JOIN work_order wo
+	  ON wop.order_id = wo.order_id
+	WHERE wop.status = 'IN_PROGRESS'
+	  AND SYSDATE BETWEEN wop.start_time AND NVL(wop.end_time, SYSDATE)
+    </select>
 
 </mapper>

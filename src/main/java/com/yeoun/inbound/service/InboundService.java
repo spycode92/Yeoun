@@ -200,9 +200,6 @@ public class InboundService {
 		// DTO -> Entity 변환
 		Inbound inbound = inboundDTO.toEntity();
 		
-		// 입고 등록
-		inboundRepository.save(inbound);
-		
 		// -------------------------------------
 		// 입고 품목 등록
 		// 제품 기준정보의 유효일자(개월) 가져오기

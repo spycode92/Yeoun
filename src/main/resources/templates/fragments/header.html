@@ -14,30 +14,31 @@
 			        <i class="bx bx-menu bx-sm"></i>
 			    </a>
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
-              	<li class="nav-item lh-1 me-3">
-              		<i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
-              		<span id="badge_payment"></span>
-				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					  <li><a class="dropdown-item" href="#">Action</a></li>
-					  <li><a class="dropdown-item" href="#">Another action</a></li>
-					  <li><a class="dropdown-item" href="#">Something else here</a></li>
-					  <li><hr class="dropdown-divider"></li>
-					  <li><a class="dropdown-item" href="#">Separated link</a></li>
-					</ul>
-                </li>
+<!--               	<li class="nav-item lh-1 me-3"> -->
+<!--               		<i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i>  -->
+<!--               		<span id="badge_payment"></span> -->
+<!-- 				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"> -->
+<!-- 					  <li><a class="dropdown-item" href="#">Action</a></li> -->
+<!-- 					  <li><a class="dropdown-item" href="#">Another action</a></li> -->
+<!-- 					  <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+<!-- 					  <li><hr class="dropdown-divider"></li> -->
+<!-- 					  <li><a class="dropdown-item" href="#">Separated link</a></li> -->
+<!-- 					</ul> -->
+<!--                 </li> -->
               	<li class="nav-item lh-1 me-3"> 
               		<div class="bell-wrapper">
 		              	<i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
-		              	<span id="badge_bell" >●</span>
+<!-- 		              	<span id="badge_bell" >●</span> -->
 		                <ul class="dropdown-menu" >
-						  <li><a class="dropdown-item" href="#">bell</a></li>
 						  <li><a class="dropdown-item alarm-list" href="/alarm" id="alarmList">
 						  	알림
 						  	<span class="alarm-new-badge" style="display:none;">NEW</span>
 						  </a></li>
-						  <li><a class="dropdown-item" href="#">공지사항</a></li>
-						  <li><hr class="dropdown-divider"></li>
-						  <li><a class="dropdown-item" href="#">집중</a></li>
+						  <li>
+						  	<a class="dropdown-item" th:href="@{/notice}">공지사항</a>
+						  </li>
+<!-- 						  <li><hr class="dropdown-divider"></li> -->
+<!-- 						  <li><a class="dropdown-item" href="#">집중</a></li> -->
 						</ul>
               		</div>
                 </li>
@@ -103,33 +104,29 @@
 		  <script>
 			//Resources
 		  
-         	const payment = document.getElementById("payment");
-      		const bell = document.getElementById("bell");
+//          	const payment = document.getElementById("payment");
       		const chat = document.getElementById("chat");
 
-        	const badgePayment = document.getElementById("badge_payment");
-        	const badgeBell = document.getElementById("badge_bell");
+//         	const badgePayment = document.getElementById("badge_payment");
+//         	const badgeBell = document.getElementById("badge_bell");
         	const badgeChat = document.getElementById("badge_chat");
-            this.pamentCount = 0;
-            this.bellCount = 0;
+//             this.pamentCount = 0;
             this.chatCount = 0;
 
-    		payment.addEventListener("click",()=>{
+//     		payment.addEventListener("click",()=>{
     			
-    		    if(badgePayment.style.display === 'none'){
-    		    	this.pamentCount += 1;
-    		    	badgePayment.textContent = this.pamentCount;
-    		    	badgePayment.style.display = 'unset';
-    		    }else {
-    		    	badgePayment.style.display = 'none';
-    		    }
-    		});
+//     		    if(badgePayment.style.display === 'none'){
+//     		    	this.pamentCount += 1;
+//     		    	badgePayment.textContent = this.pamentCount;
+//     		    	badgePayment.style.display = 'unset';
+//     		    }else {
+//     		    	badgePayment.style.display = 'none';
+//     		    }
+//     		});
 
     		
     		bell.addEventListener("click",()=>{
     			if(badgeBell.style.display === 'none'){
-       		    	this.bellCount += 1;
-       		    	badgeBell.textContent = this.bellCount;
        		    	badgeBell.style.display = 'block';
        		    }else {
        		    	badgeBell.style.display = 'none';

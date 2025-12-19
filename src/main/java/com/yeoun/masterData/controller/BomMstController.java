@@ -97,7 +97,7 @@ public class BomMstController {
 	//BOM 저장
     @ResponseBody
    	@PostMapping("/save")
-   	public String bomSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@org.springframework.web.bind.annotation.RequestBody Map<String, Object> param) {
+   	public String bomSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
     	String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
     	log.info("bomSave------------->{}", param);
     	return bomMstService.saveBomMst(empId,param);

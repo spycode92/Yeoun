@@ -10,7 +10,7 @@
 		 계획 = WORK_ORDER.PLAN_QTY 합
 		 완료 = 최종공정(6) WORK_ORDER_PROCESS.GOOD_QTY 합
 	 	 ========================================================= -->
-	<select id="plannedByDay" resultType="com.yeoun.process.dto.TrendRowDTO">
+	<select id="plannedByDay" resultType="com.yeoun.production.dto.TrendRowDTO">
 		SELECT TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM-DD') AS label,
 			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
 	    FROM WORK_ORDER w
@@ -20,7 +20,7 @@
 	    ORDER BY label
 	</select>
 	
-	<select id="completedByDay" resultType="com.yeoun.process.dto.TrendRowDTO">
+	<select id="completedByDay" resultType="com.yeoun.production.dto.TrendRowDTO">
 		WITH planned_orders AS (
 			SELECT w.ORDER_ID, w.PLAN_END_DATE
 			FROM WORK_ORDER w
@@ -41,7 +41,7 @@
 	<!-- =========================================================
 		 WEEK (주) : 월 기준 주차: "MM월 W주차"
 	 	 ========================================================= -->
-	<select id="plannedByWeek" resultType="com.yeoun.process.dto.TrendRowDTO">
+	<select id="plannedByWeek" resultType="com.yeoun.production.dto.TrendRowDTO">
 		SELECT TO_CHAR(w.PLAN_END_DATE, 'MM') || '월 ' || TO_CHAR(w.PLAN_END_DATE, 'W') || '주차' AS label,
 			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
 	    FROM WORK_ORDER w
@@ -51,7 +51,7 @@
  		ORDER BY TO_CHAR(w.PLAN_END_DATE, 'MM'), TO_CHAR(w.PLAN_END_DATE, 'W')
 	</select>
 
-  	<select id="completedByWeek" resultType="com.yeoun.process.dto.TrendRowDTO">
+  	<select id="completedByWeek" resultType="com.yeoun.production.dto.TrendRowDTO">
  		WITH planned_orders AS (
 		    SELECT w.ORDER_ID, w.PLAN_END_DATE
 		    FROM WORK_ORDER w
@@ -73,7 +73,7 @@
          MONTH (월) : label = YYYY-MM
          ========================================================= -->
 
- 	<select id="plannedByMonth" resultType="com.yeoun.process.dto.TrendRowDTO">
+ 	<select id="plannedByMonth" resultType="com.yeoun.production.dto.TrendRowDTO">
 		SELECT TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM') AS label,
 			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
 		FROM WORK_ORDER w
@@ -83,7 +83,7 @@
 		ORDER BY label
   	</select>
 
-  	<select id="completedByMonth" resultType="com.yeoun.process.dto.TrendRowDTO">
+  	<select id="completedByMonth" resultType="com.yeoun.production.dto.TrendRowDTO">
 	    WITH planned_orders AS (
 	    	SELECT w.ORDER_ID, w.PLAN_END_DATE
 	    	FROM WORK_ORDER w

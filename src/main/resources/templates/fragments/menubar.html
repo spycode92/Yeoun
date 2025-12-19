@@ -143,7 +143,7 @@
                 <span class="menu-header-text">MES</span>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <a href="javascript:void(0);" class="menu-link menu-toggle"  sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                     <div data-i18n="Master Data Management" class="menu-link-sub">기준정보관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -242,12 +242,17 @@
 	            </ul>
             </li>
 
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Work order">생산관리</div>
                 </a>               
                 
                 <ul class="menu-sub">
+              		<li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/production/dashboard}" class="menu-link">
+                            <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
+                        </a>
+                    </li>
                		<li class="menu-item" sec:authorize="isAuthenticated()">
                         <a th:href="@{/production/plan}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">생산계획</div>
@@ -267,7 +272,7 @@
             </li>
             
             <!-- 설비 관리 -->
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
             	<a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Equipment management">설비관리</div>
                 </a>
@@ -292,7 +297,7 @@
                 </a>
                 <ul class="menu-sub">
                		<li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/production/dashboard}" class="menu-link">
+                        <a th:href="@{/process/dashboard}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
                         </a>
                     </li>

@@ -129,6 +129,14 @@ public class InventoryRestController {
 	// ----------------------------------------------------------------------------
 	// 대시보드
 	
+	// 재고의 상태가 normal이아닌 재고데이터
+	@PostMapping("/expiration")
+	public ResponseEntity<List<InventoryDTO>> getNotnormalIv() {
+		List<InventoryDTO> inventoryList = inventoryService.getInventoryNotnormal();
+		
+		return ResponseEntity.ok(inventoryList);
+	}
+	
 	// 상품별 재고정보 조회
 	@GetMapping("/inventorySafetyStockCheckInfo")
 	public ResponseEntity<List<InventorySafetyCheckDTO>> getIvSummary() {

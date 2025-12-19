@@ -96,12 +96,12 @@ const grid1 = new Grid({
 		}
 		,{header: '단가' ,name: 'unitPrice' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
-			,editor: {
-            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
-            options: {
-              maxLength: 10
-            }
-          }
+				,editor: {
+					type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+				options: {
+				maxLength: 10
+				}
+			}
 		}
         ,{header: '상태' ,name: 'prdStatus' ,align: 'center',hidden:true
 			,renderer:{ type: StatusModifiedRenderer

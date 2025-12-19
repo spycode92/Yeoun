@@ -6,14 +6,12 @@
 		<h3>출퇴근 현황</h3>
 		<div class="d-flex justify-content-between">
 			<div class="row flex-nowrap">
-				<div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
-					<input type="date" name="srhStrDate" class="form-control" id="startDate">
+				<div class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-3">
+					<input type="date" class="form-control" id="startDate" style="width: 140px;"/>
+					<span>~</span>
+					<input type="date" class="form-control" id="endDate" style="width: 140px;">
 				</div>
-                ~
-                <div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
-	                <input type="date" name="srhEndDate" class="form-control" id="endDate">
-                </div>
-                <div class="mb-6 col-lg-6 col-xl-4 col-12 mb-0">
+                <div>
 	             	<button type="button" class="btn btn-primary" id="searchbtn">조회</button>
                 </div>
 			</div>

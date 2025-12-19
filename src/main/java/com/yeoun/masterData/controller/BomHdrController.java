@@ -36,7 +36,7 @@ public class BomHdrController {
 	//BOM 그룹 BOM_HDR_TYPE 타입 드롭다운
 	//hdrTypeLis
 	@ResponseBody
-	@GetMapping("/hdrTypeLis")
+	@GetMapping("/hdrTypeList")
 	public List<Map<String, Object>> findBomHdrTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		return bomHdrService.findBomHdrTypeList();
 	}
@@ -51,5 +51,13 @@ public class BomHdrController {
 			) {
 		return bomHdrService.findBomHdrList(bomHdrId,bomHdrType);
 	}
+	
+	//Bom 그룹 수정(저장)
+	@ResponseBody
+	@PostMapping("/bomHdrSave")
+	public String findBomHdrSave(@AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
+		return bomHdrService.saveBomHdr(loginDTO.getEmpId(),param);
+	}
+	
 
 }

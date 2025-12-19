@@ -1,0 +1,127 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+<th:block layout:fragment="content">
+
+  <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 제목 -->
+    <div class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
+      <div>
+        <h4 class="mb-0"><b>생산관리 대시보드</b></h4>
+      </div>
+    </div>
+    
+    <!-- ******************************************************* -->
+    <!-- 1. KPI 카드 4개 -->
+    <div class="row g-3 mb-3">
+    
+    	<!-- 1) 오늘 작업지시 카드 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" role="button" tabindex="0"
+    			 aria-label="오늘 작업지시 목록으로 이동"> <!-- data-link="/order/list" -->
+    			<div class="card-body">
+    			 	<div class="kpi-title">오늘 생산계획</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+    			 		<!-- <div class="kpi-value" th:text="${kpi.todayOrders}">8</div> -->
+    			 		<div class="kpi-sub text-muted small">
+    			 			<span class="text-success">
+    			 				↑ 처리 <!-- <span th:text="${kpi.completedDelta}">0</span> -->
+    			 			</span>
+    			 			&nbsp;
+    			 			<span class="text-danger">
+    			 				↓ 대기 <!-- <span th:text="${kpi.waitingDelta}">0</span> -->
+    			 			</span>
+    			 		</div>
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<!-- 2) 진행 중 작업 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card"  role="button" tabindex="0"
+    			 aria-label="진행 중 작업으로 이동"><!-- data-link="/process/status" -->
+    			<div class="card-body">
+    			 	<div class="kpi-title">생성된 작업지시</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+    			 		<!-- <div class="kpi-value" th:text="${kpi.inProgressOrders}">3</div> -->
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<!-- 3) 지연 작업 현황 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" role="button" tabindex="0" aria-label="지연 작업 현황으로 이동"><!-- data-link="/process/status"--> 
+    			<div class="card-body">
+    			 	<div class="kpi-title">미지시 계획</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+    			 		<!-- <div class="kpi-value" th:text="${kpi.delayedOrders}">1</div>
+              			<div class="kpi-sub trend-warn" th:if="${kpi.delayedOrders > 0}">주의 필요</div> -->
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<!-- 4) QC 대기 / 불합격 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" role="button" tabindex="0"
+    			 aria-label="QC 화면으로 이동"> <!-- data-link="/qc/regist" -->
+    			<div class="card-body">
+    			 	<div class="kpi-title">지연 작업지시</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+						<div class="kpi-value">
+							<a class="kpi-link" href="/qc/regist?status=PENDING" 
+							   aria-label="QC 대기 목록으로 이동"> <!-- onclick="event.stopPropagation();" -->
+							   <!-- <span th:text="${kpi.qcPendingOrders}">0</span> -->
+							</a>
+							<span class="text-muted fs-5"> / </span>
+							<a class="kpi-link" href="/qc/result?status=FAIL" 
+							   aria-label="QC 불합격 목록으로 이동"> <!-- onclick="event.stopPropagation();" -->
+							   <!-- <span th:text="${kpi.qcFailSteps}">0</span> -->
+							</a>
+						</div>
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    </div> <!-- KPI 카드 끝 -->
+    
+
+    <!-- ******************************************************* -->
+	<!-- 3. 생산 현황 추적 차트 -->
+	<div class="card card-soft mb-3">
+		<div class="card-body">
+			<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+				<div>
+					<h6 class="section-title">생산 현황 추적</h6>
+					<div class="section-sub">기간별 계획 대비 완료 추이</div>
+				</div>
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-outline-primary btn-sm" data-range="month">월</button>
+					<button type="button" class="btn btn-outline-primary btn-sm" data-range="week">주</button>
+            		<button type="button" class="btn btn-primary btn-sm" data-range="day">일</button>
+				</div>
+			</div>
+			
+			<div id="prodChart" style="height: 320px;"></div>
+			<div class="text-muted small mt-2">※ 일/주/월 기준 집계</div>
+		</div>
+	</div>
+
+  </div> <!-- /container -->
+
+  <!-- ApexCharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  
+  <!-- 서버 주입 데이터 -->
+  <script th:inline="javascript">
+    window.ctx = /*[[@{/}]]*/ '';
+    window.initialTrend = /*[[${trend}]]*/ null;
+  </script>
+
+  <script src="/js/production/dashboard.js"></script>
+
+</th:block>
+</th:block>

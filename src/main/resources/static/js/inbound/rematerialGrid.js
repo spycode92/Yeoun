@@ -84,7 +84,7 @@ async function loadReMaterialInbound(startDate, endDate, searchType, keyword) {
 		
 		// 데이터가 없을 경우 빈배열 반환
 		if (!data || data.length === 0) {
-			grid.resetData([]);
+			reMaterialGrid.resetData([]);
 		}
 		
 		const statusMap = {
@@ -154,7 +154,7 @@ document.querySelector("#reSearchbtn").addEventListener("click", async () => {
 	const startDate = reStartDateInput.value;
 	const endDate = reEndDateInput.value;
 	const keyword = document.querySelector("#reMaterialKeyword").value;
-	const searchType = document.querySelector("select[name='searchType']").value;
+	const searchType = document.querySelector("select[name='reSearchType']").value;
 	
 	if (!startDate || !endDate) {
 		alert("조회할 기간을 선택해주세요!");
@@ -171,8 +171,8 @@ document.querySelector("#reStartDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#reMaterialKeyword").value;
 	const searchType = document.querySelector("select[name='reSearchType']").value;
 	
-	sessionStorage.setItem("rematerial_startDate", reStartDateInput.value);
-	sessionStorage.setItem("rematerial_endDate", reEndDateInput.value);
+	sessionStorage.setItem("rematerial_startDate", startDate);
+	sessionStorage.setItem("rematerial_endDate", endDate);
 	
 	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });
@@ -184,8 +184,8 @@ document.querySelector("#reEndDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#reMaterialKeyword").value;
 	const searchType = document.querySelector("select[name='reSearchType']").value;
 	
-	sessionStorage.setItem("rematerial_startDate", reStartDateInput.value);
-	sessionStorage.setItem("rematerial_endDate", reEndDateInput.value);
+	sessionStorage.setItem("rematerial_startDate", startDate);
+	sessionStorage.setItem("rematerial_endDate", endDate);
 	
 	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });

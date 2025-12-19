@@ -12,6 +12,8 @@ import com.yeoun.equipment.repository.ProdLineRepository;
 import com.yeoun.process.dto.WorkOrderProcessDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,7 @@ public class EquipmentService {
     // ===================================================
     // 라인 목록
     public List<ProdLineDTO> loadAllLines() {
-        return prodLineRepository.findAll().stream()
+        return prodLineRepository.findAll(Sort.by(Sort.Direction.ASC, "lineId")).stream()
                 .map(ProdLineDTO::fromEntity)
                 .toList();
     }
@@ -191,6 +193,12 @@ public class EquipmentService {
 	public List<EquipDowntimeDTO> loadAllEquipDowntimeHistory(HistorySearchDTO dto) {
 		return equipmentMapper.selectDowntimeHistories(dto);
 	}
+	
+	// 가동중 설비 목록
+	public Integer selectRunningEquipmentCount () {
+		return equipmentMapper.countRunningEquipments();
+	}
+	
 }
 
 

@@ -277,7 +277,7 @@ body {
 .alarm-new-badge {
   color: red !important;
   font-weight: 700 !important;
-  border: 1px solid black !important;
+/*   border: 1px solid black !important; */
   padding: 0 4px;
 }
 

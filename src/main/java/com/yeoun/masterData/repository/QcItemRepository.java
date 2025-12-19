@@ -19,6 +19,18 @@ public interface QcItemRepository extends JpaRepository<QcItem, String> {
         FROM QC_ITEM ORDER BY QC_ITEM_ID ASC
         """, nativeQuery = true)
     List<String> qcIdList();
+	//대상구분 드롭다운
+	// 품질 단위 드롭다운
+	@Query(value = """
+		SELECT code_id as value
+				,code_name as text
+		FROM COMMON_CODE
+		WHERE PARENT_CODE_ID = 'QCITEM_UNIT'
+		ORDER BY CODE_SEQ ASC
+		""", nativeQuery = true)
+	List<Map<String, Object>> unitTypeList();
+
+
     //품질항목조회 (네이티브 SQL 사용)
     @Query(value = """
      

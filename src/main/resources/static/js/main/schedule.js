@@ -751,7 +751,7 @@ async function initNoticeGrid(data) {
 	        {
 	            header: '제목',
 	            name: 'noticeTitle',
-	            align: "left",
+	            align: "center",
 	            formatter: function({ row }) {
 	                const title = row.noticeTitle || "";
 	                let dateHtml = "";
@@ -765,17 +765,21 @@ async function initNoticeGrid(data) {
 	                        const min = String(date.getMinutes()).padStart(2, '0');
 	                        
 	                        // 날짜 텍스트 생성
-	                        const dateText = `(${mm}-${dd} ${hh}:${min})`;
+	                        const dateText = `(${mm}-${dd})`;
 	                        
 	                        // 날짜 부분에만 적용할 스타일 (글자 작게, 줄바꿈 방지 등)
 	                        dateHtml = `<span style="font-size: 11px; color: #888; margin-left: 10px; flex-shrink: 0;">${dateText}</span>`;
 	                    }
 	                }
+					
+					const textAlignStyle = row.noticeYN === 'Y' ? 'text-align: center; font-weight: bold;' : 'display: flex;';
 
 	                // Flexbox를 사용하여 제목(왼쪽)과 날짜(오른쪽) 배치
 	                return `
-	                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-	                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${title}</span>
+            			<div style="justify-content: space-between; align-items: center; width: 100%; ${textAlignStyle}">
+						<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.7rem;">
+						${title}
+						</span>
 	                        ${dateHtml}
 	                    </div>
 	                `;
@@ -789,8 +793,8 @@ async function initNoticeGrid(data) {
 	noticeGrid.resetData(data);
 //	console.log(noticeGrid.gridEl, "노티스그리드");
 	const rows = noticeGrid.getData();
-	
 	rows.forEach(row => {
+		console.log(row);
 		if(row.noticeYN == 'Y'){
 			noticeGrid.addCellClassName(row.rowKey, 'noticeTitle', 'notice-cell');
 		}

@@ -55,9 +55,9 @@ public class ProcessMstService {
 	}
 	// 공정단계 그리드 조회
 	@Transactional(readOnly = true)
-	public List<RouteStep> getProcessStepList(String routeId) {
+	public List<Map<String, Object>> getProcessStepList(String routeId) {
 		log.info("getProcessStepList 조회 - {}", routeId);
-		return routeStepRepository.findByRouteHeader_RouteIdOrderByStepSeqAsc(routeId);
+		return routeStepRepository.findRouteStepByRouteId(routeId);
 	}
 	// 공정코드 그리드 저장
 	public String saveProcessCode(String empId, Map<String,Object> param) {
@@ -117,7 +117,9 @@ public class ProcessMstService {
 							.processType(row.get("processType").toString())
 							.useYn(row.get("useYn").toString())
 							.createdId(row.get("createdId").toString())
-							.createdDate(LocalDateTime.parse(row.get("createdDate").toString()))
+							.createdDate(
+								java.time.OffsetDateTime.parse(row.get("createdDate").toString()).toLocalDateTime()
+							)
 							.updatedId(empId)
 							.updatedDate(LocalDateTime.now())
 							.build();

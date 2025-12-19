@@ -176,7 +176,7 @@ function changeStatus(req){
 }
 
 // ==========================
-// 상태 실시간 변화 구독
+// 채팅방 실시간 변화 구독
 // ==========================
 function receiveNewMessage(req){
 
@@ -472,11 +472,22 @@ let manuallySet = false;  // 수동 상태 변경 여부
 // ==========================
 // 서버로 상태 전송 함수
 // ==========================
-async function sendStatusToServer(presence, reason) {
+async function sendStatusToServer(presence, reason, isUnload = false) {
 	
 	console.log("sendStatusToServer 진입!!!!!");
 	console.log("presence... : " , presence);
 	console.log("reason... : ", reason);
+
+    const payload = JSON.stringify({
+        avlbStat: presence,     // ONLINE / AWAY / BUSY / OFFLINE
+        workStat: reason        // MEETING / LUNCH / WORKING / etc
+    });
+
+    // 🔥 OFFLINE 전용 처리
+    if (isUnload && presence === "OFFLINE" && navigator.sendBeacon) {
+        navigator.sendBeacon("/messenger/status/offline", "");
+        return;
+    }
 	
     try {
         const res = await fetch('/messenger/status', {
@@ -485,10 +496,7 @@ async function sendStatusToServer(presence, reason) {
                 'Content-Type': 'application/json',
                 [csrfHeader]: csrfToken
             },
-            body: JSON.stringify({
-                avlbStat: presence,     // ONLINE / AWAY / BUSY / OFFLINE
-                workStat: reason        // MEETING / LUNCH / WORKING / etc
-            })
+            body: payload
         });
 
         const text = await res.text();
@@ -498,6 +506,26 @@ async function sendStatusToServer(presence, reason) {
         console.error("상태 전송 실패:", err);
     }
 }
+
+// =====================
+// 창 열리면 자동 온라인 처리
+// =====================
+window.addEventListener("load", () => {
+    sendStatusToServer("ONLINE", "WORKING");
+});
+
+// =====================
+// 창 닫힐때 자동 오프라인 처리
+// =====================
+window.addEventListener("beforeunload", () => {
+    sendStatusToServer("OFFLINE", null, true);
+});
+
+window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+        sendStatusToServer("OFFLINE", null, true);
+    }
+});
 
 // =====================
 // 수동 상태 변경

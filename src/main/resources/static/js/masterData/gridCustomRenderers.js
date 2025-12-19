@@ -132,6 +132,7 @@ class StatusModifiedRenderer {
     }
 }
 
+// 숫자만 입력 가능하도록 하는 커스텀 에디터 클래스
 class NumberOnlyEditor {
   constructor(props) {
     const el = document.createElement('input');

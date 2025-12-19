@@ -116,7 +116,7 @@
 	        <div class="row">
 				<!-- 왼쪽 열: 달력/탭(View 변환) -->
 	            <div class="col-md-7 col-lg-8" >
-	                <section class="panel calendar border">
+	                <section class="panel calendar">
 	                    <div class="calendar-header d-flex align-items-center pb-2">
 	                        <!-- 달력 타입변환 -->
 	                        <div class="btn-group" role="group">
@@ -165,7 +165,7 @@
 	                    </div>
 	                    <!-- 실제 TUI 캘린더 출력 -->
 	                    <div id="mainContent"> 
-		                    <div id="calendar" style="height: 700px; border: solid;"></div>
+		                    <div id="calendar" style="height: 700px; border: 2px solid #D9DEE3;"></div>
 	                    </div>
                    		<!-- 스피너 -->
 						<div id="calendar-loading-overlay" style="display:none; 
@@ -191,8 +191,8 @@
 	            			onclick="handleAttendanceToggle(this.dataset.empId)" 
 	            			id="attendance" 
 	            			style="width:50%"
-	            			 th:attr="data-emp-id=${#authentication.name},
-                 					  disabled=${buttonEnabled} ? null : 'disabled'">
+	            			th:attr="data-emp-id=${#authentication.name},
+                 					 disabled=${buttonEnabled} ? null : 'disabled'">
 	            				<span th:if="${status == 'WORKIN' or status == 'LATE'}">퇴근</span>
 	            				<span th:unless="${status == 'WORKIN' or status == 'LATE'}">출근</span>
 	            		</button>
@@ -202,7 +202,7 @@
 	            	</div>
 					<div class="card">
 						<div>
-							<h3 style="font-size:18px; font-weight:700;">공지사항 목록</h3>
+							<h3 style="font-size:18px; font-weight:700; text-align: center;">공지사항 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="noticeGrid"></div>
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
@@ -211,7 +211,7 @@
 					</div>
 					<div class="card">
 						<div>
-							<h3 style="font-size:18px; font-weight:700;">결재 문서 목록</h3>
+							<h3 style="font-size:18px; font-weight:700; text-align: center;">결재 문서 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="approvalGrid"></div>
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">

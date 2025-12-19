@@ -1,4 +1,4 @@
-package com.yeoun.process.dto;
+package com.yeoun.production.dto;
 
 import lombok.Getter;
 import lombok.Setter;

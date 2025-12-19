@@ -137,7 +137,7 @@ function initAlarmGrid() {
 		rowHeaders: ['rowNum'],
 		pageOptions: {
 		    useClient: true,
-		    perPage: 5
+		    perPage: 10
 		},
         columns: [
 //            { header: 'ID', name: 'alarmId', width: 70, align: 'center' },

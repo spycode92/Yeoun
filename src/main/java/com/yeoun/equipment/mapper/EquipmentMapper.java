@@ -20,5 +20,8 @@ public interface EquipmentMapper {
 	
 	// 설비 비가동 사유 정보 불러오기
 	List<EquipDowntimeDTO> selectDowntimeHistories (HistorySearchDTO dto);
+	
+	// 현재 가동중인!! 설비
+	Integer countRunningEquipments();
 
 }

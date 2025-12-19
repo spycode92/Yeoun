@@ -59,26 +59,43 @@ public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
 	List<Object[]> findFinishedLotsNative();
 	
 	@Query(value = """
-		    SELECT
-		      lm.lot_no AS lotNo,
-		      COALESCE(p.prd_name, m.mat_name, lm.prd_id) AS displayName,
-		      COALESCE(
-		        (SELECT i.iv_status
-		         FROM inventory i
-		         WHERE i.iv_id = (
-		           SELECT MAX(i2.iv_id)
-		           FROM inventory i2
-		           WHERE i2.lot_no = lm.lot_no
-		         )
-		        ),
-		        'SOLD_OUT'
-		      ) AS invStatus
-		    FROM lot_master lm
-		    LEFT JOIN product_mst p ON p.prd_id = lm.prd_id
-		    LEFT JOIN material_mst m ON m.mat_id = lm.prd_id
-		    WHERE lm.lot_type IN ('RAW','SUB','PKG')
-		    ORDER BY lm.created_date DESC
-		    """, nativeQuery = true)
+			WITH base AS (
+			  SELECT
+			    lm.lot_no AS lotNo,
+			    COALESCE(p.prd_name, m.mat_name, lm.prd_id) AS displayName,
+			    lm.created_date AS createdDate,
+			    COALESCE(
+			      (SELECT i.iv_status
+			       FROM inventory i
+			       WHERE i.iv_id = (
+			         SELECT MAX(i2.iv_id)
+			         FROM inventory i2
+			         WHERE i2.lot_no = lm.lot_no
+			       )
+			      ),
+			      'SOLD_OUT'
+			    ) AS invStatus
+			  FROM lot_master lm
+			  LEFT JOIN product_mst p ON p.prd_id = lm.prd_id
+			  LEFT JOIN material_mst m ON m.mat_id = lm.prd_id
+			  WHERE lm.lot_type IN ('RAW','SUB','PKG')
+			)
+			SELECT
+			  lotNo,
+			  displayName,
+			  invStatus
+			FROM base
+			ORDER BY
+			  CASE invStatus
+			    WHEN 'EXPIRED'       THEN 0
+			    WHEN 'DISPOSAL'      THEN 1
+			    WHEN 'DISPOSAL_WAIT' THEN 2
+			    WHEN 'NORMAL'        THEN 3
+			    WHEN 'SOLD_OUT'      THEN 4
+			    ELSE 9
+			  END,
+			  createdDate DESC
+			""", nativeQuery = true)
 	List<MaterialRootRow> findMaterialRootLots();
 
 

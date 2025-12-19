@@ -26,6 +26,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
             FROM WORK_ORDER w
             WHERE w.PLAN_ID = :planId
             AND w.STATUS != 'CANCELED'
+            AND w.STATUS != 'SCRAPPED'
     """, nativeQuery = true)
 	Integer sumWorkOrderQty(@Param("planId")String planId);
 

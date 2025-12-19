@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.QcItem;
+import com.yeoun.masterData.repository.MaterialMstRepository;
 import com.yeoun.masterData.repository.QcItemRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,24 @@ import lombok.extern.log4j.Log4j2;
 @Transactional
 public class QcItemService {
 	private final QcItemRepository qcItemRepository;
+	private final MaterialMstRepository materialMstRepository;
 	
 	//품질 항목 기준 qcId 목록 조회 (distinct)
 	@Transactional(readOnly = true)
 	public List<String> qcIdList() {
 		return qcItemRepository.qcIdList();
 	}
+	//대상구분 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> targetTypeList() {
+		return materialMstRepository.findByMatTypeList();
+	}
+	//품질 단위 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> unitTypeList() {
+		return qcItemRepository.unitTypeList();
+	}
+
 	//품질 항목 기준 조회
 	@Transactional(readOnly = true)
 	public List<Map<String, Object>> qcItemList(String qcItemId) {
@@ -51,6 +64,7 @@ public class QcItemService {
 	        
 	    } else {
 	        
+			qcItem.setUseYn("Y");
 	        //신규 등록 시, CreatedId와 CreatedDate 설정
 	        qcItem.setCreatedId(empId);
 	        qcItem.setCreatedDate(LocalDate.now());

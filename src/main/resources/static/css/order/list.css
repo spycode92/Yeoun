@@ -346,6 +346,7 @@
     border-top: 1px solid #eeeafc;
     padding: 16px 24px;
     text-align: right;
+    justify-content: end;
   }
 
   /* 입력폼 스타일 보완 */

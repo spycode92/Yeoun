@@ -1,6 +1,5 @@
 window.onload = function () {	
 	qcItemGridAllSearch();//품질항목기준
-
 }
 
 
@@ -20,7 +19,9 @@ const grid1 = new Grid({
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용' ,name: 'useYn' ,align: 'center'}  
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer}
+		}  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true} 
 		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden: true}
@@ -46,7 +47,7 @@ const grid1 = new Grid({
     		perPage: 20
   	  }
 	});
-	
+
 //qcitem  품질항목관리 조회
 function qcItemGridAllSearch(){
 
@@ -178,13 +179,14 @@ const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');
 qcItemRegistBtn.addEventListener("click", function() {
 	document.getElementById('qcmodalTilte').innerText= 'QC 항목 등록';
 	qcModalreset();
+	document.getElementById('modalQcItemId').value = 'QC-';
 	document.getElementById('qcItemId').readOnly = false;
 	document.getElementById('userAndDate').style.display ='none';//생성자
 	
 });
 
 function qcModalreset() {
-	document.getElementById('qcItemId').value = '';//QC 항목 ID
+	document.getElementById('modalQcItemId').value = '';//QC 항목 ID
 	document.getElementById('itemName').value = '';//항목명
 	document.getElementById('targetType').value = '';//대상구분
 	document.getElementById('unit').value = '';//단위

@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.yeoun.process.dto.ImmediateActionRowDTO;
-import com.yeoun.process.dto.TrendRowDTO;
+import com.yeoun.production.dto.TrendRowDTO;
 
 // 생산 현황 추적 차트 전용 Mapper
 @Mapper

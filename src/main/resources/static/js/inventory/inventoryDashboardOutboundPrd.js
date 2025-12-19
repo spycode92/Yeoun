@@ -105,7 +105,7 @@ function renderProductList(items) {
 				<td data-qty="${prd.shipmentQty}" name="shipmentQty">${prd.shipmentQty}</td>
 				<td data-stock="${prd.orderqQty}" name="stock">${prd.orderqQty}</td>
 				<td>
-					<input type="number" class="form-control outboundQty" min="0">
+					<input type="number" class="form-control outboundQty" min="0" value="${prd.shipmentQty}">
 					<input type="hidden" name="prdId" value="${prd.prdId}"/>
 				</td>
 			</tr>

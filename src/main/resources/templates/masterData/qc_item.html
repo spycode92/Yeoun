@@ -75,21 +75,36 @@
 		
 		          <div class="col-md-4">
 		            <label class="form-label required">대상구분</label>
-		            <select id="targetType" name="targetType" class="form-select form-select-sm">
+					<select  id="targetType" class="form-select form-select-sm">
+						<option value="" selected disabled hidden>대상구분</option>
+						<option th:each="item : ${targetTypeList}" 
+								th:value="${item.value}" 
+								th:text="${item.text}"
+								name="value">
+						</option>
+					</select>
+		            <!-- <select id="targetType" name="targetType" class="form-select form-select-sm">
 		              <option value="FINISHED_QC">완제품</option>
 		              <option value="RAW">원재료</option>
 		              <option value="PKG">포장재</option>
-		              
-		            </select>
+		            </select> -->
 		          </div>
 		
 		          <div class="col-md-3">
 		            <label class="form-label">단위</label>
-		            <select id="unit" name="unit" class="form-select form-select-sm">
+					<select  id="unit" class="form-select form-select-sm">
+						<option value="" selected disabled hidden>단위</option>
+						<option th:each="item : ${unitTypeList}" 
+								th:value="${item.value}" 
+								th:text="${item.text}"
+								name="value">
+						</option>
+					</select>
+		            <!-- <select id="unit" name="unit" class="form-select form-select-sm">
 		              <option value="pH">pH</option>
 		              <option value="cps">cps</option>
 		              <option value="ml">ml</option>
-		            </select>
+		            </select> -->
 		          </div>
 		
 		          <div class="col-md-9">
@@ -113,11 +128,12 @@
 		          </div>
 		
 		          <div class="col-md-3">
-		            <label class="form-label required">사용여부</label>
-		            <select id="useYn" name="useYn" class="form-select form-select-sm" required>
+		            <label class="form-label">사용여부</label>
+		            <input type="text" id="useYn" name="useYn" class="form-control form-control-sm"  readonly/>
+					<!-- <select id="useYn" name="useYn" class="form-select form-select-sm" required>
 		              <option value="Y">Y</option>
 		              <option value="N">N</option>
-		            </select>
+		            </select> -->
 		          </div>
 		         <div id="userAndDate" style="margin-right:5px;">
 			          <div class="col-md-3 me-1">

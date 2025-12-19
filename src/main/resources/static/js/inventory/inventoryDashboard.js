@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 	showSpinner();
 	
 	// 재고정보 
-	inventoryInfo = await fetchInventoryData();
+	inventoryInfo = await fetchNotNormalInventoryData();
+//	console.log("@@@@@@",inventoryInfo);
 	// 안전재고 수량정보
 	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
 	// 오늘 입고 정보
@@ -1019,9 +1020,9 @@ async function renderExpireDisposalGrid() {
 // 데이터 정보 가져오기
 
 // 재고정보 가져오기
-async function fetchInventoryData() {
+async function fetchNotNormalInventoryData() {
 	const response = 
-		await fetch('/api/inventories', {
+		await fetch('/api/inventories/expiration', {
 			method: 'POST',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -1033,7 +1034,7 @@ async function fetchInventoryData() {
 		throw new Error('재고데이터를 가져올 수 없습니다.')
 	}
 	return await response.json();
-} 
+}
 
 // 안전재고/재고 비교 정보 데이터
 async function fetchInventorySafetyStockData() {

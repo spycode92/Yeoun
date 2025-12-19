@@ -115,7 +115,7 @@ async function loadBomList(productId, planQty) {
 					<td data-qty="${needQty}" name="needQty">${needQty}</td>
 					<td data-stock="${stock.stock}" name="stock">${stock.stock}</td>
 					<td>
-						<input type="number" class="form-control outboundQty" min="0">
+						<input type="number" class="form-control outboundQty" min="0" value="${needQty}">
 						<input type="hidden" name="matId" value="${bom.matId}"/>
 					</td>
 				</tr>

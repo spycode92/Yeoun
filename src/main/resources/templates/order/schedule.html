@@ -144,7 +144,7 @@
             	time(event) {
             		const start = formatTimeOnly24(event.start);
             		const end	= formatTimeOnly24(event.end);
-            		return `${start}-${end} ${event.title}`;
+            		return `${start}-${end} <br/> ${event.title}`;
             	}
             }
         });
@@ -168,7 +168,7 @@
         	return workOrders.map(order => ({
         		id: order.workId,
         		calendarId: 'WORK_ORDER',
-        		title: `${order.lineName} / ${order.productName}`,
+        		title: `${order.lineName} <br/> ${order.productName} <br/> ${order.planQty}`,
         		start: order.startTime,
         		end: order.endTime,
         		backgroundColor: order.colorCode,

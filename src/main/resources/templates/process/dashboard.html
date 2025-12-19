@@ -7,10 +7,15 @@
 
     <!-- 제목 -->
     <div class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
-      <div>
-        <h4 class="mb-0"><b>생산관리 대시보드</b></h4>
-      </div>
-    </div>
+	  <div>
+	    <h4 class="mb-0"><b>공정현황 대시보드</b></h4>
+	  </div>
+	
+	  <div class="mini-chip text-muted">
+	    마지막 업데이트: <span id="lastUpdatedAt">-</span>
+	  </div>
+	</div>
+
 
     <style>
       .card-soft {
@@ -286,36 +291,13 @@
 		</div>
 	</div> <!-- 라인 끝 -->
 
-
-    <!-- ******************************************************* -->
-	<!-- 3. 생산 현황 추적 차트 -->
-	<div class="card card-soft mb-3">
-		<div class="card-body">
-			<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-				<div>
-					<h6 class="section-title">생산 현황 추적</h6>
-					<div class="section-sub">기간별 계획 대비 완료 추이</div>
-				</div>
-				<div class="btn-group" role="group">
-					<button type="button" class="btn btn-outline-primary btn-sm" data-range="month">월</button>
-					<button type="button" class="btn btn-outline-primary btn-sm" data-range="week">주</button>
-            		<button type="button" class="btn btn-primary btn-sm" data-range="day">일</button>
-				</div>
-			</div>
-			
-			<div id="prodChart" style="height: 320px;"></div>
-			<div class="text-muted small mt-2">※ 일/주/월 기준 집계</div>
-		</div>
-	</div>
-
-
     <!-- ******************************************************* -->
 	<!-- 4. 즉시 조치 리스트 -->
     <div class="card card-soft">
     	<div class="card-body">
         	<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
           		<div>
-		            <h6 class="section-title">즉시 조치 작업 리스트</h6>
+		            <h6 class="section-title">즉시 조치 작업 대상 리스트</h6>
 		            <div class="section-sub">지연 / QC대기 / 장기 진행 작업을 우선 표시합니다.</div>
           		</div>
         	</div>
@@ -395,15 +377,6 @@
       </div>
     </div> <!-- 즉시 조치 끝 -->
   </div> <!-- /container -->
-
-  <!-- ApexCharts CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  
-  <!-- 서버 주입 데이터 -->
-  <script th:inline="javascript">
-    window.ctx = /*[[@{/}]]*/ '';
-    window.initialTrend = /*[[${trend}]]*/ null;
-  </script>
 
   <script src="/js/process/dashboard.js"></script>
 

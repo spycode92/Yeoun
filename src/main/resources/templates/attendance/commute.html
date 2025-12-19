@@ -7,15 +7,13 @@
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>나의 출퇴근 현황</h3>
 		<div class="d-flex justify-content-between">
-			<div class="row flex-nowrap">
-				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0">
-					<input type="date" name="srhStrDate" class="form-control" id="startDate">
+			<div class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-3">
+				<div class="d-flex align-items-center gap-2">
+					<input type="date" class="form-control" id="startDate" style="width: 140px;"/>
+					<span>~</span>
+					<input type="date" class="form-control" id="endDate" style="width: 140px;">
 				</div>
-                ~
-                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0">
-	                <input type="date" name="srhEndDate" class="form-control" id="endDate">
-                </div>
-                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
+                <div>
 	             	<button class="btn btn-primary" type="button" id="searchbtn">조회</button>
                 </div>
 			</div>

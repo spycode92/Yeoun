@@ -20,7 +20,12 @@
 	.lot-status-in    { color: #0d6efd; }  /* 진행중: 파랑 */
 	.lot-status-done  { color: #198754; }  /* 완료: 초록 */
 	.lot-status-scrap { color: #6c757d; }  /* 폐기: 회색 */
+	.lot-status-soldout { color: #adb5bd; }  /* 연한 회색 */
 	.lot-status-etc   { color: #212529; }  /* 기타 */
+	.lot-status-expired {
+ 	 	color: #dc3545;   /* bootstrap danger */
+  		font-weight: 600;
+	}
 	
 	/* 안쪽 링크 기본색 강제 */
 	.process-item a,
@@ -229,7 +234,8 @@
 					          (${lot.status}=='정상' ? ' lot-status-done' :
 					           (${lot.status}=='임박' ? ' lot-status-in' :
 					            (${lot.status}=='폐기' ? ' lot-status-scrap' :
-					             (${lot.status}=='소진완료' ? ' lot-status-etc' : ' lot-status-etc'))))">
+					             (${lot.status}=='유통기한 경과' ? ' lot-status-expired' : 
+					              (${lot.status}=='소진완료' ? ' lot-status-soldout' : ' lot-status-etc')))))">
 					  / 상태
 					</span>
 				  </a>

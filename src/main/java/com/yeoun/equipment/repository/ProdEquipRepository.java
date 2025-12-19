@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface ProdEquipRepository extends JpaRepository<ProdEquip, Long> {
 
+	// 상태별 설비갯수
+	List<ProdEquip> findByStatus(String status);
+	
     @Query("""
         SELECT e
         FROM ProdEquip e

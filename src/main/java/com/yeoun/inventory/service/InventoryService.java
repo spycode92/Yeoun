@@ -385,6 +385,15 @@ public class InventoryService {
 	}
 
 	// ==================================
+	
+	// 재고상태가 normal이 아닌 재고 조회
+	public List<InventoryDTO> getInventoryNotnormal() {
+		
+		return inventoryRepository.findByIvStatusNot("NORMAL")
+				.stream()
+				.map(InventoryDTO::fromEntity).toList();
+	}
+	
 	// 창고 등록
 	@Transactional
 	public void createLocations(WarehouseLocationCreateRequest req) {
@@ -470,5 +479,6 @@ public class InventoryService {
 		
 		warehouseLocationRepository.deleteAllByZoneAndRack(zone, rack);
 	}
+	
 
 }

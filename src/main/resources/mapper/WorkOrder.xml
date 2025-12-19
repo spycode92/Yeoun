@@ -36,7 +36,7 @@
 			</if>
 
 			<!-- 상태 검색 -->
-			<if test="status != null and status != '' and status != 'ALL'">
+			<if test="status != null and status != '' and status != 'ALL' and status != 'DONE'">
 				AND w.STATUS = #{status}
 			</if>
 
@@ -44,6 +44,11 @@
 			<if test="startDateFrom != null and startDateFrom != ''">
 				AND TO_CHAR(w.PLAN_START_DATE, 'YYYY-MM-DD') = #{startDateFrom}
 			</if>
+			
+			<if test="status == 'DONE'">
+				AND w.STATUS = 'SCRAPPED' OR w.STATUS = 'COMPLETED' OR w.STATUS = 'CANCELED'
+			</if>
+
 		</where>
 		ORDER BY w.ORDER_ID DESC
 	</select>

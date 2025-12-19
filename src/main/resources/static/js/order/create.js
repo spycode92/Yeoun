@@ -355,6 +355,7 @@
 
 	lines.forEach(lineId => {
 		const btn = document.createElement("button");
+		btn.type = "button";
 		btn.className = "btn btn-sm btn-outline-primary me-1";
 		btn.innerText = lineId;
 		btn.onclick = () => {
@@ -374,6 +375,7 @@
 
 	  workers.forEach(workerId => {
 		 const btn = document.createElement("button");
+		 btn.type = "button";
 		 btn.className = "btn btn-sm btn-outline-primary me-1";
 		 btn.innerText = workerId;
 		 btn.onclick = () => {

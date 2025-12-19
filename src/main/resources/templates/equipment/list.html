@@ -312,6 +312,39 @@
             padding: 24px 28px;
             overflow: hidden; /* 내부에서 나눠서 스크롤 */
         }
+        
+        /* ===== 상단 카드 ===== */
+        
+	    .stat-card {
+	      border-radius: 12px;
+	      background: linear-gradient(135deg, #6f5cec, #9479ff);
+	      color: #fff;
+	      padding: 14px 16px;
+	      position: relative;
+	      overflow: hidden;
+	    }
+	
+	    .stat-card small {
+	      font-size: 11px;
+	      opacity: 0.9;
+	    }
+	
+	    .stat-card strong {
+	      font-size: 20px;
+	      display: block;
+	      margin-top: 4px;
+	    }
+	
+	    .stat-card.sub {
+	      background: #ffffff;
+	      color: #514b9a;
+	      border: 1px solid #dad7f7;
+	      box-shadow: 0 8px 20px rgba(60, 50, 160, 0.05);
+	    }
+	
+	    .stat-card.sub strong {
+	      font-size: 18px;
+	    }
 
     </style>
 </head>
@@ -326,6 +359,38 @@
                 <i class="bi bi-plus-circle"></i> 새로 등록
             </button>
         </div>
+
+		    <!-- 상단 KPI 카드 -->
+	    <div class="row g-3 mb-3">
+	      <div class="col-md-3">
+	        <div class="stat-card">
+	          <small>전체 설비 갯수</small>
+	          <strong th:text="${totalEquipCount}"></strong>
+	          <span class="small-text" th:text="|전체 ${totalEquipCount}개 중 ${inactiveEquipCount}개 사용 가능|"></span>
+	        </div>
+	      </div>
+	      <div class="col-md-3">
+	        <div class="stat-card sub">
+	          <small>가동 설비 갯수</small>
+	          <strong th:text="${activeEquipCount}"></strong>
+	          <span class="small-text" th:text="|가동률 ${activePer}%|"></span>
+	        </div>
+	      </div>
+	      <div class="col-md-3">
+	        <div class="stat-card sub">
+	          <small>비가동 설비 갯수</small>
+	          <strong th:text="${inactiveEquipCount}"></strong>
+	          <span class="small-text" th:text="|비가동 설비 ${inactivePer}%|"></span>
+	        </div>
+	      </div>
+	      <div class="col-md-3">
+	        <div class="stat-card sub">
+	          <small>고장 설비 갯수</small>
+	          <strong th:text="${downEquipCount}"></strong>
+	          <span class="small-text" th:text="|사용불가 장비 ${downPer}%|"></span>
+	        </div>
+	      </div>
+	    </div>
 
         <div>
             <div class="order-card">
@@ -352,8 +417,6 @@
                         <option value="ALL">전체 상태</option>
                         <option value="RUN">가동</option>
                         <option value="STOP">정지</option>
-                        <option value="BREAKDOWN">고장</option>
-                        <option value="MAINTENANCE">보수</option>
                     </select>
                 </div>
 
@@ -376,7 +439,7 @@
 
                             <!-- 설비 종류 -->
                             <div class="mb-3">
-                                <label class="form-label">설비 종류</label>
+                                <label class="form-label">설비 타입</label>
                                 <select class="form-select" th:field="*{equipType}" required>
                                     <option value="">선택</option>
                                     <option th:each="type : ${useEquipTypes}"

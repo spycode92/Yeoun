@@ -40,6 +40,13 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session
 	                    .invalidSessionUrl("/login?session=expired")
 	            )
+
+				// ================== CSRF 예외 설정 ==================
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers(
+								"/messenger/status/offline"
+						)
+				)
 				
 				// --------- 요청에 대한 접근 허용 여부 등의 요청 경로에 대한 권한 설정 -------
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
