@@ -241,41 +241,44 @@ shipmentSelect.addEventListener("focus", async () => {
 		shipmentSelect.appendChild(opt);
 	});
 	
-	shipmentSelect.addEventListener("change", async () => {
-		const shipId = shipmentSelect.value;
-		
-		if (!shipId) return;
-		
-		// 선택한 출하지시서 리스트에서 찾기
-		const shipOrder = shipmentList.find(el => el.shipmentId === shipId);
-		
-		if (!shipOrder) {
-			alert("출하지시서 데이터를 찾을 수 없습니다.");
-			return;
-		}
-		
-		// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
-		processByName.value = shipOrder.createdName;
-		shopClientName.value = shipOrder.clientName;
-		
-		// 오늘 날짜 구하기(한국 시간)
-		const now = new Date();
-		const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
-				.toISOString()
-				.split("T")[0];
-				
-		// 오늘 이전 날자 선택 불가
-		expectDate.min = today;
-		
-		// startDate가 없으면 오늘 날짜를 기본값으로 하거나 0 처리
-		expectDate.value = shipOrder.startDate?.split("T")[0] || today;
-		
-		prdOutboundDate = shipOrder.startDate;
-		
-		// 선택한 출하지시서의 품목 리스트 렌더링
-		renderProductList(shipOrder.items);
-		
-	});
+});
+
+shipmentSelect.addEventListener("change", async () => {
+	const shipId = shipmentSelect.value;
+	
+	shipmentId.value = shipId;
+	
+	if (!shipId) return;
+	
+	// 선택한 출하지시서 리스트에서 찾기
+	const shipOrder = shipmentList.find(el => el.shipmentId === shipId);
+	
+	if (!shipOrder) {
+		alert("출하지시서 데이터를 찾을 수 없습니다.");
+		return;
+	}
+	
+	// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
+	processByName.value = shipOrder.createdName;
+	shopClientName.value = shipOrder.clientName;
+	
+	// 오늘 날짜 구하기(한국 시간)
+	const now = new Date();
+	const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+			.toISOString()
+			.split("T")[0];
+			
+	// 오늘 이전 날자 선택 불가
+	expectDate.min = today;
+	
+	// startDate가 없으면 오늘 날짜를 기본값으로 하거나 0 처리
+	expectDate.value = shipOrder.startDate?.split("T")[0] || today;
+	
+	prdOutboundDate = shipOrder.startDate;
+	
+	// 선택한 출하지시서의 품목 리스트 렌더링
+	renderProductList(shipOrder.items);
+	
 });
 
 // 출고 버튼 클릭(모달 초기화)
