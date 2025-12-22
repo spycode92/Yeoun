@@ -81,6 +81,9 @@ public class EmpController {
 	    model.addAttribute("canEditBankInfo", canEditBankInfo);
 	    
 	    model.addAttribute("formAction", "/emp/regist");
+	    
+	    model.addAttribute("pageTitle", "인사 신규 등록");
+	    model.addAttribute("isMyPage", false);
 
 	    setupEmpFormCommon(model);
 		
@@ -232,6 +235,9 @@ public class EmpController {
 		// 공통 모델 세팅
 	    model.addAttribute("empDTO", empDTO);
 		model.addAttribute("mode", "edit");
+		model.addAttribute("pageTitle", "사원 정보 수정");  
+		model.addAttribute("isMyPage", false);
+
 		model.addAttribute("formAction", "/emp/edit");
 		
 		setupEmpFormCommon(model);
@@ -262,6 +268,8 @@ public class EmpController {
 			model.addAttribute("empDTO", empDTO);
 			model.addAttribute("mode", "edit");
 			model.addAttribute("formAction", "/emp/edit");
+			model.addAttribute("pageTitle", "사원 정보 수정");
+			model.addAttribute("isMyPage", false);
 			model.addAttribute("canEditBankInfo", canEditBankInfo);
 			setupEmpFormCommon(model); 
 			
@@ -302,6 +310,8 @@ public class EmpController {
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/emp/edit");
+	        model.addAttribute("pageTitle", "사원 정보 수정");
+	        model.addAttribute("isMyPage", false);
 	        model.addAttribute("canEditBankInfo", canEditBankInfo);
 	        setupEmpFormCommon(model);
 

@@ -182,6 +182,7 @@
 	  const prcFlt = document.getElementById("PRC-FLT").value;
 	  const prcFil = document.getElementById("PRC-FIL").value;
 	  const prcCap = document.getElementById("PRC-CAP").value;
+	  const prcQc  = document.getElementById("PRC-QC").value;
 	  const prcLbl = document.getElementById("PRC-LBL").value;
 	  const remark = document.getElementById("detailRemark").value;
 	  
@@ -190,6 +191,7 @@
 		"PRC-FLT": prcFlt,
 		"PRC-FIL": prcFil,
 		"PRC-CAP": prcCap,
+	    "PRC-QC" : prcQc,
 		"PRC-LBL": prcLbl,
 		"remark": remark
 	  };

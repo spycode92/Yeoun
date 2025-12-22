@@ -28,7 +28,7 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 			SELECT PRD_ID AS value
 					,PRD_NAME AS text
 			FROM PRODUCT_MST
-			WHERE USE_YN='Y'
+			WHERE USE_YN = 'Y'
 				""", nativeQuery = true)
 	List<Map<String, Object>> findBomPrdList();
 	

@@ -160,5 +160,18 @@
 		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
 		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}
 	</select>
+
+	<select id="countTodayProductionPlan" resultType="Integer">
+		SELECT COUNT(PLAN_ID)
+			FROM PRODUCTION_PLAN
+		WHERE PLAN_DATE = TRUNC(SYSDATE)
+	</select>
+
+	<select id="countTodayWorkOrder" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER
+		WHERE PLAN_START_DATE >= TRUNC(SYSDATE)
+			AND PLAN_START_DATE <![CDATA[ < ]]> TRUNC(SYSDATE) + 1
+	</select>
 	
 </mapper>

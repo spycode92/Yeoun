@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.service.MaterialMstService;
 import com.yeoun.masterData.service.BomMstService;
+import com.yeoun.masterData.service.BomHdrService;
 import com.yeoun.masterData.service.ProductMstService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class ProductMstController {
 	private final ProductMstService productMstService;
 	private final MaterialMstService materialMstService;
 	private final BomMstService bomMstService;
+	private final BomHdrService bomHdrService;
 	
     //기준정보관리(완제품/원재료) 연결페이지
   	@GetMapping("/product")
@@ -97,6 +99,8 @@ public class ProductMstController {
 	public String bomStock(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		// BOM 페이지에서 사용하는 bomIdList를 서비스에서 조회하여 모델에 추가
 		model.addAttribute("bomIdList", bomMstService.findAllDetail());
+		// BOM 타입 드롭다운용 데이터 추가
+		model.addAttribute("bomHdrTypeList", bomHdrService.findBomHdrTypeList());
 		return "masterData/bom_stock";
 	}
     

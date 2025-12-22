@@ -29,6 +29,7 @@ public class WorkerProcessCreator {
                 "PRC-FLT", dto.getPrcFlt(),
                 "PRC-FIL", dto.getPrcFil(),
                 "PRC-CAP", dto.getPrcCap(),
+                "PRC-QC", dto.getPrcQc(),
                 "PRC-LBL", dto.getPrcLbl()
         );
 

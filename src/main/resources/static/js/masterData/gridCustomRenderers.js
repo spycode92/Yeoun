@@ -1,7 +1,54 @@
 /**
  * tui ui 수정스타일변경과 영어표기를 따로 만든 클래스
  */
-// 영어 한글 표기 CODE_MAP
+//전자결재
+class StatusBadgeRenderer {
+  constructor(props) {
+    const el = document.createElement('div');
+    el.style.textAlign = 'center'; // 가운데 정렬
+    
+    this.el = el;
+    this.render(props);
+  }
+
+  getElement() {
+    return this.el;
+  }
+
+  render(props) {
+    const value = String(props.value || '');
+    let style = { bg: '#F1F3F5', text: '#868E96' }; // 기본 회색
+
+    // '대기'라는 단어만 포함되어 있으면 무조건 파랑 적용
+    if (value.includes('대기')) {
+      style = { bg: '#D0EBFF', text: '#228BE6' };
+    } 
+    else if (value === '완료' || value.includes('승인')) {
+      style = { bg: '#D3F9D8', text: '#40C057' }; // 초록
+    } 
+    else if (value === '반려') {
+      style = { bg: '#FFE3E3', text: '#FA5252' }; // 빨강
+    }
+
+   this.el.innerHTML = `
+      <span style="
+        background-color: ${style.bg};
+        color: ${style.text};
+        padding: 4px 12px;
+        border-radius: 20px; /* 알약 모양 */
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 50px;
+        line-height: 1.4;
+      ">
+        ${value}
+      </span>
+    `;
+  }
+}
+
+// 영어 한글 표기 mes - CODE_MAP
 const CODE_MAP = {
 	//제품유형
     'FINISHED_GOODS': '완제품',
@@ -42,7 +89,11 @@ const CODE_MAP = {
 	'DAYS_COVER': '일수기반',
 	
 	//품질항목기준 - 대상구분
-	'FINISHED_QC':'완제품'
+	'FINISHED_QC':'완제품',
+    'qc_pH':'pH',
+    'qc_cps':'cps',
+    'qc_ml':'ml'
+
 };
 
 class StatusModifiedRenderer {
@@ -101,21 +152,34 @@ class StatusModifiedRenderer {
         const displayText = (!hasValue && isCreated) ? '' : koreanText;
 
         let contentHTML = '';
+        const showArrow = hasEditor;
         
-        if (isSelect) {
-            // ⭐ 2. isSelect 모드일 때도 editor가 있을 때만 화살표 렌더링
-            const arrow = hasEditor ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
+        // ⭐ 수정된 부분: Y/N 컬럼인지 확인하는 로직 (값 유무와 상관없이)
+        const isYNColumn = columnInfo.name === 'useYn' || columnInfo.name === 'status'; // 프로젝트의 Y/N 컬럼명을 넣으세요
+
+        if (value === 'Y' || value === 'N') {
+            // 1. 이미 값이 있는 경우 (기존 배지 로직)
+            contentHTML = this.formatStatusBadge(value, showArrow);
+        } else if (isYNColumn && isCreated) {
+            // 2. ⭐ Y/N 컬럼인데 신규 행이라서 아직 값이 없는 경우
+            // 빈 텍스트 상태의 배지 모양이나 화살표가 포함된 레이아웃을 그려줍니다.
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
             contentHTML = `
-            <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; background:transparent; cursor:pointer;">
-                <span>${displayText}</span>
-                ${arrow}
-            </div>
+                <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span></span> ${arrow}
+                </div>
             `;
-        } else if (value === 'Y' || value === 'N') {
-            // ⭐ 3. 배지 함수에 editor 여부 전달
-            contentHTML = this.formatStatusBadge(value, hasEditor);
+        } else if (isSelect) {
+            // 3. 일반 Select 컬럼
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
+            contentHTML = `
+                <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span>${displayText}</span>
+                    ${arrow}
+                </div>
+            `;
         } else {
-            contentHTML = koreanText;
+            contentHTML = displayText;
         }
 
         this.el.innerHTML = contentHTML;

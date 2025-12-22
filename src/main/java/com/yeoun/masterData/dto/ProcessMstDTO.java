@@ -32,6 +32,9 @@ public class ProcessMstDTO {
 	// 설명 
 	private String description;
 	
+	// 공정순서 
+	private String stepNo;
+
 	// 사용여부
 	private String useYn;
 	

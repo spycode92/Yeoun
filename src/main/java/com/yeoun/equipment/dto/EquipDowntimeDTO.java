@@ -26,9 +26,9 @@ public class EquipDowntimeDTO {
 	private String lineId;
 	private String downReason;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private LocalDateTime startTime;
+	private LocalDateTime startDate;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private LocalDateTime endTime;
+	private LocalDateTime endDate;
 	
 
 }

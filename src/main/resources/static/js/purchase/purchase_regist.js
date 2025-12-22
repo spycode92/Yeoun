@@ -251,23 +251,17 @@ orderTableBody.addEventListener("change", (e) => {
 	 
 	 let qty = parseInt(qtyInput.value);
 
-	 	 // 최소 주문수량 체크
-	 if (qty < minOrder) {
-	     qty = minOrder;
-	     qtyInput.value = qty;
-	 }
-	 
 	 // 주문 단위 체크
 	 if (qty % unit !== 0) {
-		qty = Math.ceil(qty / unit) * unit;
-		
-		if (qty < minOrder) {
-			qty = minOrder;
-		}
-		
-		qtyInput.value = qty;
+		qty = Math.round(qty / unit) * unit;
 	 }
 	 
+	 // 최소 주문수량 체크
+	 if (qty < minOrder) {
+	     qty = minOrder;
+	 }
+	 
+	qtyInput.value = qty;
 	 // 공급가액, 부가세, 총 금액 계산
 	 const supply = qty * price;
 	 const tax = Math.round(supply * 0.1);

@@ -39,8 +39,7 @@ public interface ProcessMstRepository extends JpaRepository<ProcessMst, String> 
 				    p.updated_id = eu.emp_id
 			WHERE ( ?1 IS NULL OR ?1 = '' OR PROCESS_ID LIKE '%' || ?1 || '%')
 			  AND ( ?2 IS NULL OR ?2 = '' OR PROCESS_NAME LIKE '%' || ?2 || '%')
-			  AND USE_YN = 'Y'
-			ORDER BY PROCESS_ID ASC
+			ORDER BY USE_YN DESC,STEP_NO ASC
 			""", nativeQuery = true)
 	List<Map<String, Object>> findByprocesslList(String processId, String processName);
 	

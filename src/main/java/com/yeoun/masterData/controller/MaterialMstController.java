@@ -57,27 +57,9 @@ public class MaterialMstController {
 	//원재료 저장
     @ResponseBody
    	@PostMapping("/save")
-   	public org.springframework.http.ResponseEntity<java.util.Map<String,Object>> materialSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
+   	public String materialSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
     	log.info("param------------->{}",param);
-    	java.util.Map<String,Object> resp = new java.util.HashMap<>();
-    	try {
-    		String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
-    		String result = materialMstService.saveMaterialMst(empId, param);
-    		if (result != null && result.trim().toLowerCase().startsWith("success")) {
-    			resp.put("status", "success");
-    			resp.put("message", result);
-    			return org.springframework.http.ResponseEntity.ok(resp);
-    		} else {
-    			resp.put("status", "error");
-    			resp.put("message", result == null ? "unknown error" : result);
-    			return org.springframework.http.ResponseEntity.status(500).body(resp);
-    		}
-    	} catch (Exception e) {
-    		log.error("materialSave error", e);
-    		resp.put("status", "error");
-    		resp.put("message", e.getMessage());
-    		return org.springframework.http.ResponseEntity.status(500).body(resp);
-    	}
+   		return materialMstService.saveMaterialMst(loginDTO.getEmpId(), param);
    	}
 
 	//원재료 삭제

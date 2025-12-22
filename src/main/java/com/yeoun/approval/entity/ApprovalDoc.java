@@ -73,7 +73,7 @@ public class ApprovalDoc implements FileUtil.FileUploadHelpper {
 	@Column(name="EXPND_TYPE")
 	private String expndType; //지출종류
 	
-	@Column(name="REASON")
+	@Column(name="REASON",length = 4000)
 	private String reason; //사유
 
 	@Override

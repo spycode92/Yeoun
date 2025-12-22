@@ -5,6 +5,9 @@
     <select id="selectProcessByLineAndStep" resultType="com.yeoun.equipment.dto.EquipProcessHistoryDTO">
         SELECT
             o.ORDER_ID,
+			p.STEP_SEQ AS STEP,
+			e.EQUIP_ID,
+			pe.EQUIP_NAME,
             m.PRD_NAME AS PRODUCT_NAME,
             o.LINE_ID,
             p.WOP_ID,
@@ -14,9 +17,25 @@
         FROM WORK_ORDER_PROCESS p
             JOIN WORK_ORDER o ON p.ORDER_ID = o.ORDER_ID
             JOIN PRODUCT_MST m ON o.PRD_ID = m.PRD_ID
-        WHERE o.LINE_ID = #{line}
-        AND p.STEP_SEQ = #{step}
-        AND p.STATUS != 'READY'
+			JOIN EQUIPMENT e ON p.PROCESS_ID = e.PROCESS_ID
+			JOIN PROD_EQUIP pe ON o.LINE_ID = pe.LINE_ID
+				AND e.EQUIP_ID = pe.EQUIP_CODE
+		WHERE p.STATUS != 'READY'
+		<if test="equipment != null">
+			AND e.EQUIP_ID = #{equipment}
+		</if>
+		<if test="line != null">
+			AND o.LINE_ID = #{line}
+		</if>
+		<if test="step != null">
+			AND p.STEP_SEQ = #{step}
+		</if>
+		<if test="start != null">
+			AND p.END_TIME <![CDATA[ >= ]]> TO_DATE(#{start}, 'YYYY-MM-DD')
+		</if>
+		<if test="end != null">
+			AND p.START_TIME <![CDATA[ <= ]]> TO_DATE(#{end}, 'YYYY-MM-DD') + 1
+		</if>
     </select>
     
     <select id="selectDowntimeHistories" resultType="com.yeoun.equipment.dto.EquipDowntimeDTO">

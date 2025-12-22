@@ -30,10 +30,10 @@
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	<h2>BOM정보/상세</h2>
+	<h2>BOM 정보/안전재고</h2>
 	 <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="card-title mb-0"></h5>
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#safetyStock-modal">
+        <button class="btn btn-outline-primary btn-md-sm" style="margin-right: 45px;" data-bs-toggle="modal" data-bs-target="#safetyStock-modal">
            안전재고 보기
         </button>
       </div>
@@ -60,24 +60,32 @@
 	           <div class="tab-pane fade show active"  id="navs-bomDetail-tab" role="tabpanel">
 					<div class="row" data-masonry='{"percentPosition": true }' style="margin:10px;">
 						<div class="col-sm-4 col-lg-3 mb-3" style="margin-top: 16px;">
-							<h5 class="card-title">BOM LIST</h5>
+							<h5 class="card-title">BOM 리스트</h5>
 							<div id="bomDetailGrid" style="display: grid;"></div>				
 						</div>
 						<div class="col-sm-9">
-								<div class="d-flex justify-content-end" style="margin:10px;">
-									<button id="saveBomDetailRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+								<div class="d-flex justify-content-end" style="margin:5px;">
+									<button id="saveBomDetailRowBtn" class="btn btn-success btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button">저장</button>
 								</div>
 								<figure class="p-3 mb-0">
-									<h5 class="card-title">완제품</h5>
-									<div id="bomPrdGrid" style="display: grid;"></div>
+									<h5 class="card-title">
+										<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#566a7f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+										 완제품</h5>
+									<div id="bomPrdGrid" style="display: grid;width:960px;"></div>
 								</figure>
 								<figure class="p-3 mb-0">
-									<h5 class="card-title">원재료</h5>
-									<div id="bomMatGrid" style="display: grid;"></div>
+									<h5 class="card-title">
+										<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#566a7f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+										원재료
+									</h5>
+									<div id="bomMatGrid" style="display: grid;width:960px;"></div>
 								</figure>
 								<figure class="p-3 mb-0">
-									<h5 class="card-title">포장재</h5>
-									<div id="bomMatTypeGrid" style="display: grid;"></div>
+									<h5 class="card-title">
+										<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#566a7f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+										포장재
+									</h5>
+									<div id="bomMatTypeGrid" style="display: grid;width:960px;"></div>
 								</figure>
 						</div>
 					</div>
@@ -101,10 +109,10 @@
 			           	<button type="button" class="btn btn-primary" onclick="bomGridAllSearch()" style="margin-left:5px;">조회</button>
 					</div>
 	             	<div class="d-flex justify-content-end" style="margin:10px;">
-	             	<button class="btn btn-outline-secondary btn-sm me-1" type="button" data-bs-toggle="modal" data-bs-target="#matItems-modal">원재료 조회</button>
-						<button id="addBomRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-						<button id="saveBomRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-						<button id="deleteBomRowBtn" class="btn btn-danger" type="button">신규행 삭제</button>
+	             	<button class="btn btn-outline-secondary btn-sm me-1" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')"  type="button" data-bs-toggle="modal" data-bs-target="#matItems-modal">원재료 조회</button>
+						<button id="addBomRowBtn" class="btn btn-primary btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')"  type="button" style="margin-right:5px;">추가</button>
+						<button id="saveBomRowBtn" class="btn btn-success btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')"  type="button" style="margin-right:5px;">저장</button>
+						<button id="deleteBomRowBtn" class="btn btn-danger btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')"  type="button">신규행 삭제</button>
 					</div>
 					<div id="bomGrid" style="display: grid;margin:10px;"></div>
 	           </div>
@@ -113,19 +121,30 @@
 			        	<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
 				        	<input type="text" id="bomHdrId" name="bomHdrId" class="form-control"  placeholder="BOM그룹 Id">
 				        </div>
-						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+						<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
+				        	<select  id="bomHdrType" class="form-select">
+				        	    <option value="" selected>BOM타입</option>
+			        	    	<option th:each="row : ${bomHdrTypeList}" 
+										th:value="${row.value}" 
+										th:text="${row.text}"
+										name="bomHdrType">
+								</option>
+				        	</select>
+				        </div>
+
+						<!--<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
 							<input type="text" id="bomHdrType" name="bomHdrType" class="form-control"  placeholder="bom 타입">
-						</div>
+						</div>-->
 				        
 			           	<button type="button" class="btn btn-primary" onclick="bomHdrGridAllSearch()" style="margin-left:5px;">조회</button>
 					</div>
 	             	<div class="d-flex justify-content-end" style="margin:10px;">
 	             		
 						<!--  <button id="addBomGroupRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>-->
-						<button id="saveBomGroupRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+						<button id="saveBomGroupRowBtn" class="btn btn-success btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" style="margin-right:5px;">저장</button>
 						<!--  <button id="deleteGroupBomRowBtn" class="btn btn-danger" type="button">삭제</button> -->
 					</div>
-					<h8 style="margin-left:18px;color:red;">* BOM 정보를 등록 하시면 BOM 그룹이 자동 생성됩니다. 수정은 BOM그룹명, BOM그룹타입 만 할수있습니다.</h8>
+					<h8 sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" style="margin-left:18px;color:red;">* BOM 정보를 등록 하시면 BOM 그룹이 자동 생성됩니다. 수정은 BOM그룹명, BOM그룹타입 만 할수있습니다.</h8>
 					<div id="bomGroupGrid" style="display: grid;margin:10px;"></div>				
 	           </div>
 	         </div>
@@ -150,9 +169,9 @@
 					<button type="button" class="btn btn-primary" onclick="safetyStockGridAllSearch()" style="margin-left:5px;">조회</button>
 				</div>
 		       	<div class="d-flex justify-content-end" style="margin:10px;">
-			  		<button id="addSafetyStockRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-					<button id="saveSafetyStockRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger" type="button">신규행 삭제</button>
+			  		<button id="addSafetyStockRowBtn" class="btn btn-primary btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" style="margin-right:5px;">추가</button>
+					<button id="saveSafetyStockRowBtn" class="btn btn-success btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" style="margin-right:5px;">저장</button>
+			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')"  type="button">신규행 삭제</button>
 				 </div>
 		         <div id="safetyStockGrid" style="display: grid;margin-right:5px;"></div>
 		      </div>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.production.mapper.ProductionDashboardMapper">
+
+	<select id="countTodayProductionPlan" resultType="Integer">
+		SELECT COUNT(PLAN_ID)
+			FROM PRODUCTION_PLAN
+		WHERE PLAN_DATE = TRUNC(SYSDATE)
+	</select>
+
+	<select id="countTodayProductionOrder" resultType="Integer">
+		SELECT COUNT(DISTINCT w.PLAN_ID)
+			FROM WORK_ORDER w
+		JOIN PRODUCTION_PLAN p
+			ON w.PLAN_ID = p.PLAN_ID
+		WHERE p.PLAN_DATE >= TRUNC(SYSDATE)
+		AND p.PLAN_DATE <![CDATA[ < ]]> TRUNC(SYSDATE) + 1
+	</select>
+
+	<select id="countTodayWorkOrder" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER
+		WHERE PLAN_START_DATE >= TRUNC(SYSDATE)
+			AND PLAN_START_DATE <![CDATA[ < ]]> TRUNC(SYSDATE) + 1
+	</select>
+
+	<select id="countDelayedWorkOrder" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER
+		WHERE STATUS = 'CREATED' OR STATUS = 'RELEASED'
+			AND PLAN_START_DATE <![CDATA[ < ]]> SYSDATE
+	</select>
+
+	<select id="selectDailyPlanVsOrder" resultType="com.yeoun.order.dto.PlanAndOrderDashDTO">
+		SELECT
+			TO_CHAR(p.PLAN_DATE, 'YYYY-MM-DD') AS period,
+			SUM(DISTINCT p.PLAN_QTY)           AS plan_cnt,
+			SUM(DISTINCT w.PLAN_QTY)           AS order_cnt
+		FROM PRODUCTION_PLAN p
+		LEFT JOIN WORK_ORDER w
+			ON p.PLAN_ID = w.PLAN_ID
+		WHERE p.PLAN_DATE >= TRUNC(SYSDATE) - 6
+			AND p.PLAN_DATE <![CDATA[ < ]]> TRUNC(SYSDATE) + 1
+		<if test="id != null">
+			AND p.PRD_ID = #{id}
+		</if>
+		GROUP BY TO_CHAR(p.PLAN_DATE, 'YYYY-MM-DD')
+		ORDER BY period
+	</select>
+
+	<select id="selectWeeklyPlanVsOrder" resultType="com.yeoun.order.dto.PlanAndOrderDashDTO">
+		SELECT
+		TO_CHAR(p.PLAN_DATE, 'IYYY-IW') AS period,
+		TO_CHAR(TRUNC(p.PLAN_DATE, 'IW'), 'MM') || '월 ' ||
+		TO_CHAR(
+		FLOOR(
+		(TO_NUMBER(TO_CHAR(TRUNC(p.PLAN_DATE, 'IW'), 'DD')) - 1) / 7
+		) + 1
+		) || '주차' AS period_label,
+
+		SUM(DISTINCT p.PLAN_QTY) AS plan_cnt,
+		SUM(DISTINCT w.PLAN_QTY) AS order_cnt
+		FROM PRODUCTION_PLAN p
+		LEFT JOIN WORK_ORDER w
+		ON p.PLAN_ID = w.PLAN_ID
+		<if test="id != null">
+			WHERE p.PRD_ID = #{id}
+		</if>
+		GROUP BY
+		TO_CHAR(p.PLAN_DATE, 'IYYY-IW'),
+		TRUNC(p.PLAN_DATE, 'IW')
+		ORDER BY period
+	</select>
+
+	<select id="selectMonthlyPlanVsOrder" resultType="com.yeoun.order.dto.PlanAndOrderDashDTO">
+		SELECT
+			TO_CHAR(p.PLAN_DATE, 'YYYY-MM')  AS period,
+			SUM(DISTINCT p.PLAN_QTY)         AS plan_cnt,
+			SUM(DISTINCT w.PLAN_QTY)         AS order_cnt
+		FROM PRODUCTION_PLAN p
+		LEFT JOIN WORK_ORDER w
+			ON p.PLAN_ID = w.PLAN_ID
+		WHERE p.PLAN_DATE >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+			AND p.PLAN_DATE <![CDATA[ < ]]> TRUNC(SYSDATE) + 1
+		<if test="id != null">
+			AND p.PRD_ID = #{id}
+		</if>
+		GROUP BY TO_CHAR(p.PLAN_DATE, 'YYYY-MM')
+		ORDER BY period
+	</select>
+
+	<select id="selectItemPlanVsOrder" resultType="com.yeoun.order.dto.ItemPlanAndOrderDTO">
+		SELECT
+			m.PRD_ID 			 	 AS itemId,
+			m.PRD_NAME          	 AS itemName,
+			SUM(DISTINCT p.PLAN_QTY) AS planCnt,
+			SUM(DISTINCT w.PLAN_QTY) AS orderCnt
+		FROM PRODUCTION_PLAN p
+		JOIN PRODUCT_MST m
+			ON p.PRD_ID = m.PRD_ID
+		LEFT JOIN WORK_ORDER w
+			ON w.PLAN_ID = p.PLAN_ID
+		GROUP BY m.PRD_ID, m.PRD_NAME
+		ORDER BY planCnt DESC
+	</select>
+	
+</mapper>

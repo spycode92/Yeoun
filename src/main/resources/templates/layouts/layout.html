@@ -14,7 +14,8 @@
  -->
 <!-- beautify ignore:start -->
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr"
-	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
+	data-theme="theme-default" 
+	th:attr="data-assets-path=@{/assets/}"
 	data-template="vertical-menu-template-free"
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -82,13 +83,14 @@
 <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
 <script th:src="@{/assets/js/config.js}"></script>
-
+<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
 <!-- 개별 페이지 head 영역 -->
 <th:block layout:fragment="head"></th:block>
 <script>
 	const csrfToken  = document.querySelector('meta[name="_csrf_token"]').content;
 	const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
 </script>
+
 </head>
 
 <body th:attr="data-mode=${mode}">

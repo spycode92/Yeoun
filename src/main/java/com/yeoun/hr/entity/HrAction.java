@@ -81,7 +81,7 @@ public class HrAction {
     private Position toPosition;
 	
 	// 발령사유
-	@Column(name = "REASON", length = 200)
+	@Column(name = "REASON", length = 4000)
 	private String actionReason;
 	
 	// 승인상태

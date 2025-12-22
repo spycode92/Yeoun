@@ -18,7 +18,7 @@
             <!-- 공지사항 -->
             <li class="menu-item" id="notice">
                 <a href="/notice" class="menu-link">
-                    <i class="fa-solid fa-bullhorn"></i>
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></i>
                     <div data-i18n="Analytics">공지사항</div>
                 </a>
             </li>
@@ -27,6 +27,7 @@
             </li>
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></i>
                     <div data-i18n="Human Resources Management">인사관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -53,6 +54,7 @@
             </li>
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></i>
                     <div data-i18n="Attendance management">근태관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -101,16 +103,17 @@
             </li>
             <li class="menu-item">
                 <a href="/approval/approval_doc" class="menu-link">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg></i>
                     <div data-i18n="Electronic Approval">전자결재</div>
                 </a>
             </li>
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></i>
                     <div data-i18n="Salary management">급여관리</div>
                 </a>
 
                 <ul class="menu-sub">
-
                     <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
                     <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
                         <a th:href="@{/pay/rule}" class="menu-link">
@@ -143,8 +146,9 @@
                 <span class="menu-header-text">MES</span>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle"  sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
-                    <div data-i18n="Master Data Management" class="menu-link-sub">기준정보관리</div>
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></i>
+                    <div data-i18n="Master Data Management">기준정보관리</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item">
@@ -158,12 +162,12 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/masterData/qc_item}" class="menu-link">
-                            <div data-i18n="Quality Item Management" class="menu-link-sub">품질항목기준</div>
+                        <a th:href="@{/masterData/qc_item}" class="menu-link" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')">
+                            <div data-i18n="Quality Item Management" class="menu-link-sub" >품질항목기준</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/masterData/process_mst}" class="menu-link">
+                        <a th:href="@{/masterData/process_mst}" class="menu-link" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')">
                             <div data-i18n="Process Route/Process Code Management" class="menu-link-sub">공정라우트/공정코드관리</div>
                         </a>
                     </li>
@@ -174,8 +178,10 @@
                     </li>
                 </ul>
             </li>
-            <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
+            <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN', 'MES_USER')">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></i>
                     <div data-i18n="Salary management">재고관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -219,6 +225,7 @@
               
             <li class="menu-item" sec:authorize="hasAnyRole('SALES_ADMIN','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></i>
                     <div data-i18n="Sales management">영업관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -244,6 +251,7 @@
 
             <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg></i>
                     <div data-i18n="Work order">생산관리</div>
                 </a>               
                 
@@ -274,6 +282,7 @@
             <!-- 설비 관리 -->
             <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
             	<a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0-1.4-1.4l-3.7 3.7Z"/><path d="m2 22 5-5"/><path d="M9.5 14.5 16 21l4.5-4.5L14 10l-4.5 4.5Z"/></svg></i>
                     <div data-i18n="Equipment management">설비관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -287,12 +296,18 @@
 	                       <div data-i18n="Menu2" class="menu-link-sub">설비이력</div>
 	                   </a>
 	                </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+	                   <a th:href="@{/equipment/stopHistory}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">고장이력</div>
+	                   </a>
+	                </li>
                 </ul>
             </li>
             
             <!-- 공정 관리 -->              
             <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12a10 10 0 1 1-2-6l-2 2h5V3l-2 2a12 12 0 1 0 2 10"/><path d="M12 7v5l3 3"/></svg></i>
                     <div data-i18n="Process management">공정관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -319,6 +334,7 @@
             <!-- 품질 관리 -->
             <li class="menu-item" sec:authorize="hasAnyRole('QC_USER','QC_ADMIN','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></i>
                     <div data-i18n="Qc management">품질관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -336,43 +352,38 @@
                 
 	            </ul>
             </li>
-            <!-- 품질 관리 -->
-            <li class="menu-item">
-                <a href="/dispose" class="menu-link">
-                    <div data-i18n="DisposeList">폐기 목록</div>
-                </a>
+            <li class="menu-item"  sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
+	            <a th:href="@{/dispose}" class="menu-link">
+<!-- 	            	<i class="menu-icon"> -->
+<!-- 	            		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z"/></svg> -->
+<!-- 	            	</i> -->
+					<i class="menu-icon fa-solid fa-trash-can"></i>
+	            	<div data-i18n="dispose">폐기목록</div>
+	            </a>
             </li>
-
-            <li class="menu-item">
-                <a href="/setting/setting_doc" class="menu-link">
-                    <div data-i18n="Setting" class="menu-link-sub">Setting</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item">
-                        <a href="" class="menu-link" target="_blank">
-                            <div data-i18n="Menu1" class="menu-link-sub">menu1</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="" class="menu-link" target="_blank">
-                            <div data-i18n="Menu2" class="menu-link-sub">menu2</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="" class="menu-link" target="_blank">
-                            <div data-i18n="Menu3" class="menu-link-sub">menu3</div>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
             <!-- 관리자 메뉴 -->
             <li class="menu-header small text-uppercase" sec:authorize="hasAnyRole('SYS_ADMIN')">
                 <span class="menu-header-text">관리자</span>
             </li>
             <li class="menu-item">
                 <a href="/auth/manage" class="menu-link" sec:authorize="hasAnyRole('SYS_ADMIN')">
+                  <i class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="7.5" cy="15.5" r="5.5"/>
+                        <path d="m21 2-9.6 9.6"/>
+                        <path d="m15.5 7.5 3 3L22 7l-3-3"/>
+                    </svg>
+                    </i>
                     <div data-i18n="Auth">권한 관리</div>
+                </a>
+            </li>
+            <li class="menu-header small text-uppercase" sec:authorize="hasAnyRole('SYS_ADMIN')">
+                <span class="menu-header-text">Setting</span>
+            </li>
+            <li class="menu-item">
+                <a href="/setting/setting_doc" class="menu-link">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4"/></svg></i>
+                    <div data-i18n="Setting" class="menu-link-sub">Setting</div>
                 </a>
             </li>
         </ul>

@@ -4,6 +4,7 @@ window.onload = function () {
 
 
 const Grid = tui.Grid;
+
 //g-grid1 품질항목기준
 const grid1 = new Grid({
 	  el: document.getElementById('qcItemGrid'), 
@@ -15,7 +16,9 @@ const grid1 = new Grid({
 		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-		,{header: '단위' ,name: 'unit' ,align: 'center'}
+		,{header: '단위' ,name: 'unit' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer}
+		}
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
@@ -174,6 +177,74 @@ grid1.on("click", async (ev) => {
 	}
 
 });
+
+// 모달 내 폼을 가로채서 AJAX로 전송하여 서버 에러 메시지를 alert로 표시
+const qcItemForm = document.querySelector('#qcItem-modal form');
+if (qcItemForm) {
+    qcItemForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        const form = ev.target;
+           // mode 값을 기존 input에 설정 (form에 name="mode"인 input이 있다면)
+        const modeValue = document.getElementById('qcmodalTilte').innerText == 'QC 항목 등록' ? 'new' : 'modify';
+        let modeInput = form.querySelector('input[name="mode"]');
+        
+        if (modeInput) {
+            modeInput.value = modeValue;
+        } else {
+            // mode input이 없으면 새로 생성
+            modeInput = document.createElement('input');
+            modeInput.type = 'hidden';
+            modeInput.name = 'mode';
+            modeInput.value = modeValue;
+            form.appendChild(modeInput);
+        }
+        
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        console.log('최종 params:', params.toString());
+
+        fetch(form.action, {
+            method: form.method || 'POST',
+            credentials: 'same-origin',
+            headers: {
+                [csrfHeader]: csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        })
+        .then(res => {
+            if (!res.ok) return res.text().then(t => { throw new Error(`HTTP ${res.status}: ${t || res.statusText}`); });
+            return res.text();
+        })
+        .then(result => {
+            console.log('서버 응답:', result);
+            
+            // 오류 응답 처리
+            if (result && result.toLowerCase().startsWith('error')) {
+                const errorMsg = result.replace(/^error:\s*/i, '').trim();
+                alert(errorMsg);
+                return;
+            }
+            
+            // 성공 응답 처리
+            if (result && result.toLowerCase().includes('success')) {
+                alert('저장되었습니다.');
+                // 성공 시 모달 닫고 그리드 갱신
+                document.querySelector('#qcItem-modal .modal-footer [data-bs-dismiss="modal"]').click();
+                qcModalreset();
+                qcItemGridAllSearch();
+            } else {
+                // 예상치 못한 응답도 일단 표시
+                alert(result || '알 수 없는 오류가 발생했습니다.');
+            }
+        })
+        .catch(err => {
+            console.error('QC 저장 오류', err);
+            alert(err.message || '저장 중 오류가 발생했습니다.');
+        });
+    });
+}
 // 항목 등록
 const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');
 qcItemRegistBtn.addEventListener("click", function() {

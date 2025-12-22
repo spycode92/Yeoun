@@ -11,6 +11,8 @@ public class HistorySearchDTO {
 	String equipment;
 	String line;
 	String reason;
+	Integer step;
 	LocalDateTime start;
 	LocalDateTime end;
+	String type;
 }

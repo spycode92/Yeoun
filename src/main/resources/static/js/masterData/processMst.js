@@ -29,6 +29,7 @@ processLookupModalElement.addEventListener('shown.bs.modal', function () {
 });
 
 const Grid = tui.Grid;
+
 // g- grid1 제품별 공정 라우트 그리드
 const grid1 = new Grid({
 	  el: document.getElementById('processGrid'), 
@@ -79,19 +80,6 @@ const grid2 = new Grid({
 					isSelect: false   // ⭐ 이걸로 구분
 				}
 			}
-			// ,editor: {
-			// 	type: 'select', // 드롭다운 사용
-			// 	options: {
-			// 		listItems: [
-			// 			{ text: '블렌딩', value: '블렌딩' },
-			// 			{ text: '여과', value: '여과' },
-			// 			{ text: '충전', value: '충전' },
-			// 			{ text: '캡/펌프', value: '캡/펌프' },
-			// 			{ text: 'QC 검사', value: 'QC 검사' },
-			// 			{ text: '라벨링', value: '라벨링' }
-			// 		]
-			// 	}
-			// }
 		}
 	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
@@ -99,10 +87,12 @@ const grid2 = new Grid({
 	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
-			,renderer:{ type: StatusModifiedRenderer
-				,options: {
-					isSelect: false   // ⭐ 이걸로 구분
+		,{header: '공정순서' ,name: 'stepNo' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+				type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+				options: {
+				maxLength: 10
 				}
 			}
 		}
@@ -112,6 +102,23 @@ const grid2 = new Grid({
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden:true}
 		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'} 
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: false   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
+		}
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -197,6 +204,9 @@ const grid4 = new Grid({
 	    ,{header: '공정명' ,name: 'processName' ,align: 'center'}
 	    ,{header: '공정유형' ,name: 'processType' ,align: 'center'}
 	    ,{header: '설명' ,name: 'description' ,align: 'center',width: 315}
+		,{header: '공정순서' ,name: 'stepNo' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer}
+		}
 		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
@@ -226,7 +236,6 @@ const PROCESS_CODE_TO_TYPE_MAP = {
     '캡/펌프': 'CAPPING', 
     'QC 검사': 'QC',         
     '라벨링': 'PACK'        
-    
 };
 //공정코드 관리 그리드 수정시 기존 공정ID수정 불가
 grid2.on('beforeChange', (ev) => {
@@ -270,25 +279,45 @@ grid2.on('afterChange', (ev) => {
 	
 });
 
+//공정단계에서 더블클릭시 모달열리게
+grid3.on('dblclick', function(ev) {
+    // 1. 클릭한 위치가 셀(cell)인지 확인
+    // 2. 더블클릭한 컬럼 이름이 'matId'인지 확인
+    if (ev.targetType === 'cell' && ev.columnName === 'processId') {
+        
+        const rowData = grid3.getRow(ev.rowKey);
+        
+        if (rowData) {
+            const myModal = new bootstrap.Modal(document.getElementById('processLookup-modal'));
+            myModal.show();
+          
+        }
+    }
+});
+
+
 //BOM정보 원재료 id-> 원재료 조회 클릭시 row 더블클릭시 값이 들어감 
-// 1. grid7에 dblclick 이벤트 리스너 등록
 grid4.on('dblclick', function(ev) {
     if (ev.targetType !== 'cell' && ev.targetType !== 'rowHeader') {
         return; 
     }
 
-    var sourceRowKey = ev.rowKey; 
-    var rowData = grid4.getRow(sourceRowKey); 
-	console.log("선택된 원재료 데이터:", rowData.processId);
-	var focusedRowIndex = grid3.getFocusedCell();
-	console.log("포커스된 행 인덱스:", focusedRowIndex);
-	if (focusedRowIndex.value === null || focusedRowIndex.value === undefined) {
-		var targetRowKey = focusedRowIndex.rowKey;
-		grid3.setValue(targetRowKey, 'processId', rowData.processId);
-		//모달닫기
-		document.querySelector('#processLookup-modal .modal-footer [data-bs-dismiss="modal"]').click();
-	}
+    let rowData = grid4.getRow(ev.rowKey); 
+    let focusInfo = grid3.getFocusedCell();
 
+    if (focusInfo && focusInfo.rowKey !== null) {
+        grid3.finishEditing(focusInfo.rowKey, 'processId');
+        // 데이터 입력 실행
+        grid3.setValue(focusInfo.rowKey, 'processId', rowData.processId);
+        console.log("입력 완료:", focusInfo.rowKey, rowData.processId);
+
+        // 4. 모달 닫기
+        let closeBtn = document.querySelector('#processLookup-modal .modal-footer [data-bs-dismiss="modal"]');
+        if (closeBtn) closeBtn.click();
+        
+    } else {
+        alert("데이터를 입력할 행을 먼저 선택해주세요.");
+    }
 });
 
 
@@ -390,6 +419,17 @@ function processCodeGridAllSearch() {
 			console.log("camelCaseData",camelCaseData);
 			grid2.resetData(camelCaseData);
 			grid4.resetData(camelCaseData);//신규라우트 모달 그리드 - 공정코드조회 모달
+			//공정코드 라우트 step id 자동생성 데이터 넣어주기
+			processDataList = camelCaseData.map((item, index) => {
+				let currentStep = item.stepNo || '';
+				let displayStep = String(currentStep).padStart(2, '0');
+				return {
+					// 데이터에 stepNo가 있으면 그대로 쓰고, 없으면 순번(index+1)을 2자리 문자열로 만듭니다.
+					stepNo: displayStep,
+					processId: item.processId || '',
+					processName: item.processName || ''
+				};
+			});
 		})
 		.catch(err => {	
 			console.error("조회오류", err);
@@ -499,6 +539,9 @@ grid1.on("click", async (ev) => {
 	}
 
 });
+//공정단계에서 MATID를 더블클릭하면 품목코드 창열리게
+
+
 
 //라우트 모달 셀렉트박스 값선택시 자동으로 routeId생성
 document.getElementById('modalProcessprdId').addEventListener('change', function() {
@@ -534,7 +577,8 @@ addProcessCodeRowBtn.addEventListener('click', function(event) {
 });
 
 //공정코드를 fatch로 불러와서 붙이면좋을듯
-const processDataList = [
+let processDataList = [
+	//예시
     { stepNo: "01", processId: "PRC-BLD", processName: "블렌딩" },
     { stepNo: "02", processId: "PRC-FLT", processName: "여과" },
     { stepNo: "03", processId: "PRC-FIL", processName: "충전" },
@@ -598,14 +642,13 @@ grid3.on('afterChange', (ev) => {
 });
 
 
-//공정코드 관리 그리드 저장
+//공정코드관리 그리드 저장
 const saveProcessCodeRowBtn = document.getElementById('saveProcessCodeRowBtn');
 saveProcessCodeRowBtn.addEventListener('click', function() {
 		
 	const modifiedData = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
 	let createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
-	
 
 	// 새로 추가된 행 중 모든 필드가 비어있는(빈 행) 경우 그리드에서 제거하고 서버 전송 대상에서 제외
 	const isRowEmpty = (row) => {
@@ -722,9 +765,17 @@ saveRouteBtn.addEventListener('click', function() {
 	if (missing.length > 0) {
 		alert(missing.join(' 및 ') + '을(를) 입력해주세요.');
 		return;
-	}else{
-		modifiedData.routeInfo = routeNewData;
 	}
+
+	// routeInfo에 mode 추가
+	if(document.getElementById('routeModalTitle').textContent === '신규 라우트 등록'){
+		routeNewData.mode = 'new';
+	}else{
+		routeNewData.mode = 'modify';
+	}
+	
+	// 모든 유효성 검사 완료 후 routeInfo 설정
+	modifiedData.routeInfo = routeNewData;
 	
 
 	// 새로 추가된 행 중 모든 필드가 비어있는(빈 행) 경우 그리드에서 제거하고 서버 전송 대상에서 제외
@@ -976,7 +1027,7 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 			// 서버에 삭제 요청 보낼 processId가 있으면 기존 로직 수행
 			if (serverProcessIds.length > 0) {
 				// processId가 있는 항목이 포함된 경우에만 삭제 확인창 표시
-				if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
+				/*if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
 				fetch('/masterData/processCode/modify', {
 					method: 'POST',
 					credentials: 'same-origin',
@@ -1008,7 +1059,7 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 				.catch(err => {
 					console.error('삭제 중 오류', err);
 					try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
-				});
+				});*/
 			} else {
 				if (removedUi > 0) alert('추가한 행을 화면에서만 삭제했습니다. (DB에는 반영되지 않음)');
 			}

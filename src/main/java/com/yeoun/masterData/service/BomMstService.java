@@ -80,7 +80,7 @@ public class BomMstService {
 	//2. BOM 그리드 저장
 	public String saveBomMst(String empId,Map<String,Object> param) {
 		log.info("bomMstSaveList------------->{}",param);
-		
+		try{
 			Object createdObj = param.get("createdRows");
 			int createdCount = 0;
 			if (createdObj instanceof List) {
@@ -90,6 +90,14 @@ public class BomMstService {
 					BomMst b = mapToBom(row);
 					if (b.getMatQty() == null) {
 						throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
+					}
+					// 중복 검사: prdId + matId 조합이 이미 존재하는지 확인
+					String prdIdCheck = b.getPrdId();
+					String matIdCheck = b.getMatId();
+					if (prdIdCheck != null && matIdCheck != null && !prdIdCheck.isEmpty() && !matIdCheck.isEmpty()) {
+						if (bomMstRepository.findByPrdIdAndMatId(prdIdCheck, matIdCheck).isPresent()) {
+							throw new IllegalStateException("중복되는 완제품ID +원재료ID 조합이 이미 존재합니다. (prdId=" + prdIdCheck + ", matId=" + matIdCheck + ")");
+						}
 					}
 					b.setCreatedId(empId);
 					b.setCreatedDate(LocalDate.now());
@@ -145,7 +153,10 @@ public class BomMstService {
 			
 			// Force flush so DB constraint errors occur inside try/catch and we can return meaningful message
 			bomMstRepository.flush();
-			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount+")";
+					return "success";
+		} catch(Exception e) {
+			return "error: " + e.getMessage();
+		}
 	}
 
 	// Map을 BomMst 엔티티로 변환하는 헬퍼 메서드

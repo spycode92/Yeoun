@@ -85,12 +85,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const stay = Number(el.dataset.stay);
     const active = Number(el.dataset.active);
 
-    const current = (el.textContent || "").trim();
-    if (current.includes("QC") || current.includes("대기") || current.includes("시작대기")) return;
+    if (!(active > 0) || Number.isNaN(stay)) return;
 
-    if (active > 0 && !Number.isNaN(stay)) {
-      el.textContent = formatMinutes(stay);
+    const current = (el.textContent || "").trim();
+
+    // QC대기면 "QC대기" 붙이고 시간 포맷 적용
+    if (current.startsWith("QC대기")) {
+      el.textContent = `QC대기 ${formatMinutes(stay)}`;
+      return;
     }
+
+    // 숫자 없는 대기 문구(대기/시작대기)는 그대로 둠
+    if (current.includes("대기") || current.includes("시작대기")) return;
+
+    // 일반 공정은 시간 포맷 적용
+    el.textContent = formatMinutes(stay);
   });
 
   // 2) 1분 tick
@@ -112,11 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
       el.dataset.stay = String(stay);
 
       const current = (el.textContent || "").trim();
-      if (current.startsWith("QC대기")) {
-        el.textContent = `QC대기 ${stay}분`;
-      } else {
-        el.textContent = formatMinutes(stay);
-      }
+	  if (current.startsWith("QC대기")) {
+	    el.textContent = `QC대기 ${formatMinutes(stay)}`;
+	  } else {
+	    el.textContent = formatMinutes(stay);
+	  }
     });
 
     updateLastUpdatedAt(); // tick 1회마다 갱신

@@ -61,14 +61,12 @@ public class QcItemController {
 			return qcItemService.qcItemList(qcItemId);
   	}
   	
-  	//품질기준 저장
+  	//품질기준 저장 (AJAX 전용)
+  	@ResponseBody
   	@PostMapping("/qcItem/save")
-  	public String saveItem(Model model,@AuthenticationPrincipal LoginDTO loginDTO,@ModelAttribute @Valid QcItem qcItem) {
-  		//model.addAttribute("qcItem", qcItem);
-  		
-  		qcItemService.saveQcItem(loginDTO.getEmpId(),qcItem);
-  		return "redirect:/masterData/qc_item";
-  		
+  	public String saveItem(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String,Object> params) {
+  		log.info("saveItem params: {}", params);
+  		return qcItemService.saveQcItem(loginDTO.getEmpId(), params);
   	}
 	//품질기준 삭제 (AJAX 호출을 위한 응답: 텍스트 반환)
 	@ResponseBody

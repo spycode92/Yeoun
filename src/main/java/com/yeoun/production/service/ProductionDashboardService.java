@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.yeoun.order.dto.ItemPlanAndOrderDTO;
+import com.yeoun.order.dto.PlanAndOrderDashDTO;
+import com.yeoun.production.mapper.ProductionDashboardMapper;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.process.mapper.ProductionTrendMapper;
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductionDashboardService {
 	
     private final ProductionTrendMapper productionTrendMapper;
+    private final ProductionDashboardMapper productionDashboardMapper;
 
     // =====================================================================================
     /**
@@ -175,4 +179,16 @@ public class ProductionDashboardService {
     }
 
 
+    public List<PlanAndOrderDashDTO> getOrderChart(String range, String itemId) {
+        return switch (range) {
+            case "DAY"  -> productionDashboardMapper.selectDailyPlanVsOrder(itemId);
+            case "WEEK" -> productionDashboardMapper.selectWeeklyPlanVsOrder(itemId);
+            case "MONTH" -> productionDashboardMapper.selectMonthlyPlanVsOrder(itemId);
+            default -> throw new IllegalArgumentException("유효하지 않은 값입니다.");
+        };
+    }
+
+    public List<ItemPlanAndOrderDTO> getItemOrderChart() {
+        return productionDashboardMapper.selectItemPlanVsOrder();
+    }
 }

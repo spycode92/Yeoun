@@ -13,6 +13,7 @@ public class EquipProcessHistoryDTO {
     private String lineId;
     private String equipId;
     private String step;
+    private String equipName;
 
     private String orderId;
     private String wopId;

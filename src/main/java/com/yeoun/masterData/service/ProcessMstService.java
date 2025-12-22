@@ -78,6 +78,12 @@ public class ProcessMstService {
 					}
 					String processId = String.valueOf(idObj).trim();
 					String processName = String.valueOf(nameObj).trim();
+					
+					// 신규 등록 - processId 중복검사
+					if(processMstRepository.existsById(processId)) {
+						return "error: 중복되는 공정 ID가 이미 존재합니다. (processId=" + processId + ")";
+					}
+					
 					String description = (row.get("description") == null) ? "" : String.valueOf(row.get("description"));
 					String processType = (row.get("processType") == null || String.valueOf(row.get("processType")).trim().isEmpty()) ? "GENERAL" : String.valueOf(row.get("processType")).trim();
 					String useYn = (row.get("useYn") == null || String.valueOf(row.get("useYn")).trim().isEmpty()) ? "Y" : String.valueOf(row.get("useYn")).trim();
@@ -87,6 +93,7 @@ public class ProcessMstService {
 							.processName(processName)
 							.description(description)
 							.processType(processType)
+							.stepNo(row.get("stepNo").toString())
 							.useYn(useYn)
 							.createdId(empId)
 							.createdDate(LocalDateTime.now())
@@ -115,6 +122,7 @@ public class ProcessMstService {
 							.processName(processName)
 							.description(row.get("description").toString())
 							.processType(row.get("processType").toString())
+							.stepNo(row.get("stepNo").toString())
 							.useYn(row.get("useYn").toString())
 							.createdId(row.get("createdId").toString())
 							.createdDate(
@@ -148,6 +156,16 @@ public class ProcessMstService {
 				
 				// 1. 필요한 PK 및 연관 객체 조회 (routeId로 RouteHeader 조회)
 	            String routeId = routeInfo.get("routeId").toString();
+	            String mode = routeInfo.get("mode") != null ? routeInfo.get("mode").toString() : "new";
+	            
+	            // routeId 중복 검사 (신규 등록 시에만)
+	            if ("new".equals(mode)) {
+	            	Optional<RouteHeader> duplicateCheck = routeHeaderRepository.findById(routeId);
+	            	if (duplicateCheck.isPresent()) {
+	            		return "error: 중복되는 라우트 ID가 이미 존재합니다. (routeId=" + routeId + ")";
+	            	}
+	            }
+	            
 	            Optional<RouteHeader> existingHeaderOpt = routeHeaderRepository.findById(routeId);
 				Optional<ProductMst> pmPrdId = productMstRepository.findById(routeInfo.get("prdId").toString());
 				

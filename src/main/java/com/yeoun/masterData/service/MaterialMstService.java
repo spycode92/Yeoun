@@ -51,6 +51,7 @@ public class MaterialMstService {
 	}
 
 	//2. 원재료 그리드 저장
+	@Transactional
 	public String saveMaterialMst(String empId, Map<String, Object> param) {
 		log.info("materialMstSaveList------------->{}",param);
 		try {
@@ -65,9 +66,10 @@ public class MaterialMstService {
 
 					if (!matId.isEmpty()) {
 						// 예외를 던지지 않고 중복을 감지하여 호출자에게 에러 문자열로 알립니다.
-						if (materialMstRepository.existsById(matId)) {
-							return "error: 중복되는 원재료id 이미 존재합니다.";
-						}
+						materialMstRepository.findById(matId)
+							    .ifPresent(existingProduct -> {
+							        throw new IllegalStateException("중복되는 원재료id가 이미 존재합니다.");
+							    });//중복중
 					}
 					MaterialMst m = mapToMaterial(row);
 					m.setCreatedId(empId);
@@ -122,7 +124,6 @@ public class MaterialMstService {
 
 			return "success";
 		} catch (Exception e) {
-			log.error("saveProductMst error", e);
 			return "error: " + e.getMessage();
 		}
 	}

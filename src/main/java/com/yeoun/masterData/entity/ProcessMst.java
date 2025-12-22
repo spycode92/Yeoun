@@ -43,6 +43,10 @@ public class ProcessMst implements Serializable{
 	// 설명 
 	@Column(name = "DESCRIPTION", length = 400)
 	private String description;
+
+	//STEP_NO
+	@Column(name = "STEP_NO", nullable = false)
+	private String stepNo;
 	
 	// 사용여부
 	@Column(name = "USE_YN", length = 1, nullable = false)

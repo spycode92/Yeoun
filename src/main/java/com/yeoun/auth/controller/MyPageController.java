@@ -60,6 +60,10 @@ public class MyPageController {
 		model.addAttribute("mode", "edit");
 		model.addAttribute("formAction", "/my/info/update");
 		
+		// 마이페이지용 타이틀/플래그
+	    model.addAttribute("pageTitle", "내 정보 관리");
+	    model.addAttribute("isMyPage", true);
+		
 		// 마이페이지에서 급여정보 수정 불가
 		model.addAttribute("canEditBankInfo", false);
 		
@@ -107,6 +111,9 @@ public class MyPageController {
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/my/info/update");
 	        
+	        model.addAttribute("pageTitle", "내 정보 관리");
+	        model.addAttribute("isMyPage", true);
+	        
             List<Dept> topDeptList =
                     deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
             List<Dept> subDeptList =
@@ -142,6 +149,8 @@ public class MyPageController {
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("formAction", "/my/info/update");
 	        model.addAttribute("mode", "edit");
+	        model.addAttribute("pageTitle", "내 정보 관리");
+	        model.addAttribute("isMyPage", true);
 	        model.addAttribute("canEditBankInfo", false);
 	        
 	        List<Dept> topDeptList =

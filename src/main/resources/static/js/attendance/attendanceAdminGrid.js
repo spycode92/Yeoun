@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let startDate;
 	let endDate;
 	
-	if (savedStart && savedEnd) {// 날짜 변경이 있을 경우 저장된 날짜로 가져오기
+	if (savedStart && savedEnd && savedStart !== "undefined" && savedEnd !== "undefined") {// 날짜 변경이 있을 경우 저장된 날짜로 가져오기
 		startDate = savedStart;
 		endDate = savedEnd;
 	} else {
@@ -154,6 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	document.querySelector("#startDate").value = startDate;
 	document.querySelector("#endDate").value = endDate;
 	
+	
 	await loadAttendanceList(startDate, endDate);
 });
 
@@ -162,8 +163,11 @@ document.querySelector("#searchbtn").addEventListener("click", async () => {
 	const startDate = document.querySelector("#startDate").value;
 	const endDate = document.querySelector("#endDate").value;
 	
-	sessionStorage.setItem("tartDate", startDate.value);
-	sessionStorage.setItem("endDate", endDate.value);
+	console.log("startDate". startDate);
+	console.log("endDate". endDate);
+	
+	sessionStorage.setItem("startDate", startDate);
+	sessionStorage.setItem("endDate", endDate);
 	
 	if (!startDate || !endDate) {
 		alert("조회할 기간을 선택해주세요!");

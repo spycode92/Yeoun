@@ -38,12 +38,12 @@ const EFFECTIVE_DATE_MIN = 0;
 const EFFECTIVE_DATE_MAX = 120; // 예: 최대 120개월(10년)
 
 
-
 const Grid = tui.Grid;
 
 //g-grid1 완제품(상위품번)
 const grid1 = new Grid({
 	  el: document.getElementById('productGrid'),
+	  language: 'ko', // 한글 설정
       rowHeaders: [
 			{ type: 'rowNum', header: 'No.'},
 			{ type: 'checkbox'}
@@ -255,22 +255,25 @@ const grid2 = new Grid({
         }
 });
 
-
 grid1.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
 	if (columnName === 'prdId') {
 	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
 	        const prdIdValue = grid1.getValue(rowKey, 'prdId');
 	        
-	        // prdId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
-	        const isNewRow = !prdIdValue; 
 
-	        console.log("prdId 값:", prdIdValue, " | isNewRow:", isNewRow);
-
-	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
+			let isNewRow = false;
+			try {
+				const modified = (typeof grid1.getModifiedRows === 'function') ? (grid1.getModifiedRows() || {}) : {};
+				const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
+				isNewRow = createdRows.some(r => r && String(r.rowKey) === String(rowKey));
+			} catch (e) {
+				// 실패 시 기존 fallback 사용
+				isNewRow = !prdIdValue;
+			}
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 품번은 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
+	            alert('기존 품번은 수정할 수 없습니다.'); 
 	        }
 	    }
 });
@@ -278,23 +281,26 @@ grid1.on('beforeChange', (ev) => {
 grid2.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
 	if (columnName === 'matId') {
-	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'matId' 값을 가져옵니다.
 	        const matIdValue = grid2.getValue(rowKey, 'matId');
 	        
-	        // prdId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
-	        const isNewRow = !matIdValue; 
+			let isNewRow = false;
+			try {
+				const modified = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
+				const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
+				isNewRow = createdRows.some(r => r && String(r.rowKey) === String(rowKey));
+			} catch (e) {
+				// 실패 시 기존 fallback 사용
+				isNewRow = !matIdValue;
+			}
 
-	        console.log("matId 값:", matIdValue, " | isNewRow:", isNewRow);
-
-	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
+	        // 기존 행일 경우 (isNewRow가 false, 즉 matIdValue 있는 경우)
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 원재료ID는 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
+	            alert('기존 원재료ID는 수정할 수 없습니다.'); 
 	        }
 	    }
 });
-
-
 
 
 function productGridAllSearch() {
@@ -667,6 +673,7 @@ saveProductRowBtn.addEventListener('click', function() {
 				return;
 			}
 		}
+
 		if (row.unitPrice != null && String(row.unitPrice).trim() !== '') {
 			const up = Number(row.unitPrice);
 			if (isNaN(up) || up < 0 || up > 1000000000) {
@@ -703,13 +710,15 @@ saveProductRowBtn.addEventListener('click', function() {
 			return status === 'success' || okTexts.includes(message) || message.includes('success');
 		};
 
-		if (!isSuccess(parsed)) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
-		console.log('저장 성공:', parsed);
+		if (!isSuccess(parsed)) {
+			try { alert(parsed); } catch (e) {}
+			return;
+		}
 		productGridAllSearch();
 	})
 	.catch(err => {
-		console.error('저장 오류', err);
-		try { alert('저장 중 오류가 발생했습니다.\n' + msg); } catch (e) {}
+		console.error('저장 오류', err && err.message ? err.message : err);
+		try { alert(err && err.message ? err.message : err); } catch (e) {}
 	});
 });
 
@@ -805,13 +814,18 @@ saveMaterialRowBtn.addEventListener('click', function() {
 			const message = (p.message || '').toString().toLowerCase();
 			return status === 'success' || okTexts.includes(message) || message.includes('success');
 		};
-		if (!isSuccess(parsed)) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
+
+		if (!isSuccess(parsed)) {
+			try { alert(parsed); } catch (e) {}
+			return;
+		}
 		console.log('저장 성공:', parsed);
 		materialGridAllSearch();
 	})
 	.catch(err => {
-		console.error('저장 오류', err);
-		try { alert('저장 중 오류가 발생했습니다.\n' + msg); } catch (e) {}
+		console.error('저장 오류', err.message);
+		alert('오류: ' + err.message);
+		
 	});
 });
 

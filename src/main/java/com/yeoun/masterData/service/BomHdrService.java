@@ -35,7 +35,6 @@ public class BomHdrService {
 		return bomHdrRepository.findBomHdrTypeList();
 	}
 	
-	
 	//BOM 그룸 전체 조회
 	@Transactional(readOnly = true)
 	public List<BomHdr> findBomHdrList(String bomHdrId, String bomHdrType ) {

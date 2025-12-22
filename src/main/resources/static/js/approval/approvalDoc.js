@@ -372,6 +372,47 @@ async function getApproverList(approvalId) {
 	}
 }
 
+// f- 그리드 상세에서 결재자 목록을 로드하고 UI에 표시하는 함수
+async function loadAndDisplayApprovers(approvalId) {
+	const approverList = await getApproverList(approvalId);
+
+	let sortedList;
+	if (approverList.length > 0) {
+		// 원본 배열을 복사한 후 정렬 (원본 보존)
+		sortedList = [...approverList].sort((a, b) => {
+			return Number(a.orderApprovers) - Number(b.orderApprovers);
+		});
+		console.debug("approverList (정렬 후)---------------->", approverList);
+		console.debug("sortedList---->", sortedList);
+		
+		// selectBox의 모든 아이템을 매핑 객체로 만들기 (한 번만 실행)
+		const empMapping = {};
+		const selectBoxItems = selectBox.getItems();
+		selectBoxItems.forEach(item => {
+			empMapping[item.value] = item.label;
+		});
+
+		window.count = 0;
+		approverDiv.innerHTML = "";
+
+		//넣어줄때문제가 생김
+		for (const approver of sortedList) {
+			console.log('approver:', approver);
+			console.log('looking for empId:', approver.empId);
+			const empLabel = empMapping[approver.empId];
+			console.log('found empLabel:', empLabel);
+			if (empLabel) {
+				print("detail", empLabel);
+			} else {
+				console.warn('empLabel not found for empId:', approver.empId);
+			}
+		}
+
+		// 도장 이미지 불러오기 및 표시
+		await displayStampsForApprovers(approvalId);
+	}
+}
+
 //grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 //grid - 2.전체결재 - 나와관련된 모든 결재문서
 //grid - 3.내 결재목록 - 내가 기안한 문서
@@ -407,6 +448,24 @@ async function empData() {
 		//셀렉트박스 - 토스트유아이
 		selectBox = new tui.SelectBox('#select-box', {
 			data: itemData
+			,
+			theme: {
+				'common.border': '1px solid #e4e4e4',
+				'common.color': '#353535',
+				'common.background': '#fcfcfc',
+				'common.width': '400px',
+				'common.height': '45px',
+				'common.border-radius': '5px',
+
+				'common.disabled.background': '#eceef1',
+				'common.disabled.color': '#708093',
+
+				'dropdown.maxHeight': '300px',
+
+				'itemGroup.items.paddingLeft': '15px',
+
+				'itemGroup.label.color': 'black',
+				}
 		});
 
 		//셀렉트박스 닫힐때
@@ -474,31 +533,10 @@ async function empData() {
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				//상세버튼 클릭시 디폴트 결재권한자 div 생기게하는 로직
-				//여러번 누르면 한번씩 이전값을가지고있음
-				const approverList = await getApproverList(approvalId);
-				console.debug("approverList ---------->", approverList);
-				let sortedList;
-
-				if (approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number(a.orderApprovers) - Number(b.orderApprovers);
-					});
-					console.debug("approverList---------------->", approverList);
-
-					window.count = 0;
-					approverDiv.innerHTML = "";
-					console.debug("sortedList---->", sortedList);
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem()?.label);
-					}
-
-					// 도장 이미지 불러오기 및 표시
-					await displayStampsForApprovers(approvalId);
-
-				}
+				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				// 상세버튼 양식종류에 따른 form 보이기/숨기기
 				formChange(rowData.form_type);
@@ -546,27 +584,11 @@ async function empData() {
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
 
-				const approverList = await getApproverList(approvalId);
-
-				let sortedList;
-				if (approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number(a.orderApprovers) - Number(b.orderApprovers);
-					});
-
-					window.count = 0;
-					approverDiv.innerHTML = "";
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem()?.label);
-					}
-
-					// 도장 이미지 불러오기 및 표시
-					await displayStampsForApprovers(approvalId);
-
-				}
+				// 결재자 목록 로드 및 표시
+				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
@@ -615,30 +637,10 @@ async function empData() {
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				const approverList = await getApproverList(approvalId);
-
-				let sortedList;
-
-				if (approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number(a.orderApprovers) - Number(b.orderApprovers);
-					});
-					console.debug("approverList---------------->", approverList);
-
-					window.count = 0;
-					approverDiv.innerHTML = "";
-
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem()?.label);
-					}
-
-					// 도장 이미지 불러오기 및 표시
-					await displayStampsForApprovers(approvalId);
-
-				}
+				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
@@ -686,29 +688,10 @@ async function empData() {
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				const approverList = await getApproverList(approvalId);
-
-				let sortedList;
-
-				if (approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number(a.orderApprovers) - Number(b.orderApprovers);
-					});
-
-					window.count = 0;
-					approverDiv.innerHTML = "";
-
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem()?.label);
-					}
-
-					// 도장 이미지 불러오기 및 표시
-					await displayStampsForApprovers(approvalId);
-
-				}
+				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formDisable();
 			}
@@ -753,29 +736,10 @@ async function empData() {
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				const approverList = await getApproverList(approvalId);
-
-				let sortedList;
-
-				if (approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number(a.orderApprovers) - Number(b.orderApprovers);
-					});
-
-					window.count = 0;
-					approverDiv.innerHTML = "";
-
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem()?.label);
-					}
-
-					// 도장 이미지 불러오기 및 표시
-					await displayStampsForApprovers(approvalId);
-
-				}
+				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
@@ -796,9 +760,13 @@ function formChange(formType) {
 		document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
 		document.getElementById('positionForm').style.display = 'none';//직급
 		document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		document.getElementById('expnd-type').required = true;
 		document.getElementById('start-date').required = false;
 		document.getElementById('end-date').required = false;
 		document.getElementById('leave-type').required = false;//leave-type
+		document.getElementById('position').required = false;
+		document.getElementById('to-dept-id').required = false;
+
 	} else if (formType == '연차신청서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
@@ -808,6 +776,10 @@ function formChange(formType) {
 		document.getElementById('start-date').required = true;
 		document.getElementById('end-date').required = true;
 		document.getElementById('leave-type').required = true;//leave-type
+		document.getElementById('position').required = false;
+		document.getElementById('to-dept-id').required = false;
+		document.getElementById('expnd-type').required = false;
+
 	} else if (formType == '반차신청서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
@@ -817,6 +789,9 @@ function formChange(formType) {
 		document.getElementById('start-date').required = true;
 		document.getElementById('end-date').required = true;
 		document.getElementById('leave-type').required = true;//leave-type
+		document.getElementById('position').required = false;
+		document.getElementById('to-dept-id').required = false;
+		document.getElementById('expnd-type').required = false;
 	} else if (formType == '인사발령신청서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 		document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
@@ -826,6 +801,9 @@ function formChange(formType) {
 		document.getElementById('start-date').required = false;
 		document.getElementById('end-date').required = false;
 		document.getElementById('leave-type').required = false;//leave-type
+		document.getElementById('position').required = true;
+		document.getElementById('to-dept-id').required = true;
+		document.getElementById('expnd-type').required = false;
 
 	} else if (formType == '자유양식결재서') {
 		document.getElementById('expndTypeForm').style.display = 'none';//지출종류
@@ -836,6 +814,9 @@ function formChange(formType) {
 		document.getElementById('start-date').required = false;
 		document.getElementById('end-date').required = false;
 		document.getElementById('leave-type').required = false;//leave-type
+		document.getElementById('position').required = false;
+		document.getElementById('to-dept-id').required = false;
+		document.getElementById('expnd-type').required = false;
 
 	}
 }
@@ -856,6 +837,17 @@ function formDisable() {
 	document.getElementById('to-dept-id').disabled = true;
 	document.getElementById('expnd-type').disabled = true;
 	document.getElementById('reason-write').disabled = true;
+	
+	// 결재권한자 변경 div가 열려있다면 닫기
+	if (jeongyeoljaDiv && jeongyeoljaDiv.style.display !== 'none') {
+		jeongyeoljaDiv.style.display = 'none';
+	}
+	
+	// 상세보기일 때 결재권한자 안내 문구 숨기기
+	const approverInfo = document.getElementById('approverInfo');
+	if (approverInfo) {
+		approverInfo.style.display = 'none';
+	}
 
 }
 //f- 기안서작성 클릭시 활성화 시켜주는 함수
@@ -875,16 +867,57 @@ function formEnable() {
 	document.getElementById('to-dept-id').disabled = false;
 	document.getElementById('expnd-type').disabled = false;
 	document.getElementById('reason-write').disabled = false;
+	// 작성일 때 결재권한자 안내 문구 보이기
+	const approverInfo = document.getElementById('approverInfo');
+	if (approverInfo) {
+		approverInfo.style.display = 'block';
+	}
+}
+
+//f- 글자 수 업데이트 함수 (전역 함수로 정의)
+function updateCharCount() {
+	const reasonTextarea = document.getElementById('reason-write');
+	const charCount = document.getElementById('reason-char-count');
+	
+	if (reasonTextarea && charCount) {
+		const currentLength = reasonTextarea.value.length;
+		charCount.textContent = `${currentLength}/3000자`;
+		
+		// 3000자 초과 시 경고 스타일 적용
+		if (currentLength > 2950) {
+			charCount.style.color = currentLength >= 3000 ? 'red' : 'orange';
+		} else {
+			charCount.style.color = '#6c757d'; // 기본 Bootstrap muted 색상
+		}
+	}
 }
 
 //f- 모달 첨부파일
 document.addEventListener('DOMContentLoaded', function () {
+
 	const attachBtn = document.getElementById('attachmentBtn');
 	const fileInput = document.getElementById('realFileInput');
 	const listContainer = document.getElementById('fileListContainer');
 
 	attachBtn.addEventListener('click', () => fileInput.click());
 	fileInput.addEventListener('change', updateFileListDisplay);
+
+	// 사유내용 글자 수 체크 기능 추가
+	const reasonTextarea = document.getElementById('reason-write');
+	const charCount = document.getElementById('reason-char-count');
+	
+	if (reasonTextarea && charCount) {
+		// 여러 이벤트에 리스너 등록
+		reasonTextarea.addEventListener('input', updateCharCount);
+		reasonTextarea.addEventListener('keyup', updateCharCount);
+		reasonTextarea.addEventListener('paste', function() {
+			// 붙여넣기 후 약간의 지연을 두고 카운트 업데이트
+			setTimeout(updateCharCount, 10);
+		});
+		
+		// 초기 로드 시에도 카운트 표시
+		updateCharCount();
+	}
 
 	function resetAttachments() {
 		fileInput.value = ''; // input[type=file]의 파일 목록을 초기화
@@ -970,10 +1003,18 @@ document.addEventListener('DOMContentLoaded', function () {
 			// 1. 인쇄를 위해 모달 내용을 복사합니다. (원본 폼 보호)
 			const printElement = modalDoc.cloneNode(true);
 
+			// 인쇄용 문서에서 <span>~</span> 요소들 제거
+			const tildeSpans = printElement.querySelectorAll('span');
+			tildeSpans.forEach(span => {
+				if (span.textContent.trim() === '~') {
+					span.remove();
+				}
+			});
+
 			// A. 결재완료기간 (createdDate ~ finishDate) 처리
 			const createdDate = document.getElementById('create-date')?.value || ' - ';
 			const finishDate = document.getElementById('finish-date')?.value || ' - ';
-			const completeDateDiv = printElement.querySelector('#create-date')?.closest('.row');
+			const completeDateDiv = printElement.querySelector('#create-date');
 
 			if (completeDateDiv) {
 				// 인쇄 시 두 칸을 대체할 통합 텍스트 노드 생성
@@ -990,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			// B. 휴가기간 (startDate ~ endDate) 처리
 			const startDate = document.getElementById('start-date')?.value || ' - ';
 			const endDate = document.getElementById('end-date')?.value || ' - ';
-			const leavePeriodDiv = printElement.querySelector('#start-date')?.closest('.row');
+			const leavePeriodDiv = printElement.querySelector('#start-date');
 
 			if (leavePeriodDiv) {
 				const combinedLeaveSpan = document.createElement('span');
@@ -1517,6 +1558,13 @@ document.getElementById('modal-doc').addEventListener('submit', async function (
 	// FormData 객체를 사용하여 폼 데이터 수집
 	const formData = new FormData(this);
 
+	//결재권한자가 한명이라면 또는두명이라면 순번을 앞당김
+	console.log("approverArr---->",approverArr);
+	//-----------------------------------------------------
+	//approverArr 배열에 approverOrder가 1이나 2가 없을경우 approverOrder를 앞당기고 또는 2가 비었을경우 3을 2로 앞당겨서
+	//approverArr 배열에 저장해야함
+	//-----------------------------------------------------
+	
 	//결재문서
 	if (approverArr.length != 0) { //결재권한자가 있으면
 		formData.append('docStatus', '1차대기');//문서상태
@@ -1560,7 +1608,7 @@ document.getElementById('modal-doc').addEventListener('submit', async function (
 			if (!response.ok) {	
 					throw new Error('서버 응답이 실패했습니다. 상태 코드: ' + response.status);	
 			}else{
-					// 모달 닫기
+				// 모달 닫기
 				const modalElement = document.getElementById('approval-modal');
 				const modalInstance = bootstrap.Modal.getInstance(modalElement);
 				modalInstance.hide();
@@ -1683,6 +1731,7 @@ function applyDelegateChange(button) {
 }
 
 const Grid = tui.Grid;
+
 // g- 결재사항
 const grid1 = new Grid({
 	el: document.getElementById('approvalGrid'),
@@ -1710,7 +1759,9 @@ const grid1 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' }
+		, { header: '상태', name: 'doc_status', align: 'center' 
+			,renderer:{ type: StatusBadgeRenderer}
+		}
 		, {
 			header: '상세보기', name: 'view_details', align: 'center', width: 100
 			, formatter: (rowInfo) => {
@@ -1758,7 +1809,9 @@ const grid2 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' }
+		, { header: '상태', name: 'doc_status', align: 'center' 
+			,renderer:{ type: StatusBadgeRenderer}
+		}
 		, {
 			header: '상세보기', name: 'view_details', align: 'center'
 			, formatter: (rowInfo) => {
@@ -1803,7 +1856,9 @@ const grid3 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' }
+		, { header: '상태', name: 'doc_status', align: 'center' 
+			,renderer:{ type: StatusBadgeRenderer}
+		}
 		, {
 			header: '상세보기', name: 'view_details', align: 'center'
 			, formatter: function (rowInfo) {
@@ -1848,7 +1903,9 @@ const grid4 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' }
+		, { header: '상태', name: 'doc_status', align: 'center' 
+			,renderer:{ type: StatusBadgeRenderer}
+		}
 		, {
 			header: '상세보기', name: 'view_details', align: 'center'
 			, formatter: function (rowInfo) {
@@ -1893,7 +1950,9 @@ const grid5 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' }
+		, { header: '상태', name: 'doc_status', align: 'center' 
+			,renderer:{ type: StatusBadgeRenderer}
+		}
 		, {
 			header: '상세보기', name: 'view_details', align: 'center'
 			, formatter: function (rowInfo) {
@@ -1920,22 +1979,18 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 	tab.addEventListener('shown.bs.tab', function (e) {
 		const targetId = e.target.getAttribute('data-bs-target');
 
-		if (targetId === '#nav-approval-tab') {
-			console.log("결재사항 탭 클릭!");
+		if (targetId === '#nav-approval-tab') {//결재사항
 			grid1.refreshLayout();
-		} else if (targetId === '#navs-all-tab') {
-			console.log("전체결재 탭 클릭!");
+		} else if (targetId === '#navs-all-tab') {//전체결재
 			grid2.refreshLayout();
-		} else if (targetId === '#navs-my-tab') {
-			console.log("내결재목록 탭 클릭!");
+		} else if (targetId === '#navs-my-tab') {//내결재목록
 			grid3.refreshLayout();
-		} else if (targetId === '#navs-waiting-tab') {
-			console.log("결재대기 탭 클릭!");
+		} else if (targetId === '#navs-waiting-tab') {//결재대기
 			grid4.refreshLayout();
-		} else if (targetId === '#navs-done-tab') {
-			console.log("결재완료 탭 클릭!");
+		} else if (targetId === '#navs-done-tab') {//결재완료
 			grid5.refreshLayout();
 		}
+		AllGridSearch();
 	});
 });
 // -----------------------------------------
@@ -1946,7 +2001,6 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 Grid.applyTheme('clean'); // Call API of static method
 //f- 날짜,기안자,문서양식 조회 불러오는 함수
 function AllGridSearch() {
-	console.log("AllGridSearch()-----> 해당함수 로딩시실행잘되나??");
 	const params = {
 
 		createDate: document.getElementById("searchStartDate").value ?? "",
@@ -2069,6 +2123,13 @@ function formReset(ev) {
 	document.getElementById("to-dept-id").selectedIndex = 0;//발령부서
 	document.getElementById("expnd-type").selectedIndex = 0;//지출종류
 	document.getElementById("reason-write").value = "";//사유내용
+	
+	// 사유내용 글자 수 카운터 초기화
+	const charCount = document.getElementById('reason-char-count');
+	if (charCount) {
+		charCount.textContent = '0/3000자';
+		charCount.style.color = '#6c757d'; // 기본 색상으로 복원
+	}
 	//selectBox.resetItems();
 	//selectBox.setItems(itemData);
 
@@ -2085,6 +2146,7 @@ let day = today.getDay();  // 요일
 
 const formattedDate = `${year}년 ${month}월 ${date}일`;
 document.getElementById("today-date").textContent = formattedDate;
+
 
 let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
 let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
@@ -2125,17 +2187,31 @@ function defaultPrint() {
 		formEnable();
 		if (selectBox && typeof selectBox.enable === 'function') selectBox.enable();
 	window.count = 0;
-	approverArr = [];
+	approverArr = [];//form-type-defalut
+	document.getElementById('form-menu').value = document.getElementById('form-type-defalut').value;//양식종류
+	
+	// 작성 모드용 버튼 설정
+	document.getElementById('saveBtn').style.display = "block";//등록 버튼 보이기
+	document.getElementById('attachmentBtn').style.display = 'block';//첨부파일 버튼 보이기
+	document.getElementById('downloadArea').style.display = "none";//다운로드 영역 숨기기
+	document.getElementById('approvalCompanionBtn').style.display = "none";//반려 버튼 숨기기
+	document.getElementById('approvalCheckBtn').style.display = "none";//결재확인 버튼 숨기기
+	
+	// 오늘 날짜를 create-date, finish-date 필드에 기본값으로 설정
+	const today = new Date();
+	const isoFormattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+	
+	const createDateInput = document.getElementById('create-date');
+
+	if (createDateInput) {
+		createDateInput.value = isoFormattedDate;
+		console.log('defaultPrint - create-date 설정됨:', isoFormattedDate);
+	}
 	// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 	//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
 	if (!selectedForm) {
 		console.log('모달을 열 수 없습니다.');
 		return;
-
-		// document.getElementById('leavePeriodForm').style.display = 'flex';
-		// document.getElementById('leaveTypeForm').style.display = 'flex';
-		// document.getElementById('expndTypeForm').style.display = 'flex';
-		// document.getElementById('toDeptForm').style.display = 'flex';
 	}
 
 	defalutapproverArr = []; //디폴트 결재권한자 초기화
@@ -2179,24 +2255,64 @@ function defaultPrint() {
 }
 
 defalutapprover();
+
+// 화살표를 동적으로 관리하는 함수
+function updateArrows() {
+	// 기존 화살표들 모두 제거
+	const existingArrows = approverDiv.querySelectorAll('.bi-caret-right-fill');
+	existingArrows.forEach(arrow => arrow.remove());
+	
+	// 카드 개수 확인 (btn 클래스를 가진 div들)
+	const cards = approverDiv.querySelectorAll('.btn');
+	
+	// 카드가 2개 이상일 때만 화살표 추가
+	if (cards.length >= 2) {
+		for (let i = 0; i < cards.length - 1; i++) {
+			const arrow = document.createElement('i');
+			arrow.className = 'bi bi-caret-right-fill';
+			arrow.style.marginTop = '95px';
+			
+			// 현재 카드 다음에 화살표 삽입
+			cards[i].insertAdjacentElement('afterend', arrow);
+		}
+	}
+}
+
 //f- 결재권한자 div 버튼 생성 함수
 function print(type, text) {
 
 	if (this.count < 3) {
 		const idx = this.count + 1;
-		const cardHtml = '<div class="btn btn-success"'
-			+ 'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-			+ '<a id="approver_close_' + idx + '" onclick="approverDivclose(this,' + "'" + type + "'" + ',' + idx + ')" style="float:right;margin-right: 8px;">&times;</a>'
-			+ '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + idx + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
-			+ '</div>';
+		
+		// type이 "detail"일 때는 닫기 버튼을 표시하지 않음 (상세 보기용)
+		const closeButton = type === "detail" ? '' : '<a id="approver_close_' + idx + '" onclick="approverDivclose(this,' + "'" + type + "'" + ',' + idx + ')" style="float:right;margin-right: 8px;">&times;</a>';
+		
+		// const cardHtml = '<div class="btn"'
+		// 	+ 'style="background-color: #E7E7FF;width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+		// 	+ closeButton
+		// 	+ '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + idx + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
+		// 	+ '</div>';
 
-		// 화살표 아이콘은 두번째 카드가 추가될 때(=idx===2)와 세번째 카드가 추가될 때(=idx===3)에만 삽입
-		if (idx > 1) {
-			approverDiv.innerHTML += '<i class="bi bi-caret-right-fill" style="margin-top:95px;"></i>';
-		}
+		const cardHtml = '<div class="btn" '
+            + 'style="background-color: #E7E7FF; width:250px; height:200px; margin:5px; padding: 5px 0px 0px 0px; '
+            + 'border-radius: 10px; border: 1px solid #D1D1F5; cursor: pointer; ' // 기본 테두리
+            + 'box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; display: inline-block; vertical-align: top;" ' // 입체감 추가
+            + 'onmouseover="this.style.backgroundColor=\'#DADAFF\';" ' // 마우스 올리면 살짝 진해짐
+            + 'onmouseout="this.style.backgroundColor=\'#E7E7FF\';" '
+            + 'onmousedown="this.style.transform=\'translateY(2px)\'; this.style.boxShadow=\'0 2px 3px rgba(0,0,0,0.15)\';" ' // 클릭 시 아래로 눌림
+            + 'onmouseup="this.style.transform=\'translateY(0px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\';">' // 떼면 복귀
+            + closeButton
+            + '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" '
+            + 'style="margin-top:30px; height: 129px; font-size:22px;">' // 기존 시퀀스(마진, 높이) 유지
+            + idx + '차 결재권한자 ' + '<br>' + text + '<br>' 
+            + '</p>'
+            + '</div>';
 
 		approverDiv.innerHTML += cardHtml;
 		this.count = idx;
+		
+		// 카드 추가 후 화살표 업데이트
+		updateArrows();
 	}
 }
 
@@ -2205,6 +2321,17 @@ function print(type, text) {
 function approvalNo(count, text) {
 	// 그리드에서 모달을 열었을 때는 approvalNo 동작을 무시합니다.
 	if (modalOpenedFromGrid) return;
+	
+	// 상세보기 상태인지 확인 (reason-write가 disabled된 경우)
+	const reasonTextarea = document.getElementById('reason-write');
+	if (reasonTextarea && reasonTextarea.disabled) {
+		// 상세보기 모드에서는 열려있는 결재권한자 변경 div를 닫음
+		if (jeongyeoljaDiv && jeongyeoljaDiv.style.display !== 'none') {
+			jeongyeoljaDiv.style.display = 'none';
+		}
+		return;
+	}
+	
 	elemApproverIdNum = count;
 	let type = "change";
 	if (jeongyeoljaDiv) {
@@ -2217,8 +2344,8 @@ function approvalNo(count, text) {
 	                    type="button" class="btn btn-primary" 
 	                    data-count="${count}" 
 	                    onclick="applyDelegateChange(this)"
-						style="display:none;margin-left:5px;">
-	                전결자로 지정
+						style="display:none;margin-left:5px;background-color: #788393; color:#e9ecef;">
+	                결재권한자로 지정
 	            </button>
 	        `;
 		jeongyeoljaDiv.style.display = 'block';
@@ -2249,7 +2376,6 @@ function approverDivclose(buttonDiv, type, count) {
 
 	}
 
-
 	jeongyeoljaDiv.style.display = 'none';
 	//defalut 태그 닫기 버튼시 
 	if (buttonDiv.parentElement.id === "" || type === "defalut") {//결재권한자
@@ -2260,27 +2386,22 @@ function approverDivclose(buttonDiv, type, count) {
 		}
 		approverArr = approverArr.filter((ev) => ev !== count);
 		this.count = count - 1; //제거 라벨 카운트 원상복기
+		
+		// 카드 삭제 후 화살표 업데이트
+		updateArrows();
 	}
 	if (type === "close") { //전결자 변경 닫기버튼시
 		divElement.remove(); //자신의 div 제거
 		//전결자 변경시 결재권한자 배열에서 해당 결재권한자 제거
 		approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
+		
+		// 카드 삭제 후 화살표 업데이트
+		updateArrows();
 	}
 	if (approverArr.length === 0) {
 		this.count = 0;
 	}
 }
-
-//에디터-없앰
-// const editor = new toastui.Editor({
-// 	el: document.querySelector('#editor'),
-//   	height: '500px',
-//   	initialEditType: 'markdown',
-//   	previewStyle: 'vertical'
-// });
-
-// editor.getMarkdown();
-
 
 //모달 움직이게 하기
 const modalHeader = document.querySelector(".modal-header");

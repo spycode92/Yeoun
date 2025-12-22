@@ -62,12 +62,12 @@
 					</div>
 	           		<div class="d-flex justify-content-end">
 						 <div class="col-md-4 text-md-end">
-			             	<button type="button" class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#route-modal" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
-							<button id="modifyProcessRowBtn" class="btn btn-danger" type="button">삭제</button>
+			             	<button type="button" class="btn btn-success ms-1 btn-md-sm" data-bs-toggle="modal" data-bs-target="#route-modal" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
+							<button id="modifyProcessRowBtn" class="btn btn-danger btn-md-sm" type="button">삭제</button>
 			           	 </div>
 					</div>
 	             	<br>
-	             <div id="processGrid" style="display: grid;margin-right:10px;"></div>
+	             <div id="processGrid" style="display: grid;margin-right:5px;"></div>
 	           </div>
 	           <div class="tab-pane fade" id="navs-processCode-tab" role="tabpanel">
 	             	<h2>공정 코드 관리</h2>
@@ -88,11 +88,11 @@
 			           		<button type="button" class="btn btn-primary" onclick="processCodeGridAllSearch()" style="margin-left:5px;">조회</button>
 					</div>
 				 	<div class="d-flex justify-content-end" style="margin:10px;">
-			            <button id="addProcessCodeRowBtn" class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
-						<button id="saveProcessCodeRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  			<button id="modifyProcessCodeRowBtn" class="btn btn-danger" type="button">삭제</button>
+			            <button id="addProcessCodeRowBtn" class="btn btn-primary btn-md-sm" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
+						<button id="saveProcessCodeRowBtn" class="btn btn-success btn-md-sm" type="button" style="margin-right:5px;">저장</button>
+			  			<button id="modifyProcessCodeRowBtn" class="btn btn-danger btn-md-sm" type="button">신규행삭제</button>
 			        </div>
-	  				<div id="processCodeGrid" style="display: grid;margin-right:10px;"></div>
+	  				<div id="processCodeGrid" style="display: grid;margin-right:5px;"></div>
 	           </div>
 	         </div>
        	</div>
@@ -188,8 +188,8 @@
 	        <div id="processStepGrid" style="display: grid;margin-right:5px;"></div>
 	      </div>
 	      <div class="modal-footer">
-	        <button id="saveRouteBtn" class="btn btn-primary btn-sm" type="button">저장</button>
-	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+	        <button id="saveRouteBtn" class="btn btn-primary btn-md-sm" type="button">저장</button>
+	        <button class="btn btn-secondary btn-md-sm" data-bs-dismiss="modal">닫기</button>
 	      </div>
 	    </div>
 	  </div>

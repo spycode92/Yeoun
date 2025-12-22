@@ -69,6 +69,7 @@
 		        ) LIKE #{searchKeyword}
 		        OR LOWER(h.EMP_ID) LIKE #{searchKeyword}
 		        OR LOWER(e.EMP_NAME) LIKE #{searchKeyword}
+		        OR LOWER(h.REASON) LIKE #{searchKeyword}
             )
         </if>
 

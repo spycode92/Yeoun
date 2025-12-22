@@ -585,37 +585,37 @@ a:hover {
 
 .bg-navbar-theme {
   background-color: #fff !important;
-  color: #697a8d;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-brand,
 .bg-navbar-theme .navbar-brand a {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-brand:hover, .bg-navbar-theme .navbar-brand:focus,
 .bg-navbar-theme .navbar-brand a:hover,
 .bg-navbar-theme .navbar-brand a:focus {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-search-wrapper .navbar-search-icon,
 .bg-navbar-theme .navbar-search-wrapper .search-input {
-  color: #697a8d;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .search-input-wrapper .search-input,
 .bg-navbar-theme .search-input-wrapper .search-toggler {
   background-color: #fff !important;
-  color: #697a8d;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-nav > .nav-link,
 .bg-navbar-theme .navbar-nav > .nav-item > .nav-link,
 .bg-navbar-theme .navbar-nav > .nav > .nav-item > .nav-link {
-  color: #697a8d;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-nav > .nav-link:hover, .bg-navbar-theme .navbar-nav > .nav-link:focus,
 .bg-navbar-theme .navbar-nav > .nav-item > .nav-link:hover,
 .bg-navbar-theme .navbar-nav > .nav-item > .nav-link:focus,
 .bg-navbar-theme .navbar-nav > .nav > .nav-item > .nav-link:hover,
 .bg-navbar-theme .navbar-nav > .nav > .nav-item > .nav-link:focus {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-nav > .nav-link.disabled,
 .bg-navbar-theme .navbar-nav > .nav-item > .nav-link.disabled,
@@ -626,7 +626,7 @@ a:hover {
 .bg-navbar-theme .navbar-nav .active > .nav-link,
 .bg-navbar-theme .navbar-nav .nav-link.show,
 .bg-navbar-theme .navbar-nav .nav-link.active {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-toggler {
   color: #697a8d;
@@ -639,10 +639,10 @@ a:hover {
   color: #697a8d;
 }
 .bg-navbar-theme .navbar-text a {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme .navbar-text a:hover, .bg-navbar-theme .navbar-text a:focus {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-navbar-theme hr {
   border-color: rgba(86, 106, 127, 0.075);
@@ -681,12 +681,12 @@ a:hover {
 .bg-menu-theme .menu-horizontal-prev:focus,
 .bg-menu-theme .menu-horizontal-next:hover,
 .bg-menu-theme .menu-horizontal-next:focus {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-menu-theme .menu-link.active,
 .bg-menu-theme .menu-horizontal-prev.active,
 .bg-menu-theme .menu-horizontal-next.active {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-menu-theme .menu-item.disabled .menu-link,
 .bg-menu-theme .menu-horizontal-prev.disabled,
@@ -695,10 +695,10 @@ a:hover {
 }
 .bg-menu-theme .menu-item.open:not(.menu-item-closing) > .menu-toggle,
 .bg-menu-theme .menu-item.active > .menu-link {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) {
-  /*background-color: #fff;*/*데쉬보드 메뉴바 활성화 색상*/
+  /*background-color: #fff;*//*데쉬보드 메뉴바 활성화 색상*/
 }
 .bg-menu-theme.menu-horizontal .menu-sub > .menu-item.active > .menu-link:not(.menu-toggle) {
   background-color: white;
@@ -715,7 +715,7 @@ a:hover {
   background: linear-gradient(#fff 41%, rgba(255, 255, 255, 0.11) 95%, rgba(255, 255, 255, 0));
 }
 .bg-menu-theme .menu-text {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-menu-theme .menu-header {
   color: #8f9baa;
@@ -735,7 +735,7 @@ a:hover {
   background-color: white;
 }
 .bg-menu-theme .menu-inner > .menu-item.open .menu-item.active > .menu-link::before {
-  background-color: #566a7f;
+  background-color: var(--bs-body-color);
 }
 .bg-menu-theme .menu-inner > .menu-item.open .menu-item.open > .menu-toggle::before,
 .bg-menu-theme .menu-inner > .menu-item.open .menu-item.active > .menu-link::before {
@@ -800,19 +800,19 @@ html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner .menu-item .menu-lin
   color: #697a8d;
 }
 .bg-footer-theme .footer-link:hover, .bg-footer-theme .footer-link:focus {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-footer-theme .footer-link.disabled {
   color: #a1abb8 !important;
 }
 .bg-footer-theme .footer-text {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-footer-theme .show > .footer-link,
 .bg-footer-theme .active > .footer-link,
 .bg-footer-theme .footer-link.show,
 .bg-footer-theme .footer-link.active {
-  color: #566a7f;
+  color: var(--bs-body-color);
 }
 .bg-footer-theme hr {
   border-color: rgba(86, 106, 127, 0.0768713725);

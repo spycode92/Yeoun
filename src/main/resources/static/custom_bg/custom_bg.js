@@ -1,38 +1,50 @@
-/*home 화면 ui 테마변경을 위한 js 파일*/
+/* home 화면 ui 테마변경 js */
 
 'use strict';
 
+const THEMES = ['theme-dark', 'theme-green'];
 
-const mainHeader = document.getElementById('layout-navbar');
-
-document.addEventListener("DOMContentLoaded", function () {
-  const savedTheme = localStorage.getItem("color-theme");
-  document.documentElement.setAttribute("color-theme", savedTheme);
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    setTheme(savedTheme);
+  }
 });
 
-const lightBtn = document.getElementById('light-btn');
-const darkBtn = document.getElementById('dark-btn');
-const greenBtn = document.getElementById('green-btn');
-const currentTheme = document.documentElement.getAttribute("color-theme");
+function setTheme(theme) {
+  const html = document.documentElement;
 
-if(lightBtn && darkBtn && greenBtn) {
-  
-  lightBtn.addEventListener('click', () => {      
-    document.documentElement.setAttribute("color-theme", "light");
-    localStorage.setItem("color-theme", "light");
-  });
+  // 기존 테마 제거
+  THEMES.forEach(t => html.classList.remove(t));
 
-  darkBtn.addEventListener('click', () => {      
-    document.documentElement.setAttribute("color-theme", "dark");
-    localStorage.setItem("color-theme", "dark");
-  });
+  // theme가 있으면 적용 (없으면 :root 상태)
+  if (theme) {
+    html.classList.add(theme);
+  }
 
-  greenBtn.addEventListener('click', () => {      
-    document.documentElement.setAttribute("color-theme", "green");
-    localStorage.setItem("color-theme", "green");
-  });
-   
+  localStorage.setItem('theme', theme || '');
 }
+
+const lightBtn = document.getElementById('light-btn');
+const darkBtn  = document.getElementById('dark-btn');
+const greenBtn = document.getElementById('green-btn');
+
+if (lightBtn && darkBtn && greenBtn) {
+
+  // 초기 테마 (:root)
+  lightBtn.addEventListener('click', () => {
+    setTheme('');
+  });
+
+  darkBtn.addEventListener('click', () => {
+    setTheme('theme-dark');
+  });
+
+  greenBtn.addEventListener('click', () => {
+    setTheme('theme-green');
+  });
+}
+
 
 
 

@@ -45,10 +45,10 @@
 		<button type="button" class="btn btn-primary" onclick="qcItemGridAllSearch()" style="margin-left:5px;">조회</button>
 	</div>
 	 <div class="d-flex justify-content-end align-items-center mb-3">
-        <button id="qcItemRegistBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qcItem-modal">
+        <button id="qcItemRegistBtn" class="btn btn-primary btn-md-sm" data-bs-toggle="modal" data-bs-target="#qcItem-modal">
           + 항목 등록
         </button>
-        <button id="deleteQcRowBtn" class="btn btn-danger" style="margin:5px;" type="button">삭제</button>
+        <button id="deleteQcRowBtn" class="btn btn-danger btn-md-sm" style="margin:5px;" type="button">비활성</button>
                 
       </div>
 		<div id="qcItemGrid" style="display: grid;"></div>
@@ -61,7 +61,9 @@
 		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 		      </div>
 			  <form class="row g-2 align-items-center" th:action="@{/masterData/qcItem/save}" method="post" role="search">
-		      <div class="modal-body small-text">
+			    <input type="hidden" id="modalNewModify" name="mode" value="">
+
+			  <div class="modal-body small-text">
 		        <div class="row g-3">
 		          <div class="col-md-4">
 		            <label class="form-label required">QC 항목ID</label>
@@ -75,36 +77,24 @@
 		
 		          <div class="col-md-4">
 		            <label class="form-label required">대상구분</label>
-					<select  id="targetType" class="form-select form-select-sm">
+					<select id="targetType" name="targetType" class="form-select form-select-sm">
 						<option value="" selected disabled hidden>대상구분</option>
 						<option th:each="item : ${targetTypeList}" 
 								th:value="${item.value}" 
-								th:text="${item.text}"
-								name="value">
+								th:text="${item.text}">
 						</option>
 					</select>
-		            <!-- <select id="targetType" name="targetType" class="form-select form-select-sm">
-		              <option value="FINISHED_QC">완제품</option>
-		              <option value="RAW">원재료</option>
-		              <option value="PKG">포장재</option>
-		            </select> -->
 		          </div>
-		
+
 		          <div class="col-md-3">
 		            <label class="form-label">단위</label>
-					<select  id="unit" class="form-select form-select-sm">
+					<select id="unit" name="unit" class="form-select form-select-sm">
 						<option value="" selected disabled hidden>단위</option>
 						<option th:each="item : ${unitTypeList}" 
 								th:value="${item.value}" 
-								th:text="${item.text}"
-								name="value">
+								th:text="${item.text}">
 						</option>
 					</select>
-		            <!-- <select id="unit" name="unit" class="form-select form-select-sm">
-		              <option value="pH">pH</option>
-		              <option value="cps">cps</option>
-		              <option value="ml">ml</option>
-		            </select> -->
 		          </div>
 		
 		          <div class="col-md-9">
@@ -130,10 +120,6 @@
 		          <div class="col-md-3">
 		            <label class="form-label">사용여부</label>
 		            <input type="text" id="useYn" name="useYn" class="form-control form-control-sm"  readonly/>
-					<!-- <select id="useYn" name="useYn" class="form-select form-select-sm" required>
-		              <option value="Y">Y</option>
-		              <option value="N">N</option>
-		            </select> -->
 		          </div>
 		         <div id="userAndDate" style="margin-right:5px;">
 			          <div class="col-md-3 me-1">

@@ -1,6 +1,7 @@
 package com.yeoun.masterData.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.MaterialMstRepository;
 import com.yeoun.masterData.repository.QcItemRepository;
@@ -47,48 +49,136 @@ public class QcItemService {
 	}
 	//품질 항목 기준 저장
 	@Transactional
-	public QcItem saveQcItem(String empId,QcItem qcItem) {
-		log.info("qcItem-------------------------->",qcItem);
-		Optional<QcItem> qc = qcItemRepository.findById(qcItem.getQcItemId());
+	public String saveQcItem(String empId, Map<String,Object> param) {
+		log.info("qcItem param: {}", param);
 		
-		if(qc.isPresent()) {// 수정시 저장
-	        QcItem existingItem = qc.get();
+		// null 체크
+		if(param == null || param.get("mode") == null || param.get("qcItemId") == null) {
+			return "error: 필수 데이터가 누락되었습니다.";
+		}
+		
+		String mode = param.get("mode").toString().trim();
+		String qcItemId = param.get("qcItemId").toString().trim();
+		
+		// 빈 문자열 체크
+		if(mode.isEmpty() || qcItemId.isEmpty()) {
+			return "error: mode 또는 qcItemId가 비어있습니다.";
+		}
 
-	        // 수정 시, 기존의 CreatedId/CreatedDate 유지
-	        qcItem.setCreatedId(existingItem.getCreatedId());
-	        qcItem.setCreatedDate(existingItem.getCreatedDate());
-	        
-	        // 3. UpdatedId와 UpdatedDate 설정
-	        qcItem.setUpdatedId(empId);
-	        qcItem.setUpdatedDate(LocalDate.now());
-	        
-	    } else {
-	        
-			qcItem.setUseYn("Y");
-	        //신규 등록 시, CreatedId와 CreatedDate 설정
-	        qcItem.setCreatedId(empId);
-	        qcItem.setCreatedDate(LocalDate.now());
-	        
-	    }
-		return qcItemRepository.save(qcItem);		
+		try {
+			QcItem qcItem = new QcItem();;
+			
+			if("new".equals(mode)) {
+				log.info("------------------new----------------------------------");
+				
+				// 신규 등록 - 중복검사
+				if(qcItemRepository.existsById(qcItemId)) {
+					return "error: 중복되는 QC 항목 ID가 이미 존재합니다. (qcItemId=" + qcItemId + ")";
+				}
+				
+				qcItem.setQcItemId(qcItemId);
+				qcItem.setCreatedId(empId);
+				qcItem.setCreatedDate(LocalDate.now());
+				qcItem.setUseYn("Y");
+				
+			} else if("modify".equals(mode)) {
+				log.info("------------------modify----------------------------------");
+
+				// 수정 - 기존 데이터 가져와서 수정
+				Optional<QcItem> existingItem = qcItemRepository.findById(qcItemId);
+				if(!existingItem.isPresent()) {
+					return "error: 수정할 QC 항목을 찾을 수 없습니다.";
+				}
+				
+				qcItem = existingItem.get();
+				// 수정 정보 설정
+				qcItem.setUpdatedId(empId);
+				qcItem.setUpdatedDate(LocalDate.now());
+				
+			} else {
+				return "error: 잘못된 모드입니다. mode=" + mode;
+			}
+
+
+			// 필드 설정 (null 체크만, 빈 값도 저장)
+			if(param.get("itemName") != null) {
+				qcItem.setItemName(param.get("itemName").toString());
+			}
+			if(param.get("targetType") != null) {
+				qcItem.setTargetType(param.get("targetType").toString());
+			}
+			if(param.get("unit") != null) {
+				qcItem.setUnit(param.get("unit").toString());
+			}
+			if(param.get("stdText") != null) {
+				qcItem.setStdText(param.get("stdText").toString());
+			}
+			
+			// minValue 처리
+			if(param.get("minValue") != null && !param.get("minValue").toString().trim().isEmpty()) {
+				try {
+					qcItem.setMinValue(new java.math.BigDecimal(param.get("minValue").toString()));
+				} catch(NumberFormatException e) {
+					qcItem.setMinValue(null);
+				}
+			} else {
+				qcItem.setMinValue(null);
+			}
+			
+			// maxValue 처리
+			if(param.get("maxValue") != null && !param.get("maxValue").toString().trim().isEmpty()) {
+				try {
+					qcItem.setMaxValue(new java.math.BigDecimal(param.get("maxValue").toString()));
+				} catch(NumberFormatException e) {
+					qcItem.setMaxValue(null);
+				}
+			} else {
+				qcItem.setMaxValue(null);
+			}
+			
+			// sortOrder 처리 (빈 값이면 기본값 1)
+			if(param.get("sortOrder") != null && !param.get("sortOrder").toString().trim().isEmpty()) {
+				try {
+					qcItem.setSortOrder(Integer.parseInt(param.get("sortOrder").toString()));
+				} catch(NumberFormatException e) {
+					qcItem.setSortOrder(1);
+				}
+			} else {
+				qcItem.setSortOrder(1);
+			}
+		
+		
+			// DB 저장
+			qcItemRepository.save(qcItem);
+			return "success";
+			
+		} catch(Exception e) {
+			log.error("saveQcItem error", e);
+			return "error: " + e.getMessage();
+		}
 	}
-	// 품질 항목 기준 삭제
+	// 품질 항목 기준 삭제 (사용여부 N으로 변경)
 	@Transactional
 	public String deleteQcItem(List<String> qcItemIds) {
-		log.info("qcItemRepository------------->{}", qcItemIds);
+		log.info("qcItemRepository deleteQcItem------------->{}", qcItemIds);
 		try {
-			// 기본 삭제 수행
-			qcItemRepository.deleteAllById(qcItemIds);
-			// 즉시 flush 하여 DB 제약(FOREIGN KEY 등) 오류가 있으면 이 시점에 발생하도록 함
+			// 사용여부를 'N'으로 변경 (soft delete)
+			for(String qcItemId : qcItemIds) {
+				Optional<QcItem> optionalQcItem = qcItemRepository.findById(qcItemId);
+				if(optionalQcItem.isPresent()) {
+					QcItem qcItem = optionalQcItem.get();
+					qcItem.setUseYn("N");
+					qcItem.setUpdatedDate(LocalDate.now());
+					qcItemRepository.save(qcItem);
+				} else {
+					log.warn("삭제하려는 QC 항목을 찾을 수 없습니다: {}", qcItemId);
+				}
+			}
+			// 즉시 flush 하여 DB 업데이트 확실히 적용
 			qcItemRepository.flush();
 			return "success";
-		} catch (DataIntegrityViolationException dive) {
-			// 제약 위반은 구체적으로 로깅하고 사용자에게 명확한 메시지를 반환
-			log.error("QC Item delete constraint violation", dive);
-			String causeMsg = dive.getMostSpecificCause() != null ? dive.getMostSpecificCause().getMessage() : dive.getMessage();
-			return "error: constraint violation - " + (causeMsg != null ? causeMsg : "referential integrity");
 		} catch (Exception e) {
-			log.error("qcItemRepository error", e);
+			log.error("deleteQcItem error", e);
 			return "error: " + e.getMessage();
 		}
 	}

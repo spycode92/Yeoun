@@ -59,8 +59,14 @@ public class SafetyStockService {
 				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
-					SafetyStock s = mapToSafetyStock(row);
-					safetyStockRepository.save(s);
+						SafetyStock s = mapToSafetyStock(row);
+						// 중복 검사: itemId가 비어있지 않으면 기존 레코드 존재 여부 확인
+						if (s.getItemId() != null && !s.getItemId().isEmpty()) {
+							if (safetyStockRepository.existsById(s.getItemId())) {
+								throw new IllegalStateException("중복되는 itemId가 이미 존재합니다. (itemId=" + s.getItemId() + ")");
+							}
+						}
+						safetyStockRepository.save(s);
 				}
 			}
 			
@@ -92,6 +98,11 @@ public class SafetyStockService {
 						}
 						// itemId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
 						SafetyStock s = mapToSafetyStock(row);
+						if (s.getItemId() != null && !s.getItemId().isEmpty()) {
+							if (safetyStockRepository.existsById(s.getItemId())) {
+								throw new IllegalStateException("중복되는 itemId가 이미 존재합니다. (itemId=" + s.getItemId() + ")");
+							}
+						}
 						safetyStockRepository.save(s);
 					}
 			}
@@ -99,7 +110,6 @@ public class SafetyStockService {
 			}
 			return "success";
 		} catch (Exception e) {
-			log.error("saveProductMst error", e);
 			return "error: " + e.getMessage();
 		}
 	}

@@ -49,8 +49,7 @@ public interface QcItemRepository extends JpaRepository<QcItem, String> {
 			ON
 			    q.updated_id = eu.emp_id
         WHERE (?1 IS NULL OR ?1 = '' OR QC_ITEM_ID LIKE '%' || ?1 || '%')
-        AND (USE_YN = 'Y')
-        ORDER BY SORT_ORDER ASC, QC_ITEM_ID ASC
+        ORDER BY USE_YN DESC,SORT_ORDER ASC, QC_ITEM_ID ASC
         """, nativeQuery = true)
     List<Map<String, Object>> findByQcItemList(String qcItemId);
 	// 대상구분 + 사용여부 기준으로 항목 조회

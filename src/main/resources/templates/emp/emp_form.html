@@ -6,10 +6,10 @@
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	
 	<div class="d-flex justify-content-between align-items-center mb-3">
-		<h2 th:text="${mode == 'edit'} ? '인사 정보 수정' : '인사 신규 등록'">
-		  인사 신규 등록
+		<h2 th:text="${mode == 'create'} ? '사원 신규 등록' : ${pageTitle}">
+		  내 정보 관리
 		</h2>
-		
+
 		<!-- 수정 모드 + 관리자일 때만 보이게 -->
 	    <form th:if="${mode == 'edit'} 
 	               and ${#authorization.expr('hasRole(''ROLE_SYS_ADMIN'') or hasRole(''ROLE_HR_ADMIN'')')}"
@@ -103,8 +103,14 @@
   					<div class="col-12 col-md-6 text-center">
     				  <label class="form-label">사진 미리보기</label>
     				  <div class="mt-1">
-      					<img id="photoPreview" th:src="${empDTO.photoFileId != null} ? @{'/files/download/' + ${empDTO.photoFileId}} : @{/img/default-profile.png}"
-        						 alt="프로필 사진" class="rounded shadow-sm" style="width:140px; height:140px; object-fit:cover;">
+						<img id="photoPreview"
+						     th:src="${empDTO.photoFileId != null}
+						              ? @{/files/download/{id}(id=${empDTO.photoFileId})}
+						              : @{/img/default-profile.png}"
+						     onerror="this.onerror=null; this.src='/img/default-profile.png';"
+						     alt="프로필 사진"
+						     class="rounded shadow-sm"
+						     style="width:140px; height:140px; object-fit:cover;">
     				  </div>
   					</div>
 				  </div>
@@ -325,18 +331,8 @@
 		</div>	
 	    <!-- 버튼 -->
 	    <div class="d-flex justify-content-end gap-2">
-	    
-		  <!-- 관리자 / 인사 / 부서장 : 사원 목록으로 -->
-		  <a sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN','DEPT_MANAGER')"
-		     href="/emp" class="btn btn-outline-secondary">
-		    취소
-		  </a>
-		
-		  <!-- 일반 사원 : 메인으로 (권한 없음 = 이쪽으로 옴) -->
-		  <a sec:authorize="isAuthenticated() and !hasAnyRole('SYS_ADMIN','HR_ADMIN','DEPT_MANAGER')"
-		     href="/main" class="btn btn-outline-secondary">
-		    취소
-		  </a>
+			<a th:if="${isMyPage}" href="/main" class="btn btn-outline-secondary">취소</a>
+			<a th:unless="${isMyPage}" href="/emp" class="btn btn-outline-secondary">취소</a>
 	      <button type="submit" class="btn btn-primary" th:text="${mode == 'edit'} ? '수정 완료' : '저장'">저장</button>
 	    </div>
 	  </form>
