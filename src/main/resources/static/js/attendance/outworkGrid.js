@@ -27,7 +27,8 @@ const grid = new tui.Grid({
 	pageOptions: { 
 		useClient: true,
 		perPage: 10 
-	}
+	},
+	
 });
 
 // 데이터 가져오기
@@ -42,9 +43,9 @@ async function loadOutworkList(startDate, endDate) {
 		
 		let data = await res.json();
 		
-		console.log(data);
 		
 		grid.resetData(data);
+		grid.sort('accessDate', true); 
 	} catch(error) {
 		console.error(error);
 		alert("데이터를 불러오는 중 오류가 발생했습니다.");	
