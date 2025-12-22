@@ -16,11 +16,18 @@
 			<div class="modal-body">
 				<form id="notice-write-form" th:action="@{/notices}" method="post" enctype="multipart/form-data">
 					<div class="mb-3" style="display:flex; gap:8px;">
-					    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
-					    <label class="form-check-label" for="fixedCheck">고정</label>
-					    <input class="form-check-input" type="checkbox" name="noticeYN" value="Y">
+						<div style="width:90%;">
+							<label for="notice-title-write" class="form-label">제목</label>
+						    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
+						</div>
+						<div>
+						    <label class="form-label" for="fixedCheck">고정</label>
+						    <input class="form-control" type="checkbox" name="noticeYN" value="Y" id="fixedCheck" 
+						    	style="padding-bottom: 20px; padding-top: 10px;">
+						</div>
 					</div>
 				    <div class="mb-3">
+				    	<label for="notice-content-write" class="form-label">내용</label>
 				        <textarea id="notice-content-write" name="noticeContent" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
 				    </div>
 				    <div>

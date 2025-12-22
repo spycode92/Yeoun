@@ -346,7 +346,7 @@ public class ApprovalDocService {
 				handleAfterFinalApproval(approvalDoc);
 
 				// 연차신청서 처리
-				if ("연차신청서".equals(approvalDoc.getFormType())) {
+				if ("연차신청서".equals(approvalDoc.getFormType()) || "반차신청서".equals(approvalDoc.getFormType())) {
 					leaveService.createAnnualLeave(approvalDoc.getApprovalId());
 				}
 
