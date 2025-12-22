@@ -115,6 +115,7 @@
 		    s.END_DATE AS END_TIME,
 		    s.WORK_ID,
 		    o.LINE_ID,
+		    o.PLAN_QTY,
 		    l.LINE_NAME,
 		    pm.PRD_NAME AS PRODUCT_NAME
 		FROM WORK_SCHEDULE s

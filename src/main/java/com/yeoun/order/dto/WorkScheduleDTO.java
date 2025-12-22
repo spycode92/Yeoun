@@ -24,6 +24,7 @@ public class WorkScheduleDTO {
 	private String lineId;
 	private String lineName;
 	private String productName;
+	private Integer planQty;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime startTime;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

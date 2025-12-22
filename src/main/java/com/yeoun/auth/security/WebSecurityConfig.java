@@ -92,7 +92,7 @@ public class WebSecurityConfig {
 
                 	// 급여 관리자 페이지
                 	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
-                   	.hasAnyRole("SYS_ADMIN")
+                   	.hasAnyRole("SYS_ADMIN", "PAYROLL_ADMIN")
                     	
                     	
 	                // 전자결재 설정(양식/결재선 관리 등)

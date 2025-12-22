@@ -115,19 +115,19 @@
 
                 <ul class="menu-sub">
                     <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
-                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'PAYROLL_ADMIN')">
                         <a th:href="@{/pay/rule}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">기준정보</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'PAYROLL_ADMIN')">
                         <a th:href="@{/pay/calc/main}" class="menu-link">
                             <div data-i18n="Menu2" class="menu-link-sub">급여계산</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'PAYROLL_ADMIN')">
                         <a th:href="@{/pay/history}" class="menu-link">
                             <div data-i18n="Menu3" class="menu-link-sub">급여조회</div>
                         </a>
@@ -141,6 +141,31 @@
                     </li>
 
                 </ul>
+            </li>
+                        <li class="menu-item" sec:authorize="hasAnyRole('SALES_ADMIN','SYS_ADMIN')">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></i>
+                    <div data-i18n="Sales management">영업관리</div>
+                </a>
+                <ul class="menu-sub">
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/sales/client}" class="menu-link">
+	                        <div data-i18n="Menu1" class="menu-link-sub">거래처목록</div>
+	                     </a>
+	                </li>
+                
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/sales/orders}" class="menu-link">
+	                        <div data-i18n="Menu2" class="menu-link-sub">수주관리</div>
+	                     </a>
+	                </li>
+                
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                    <a th:href="@{/sales/shipment}" class="menu-link">
+	                        <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
+	                    </a>
+	                </li>
+	            </ul>
             </li>
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">MES</span>
@@ -222,33 +247,6 @@
                     </li>
                 </ul>
             </li>
-              
-            <li class="menu-item" sec:authorize="hasAnyRole('SALES_ADMIN','SYS_ADMIN')">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></i>
-                    <div data-i18n="Sales management">영업관리</div>
-                </a>
-                <ul class="menu-sub">
-	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                     <a th:href="@{/sales/client}" class="menu-link">
-	                        <div data-i18n="Menu1" class="menu-link-sub">거래처목록</div>
-	                     </a>
-	                </li>
-                
-	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                     <a th:href="@{/sales/orders}" class="menu-link">
-	                        <div data-i18n="Menu2" class="menu-link-sub">수주관리</div>
-	                     </a>
-	                </li>
-                
-	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                    <a th:href="@{/sales/shipment}" class="menu-link">
-	                        <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
-	                    </a>
-	                </li>
-	            </ul>
-            </li>
-
             <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg></i>
@@ -377,15 +375,15 @@
                     <div data-i18n="Auth">권한 관리</div>
                 </a>
             </li>
-            <li class="menu-header small text-uppercase" sec:authorize="hasAnyRole('SYS_ADMIN')">
-                <span class="menu-header-text">Setting</span>
-            </li>
-            <li class="menu-item">
-                <a href="/setting/setting_doc" class="menu-link">
-                    <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4"/></svg></i>
-                    <div data-i18n="Setting" class="menu-link-sub">Setting</div>
-                </a>
-            </li>
+<!--             <li class="menu-header small text-uppercase" sec:authorize="hasAnyRole('SYS_ADMIN')"> -->
+<!--                 <span class="menu-header-text">Setting</span> -->
+<!--             </li> -->
+<!--             <li class="menu-item"> -->
+<!--                 <a href="/setting/setting_doc" class="menu-link"> -->
+<!--                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4"/></svg></i> -->
+<!--                     <div data-i18n="Setting" class="menu-link-sub">Setting</div> -->
+<!--                 </a> -->
+<!--             </li> -->
         </ul>
     </aside>
     <script>

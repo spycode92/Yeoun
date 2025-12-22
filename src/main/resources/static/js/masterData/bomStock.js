@@ -231,7 +231,7 @@ const grid2 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',filter: "select"
+	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',filter: "select",editor:"text"
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',filter: "select"

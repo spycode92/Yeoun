@@ -21,6 +21,7 @@
 			JOIN PROD_EQUIP pe ON o.LINE_ID = pe.LINE_ID
 				AND e.EQUIP_ID = pe.EQUIP_CODE
 		WHERE p.STATUS != 'READY'
+			AND p.STATUS != 'SKIPPED'
 		<if test="equipment != null">
 			AND e.EQUIP_ID = #{equipment}
 		</if>
