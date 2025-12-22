@@ -35,7 +35,7 @@
             <div th:text="${rootDetail.startDate}">2025-01-02</div>
           </div>
 
-          <div class="mb-3">
+          <div class="mb-6">
             <div class="text-muted small">라우트</div>
             <div th:text="${rootDetail.routeId}">RT-SC2501-5G</div>
             <div class="text-muted" th:text="${rootDetail.routeSteps}">
@@ -78,33 +78,6 @@
           </div>
         </div>
         
-        <div class="mb-3">
-		  <div class="text-muted small">출하 여부</div>
-		
-		  <span class="badge bg-light text-dark"
-		        th:if="${rootDetail.lotStatusLabel == '폐기'}">해당없음</span>
-		
-		  <span class="badge bg-success"
-		        th:if="${rootDetail.lotStatusLabel != '폐기' and rootDetail.shippedYn == 'Y'}">출하완료</span>
-		
-		  <span class="badge bg-secondary"
-		        th:if="${rootDetail.lotStatusLabel != '폐기' and rootDetail.shippedYn != 'Y'}">미출하</span>
-		</div>
-
-		<!-- 출하일 / 출하수량은 출하완료일 때만 보여주기 -->
-		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
-		  <div class="text-muted small">출하일자</div>
-		  <div th:text="${rootDetail.shippedAt != null ? #temporals.format(rootDetail.shippedAt, 'yyyy-MM-dd') : '-'}">-</div>
-		</div>
-		
-		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
-		  <div class="text-muted small">출하수량</div>
-		  <div>
-		    <span th:text="${rootDetail.shippedQty != null ? rootDetail.shippedQty : '-'}">-</span> EA
-		  </div>
-		</div>
-      </div>
-
       <!-- 공정 상세 패널 -->
       <div id="processDetailPanel" class="mt-4 p-3 border rounded bg-light" style="display:none;">
       
@@ -169,282 +142,224 @@
         </div>
       </div>
 
-      <!-- 자재 상세 패널 -->
-      <div id="materialDetailPanel" class="mt-4 p-3 border rounded bg-light" style="display:none;">
-        <h6 class="fw-semibold mb-3">자재 상세 정보</h6>
+      <!-- 자재 상세 패널 (PRODUCT 모드) -->
+		<div id="materialDetailPanel" class="mt-4 p-3 border rounded bg-light" style="display:none;">
+		  <h6 class="fw-semibold mb-3">자재 LOT 상세</h6>
+		
+		  <!-- LOT 기본 정보 -->
+		  <div class="row gx-4">
+		    <div class="col-sm-6">
+		      <div class="mb-3">
+		        <div class="text-muted small">LOT 코드</div>
+		        <div id="md-lotNo" class="fw-semibold">-</div>
+		      </div>
+		
+		      <div class="mb-3">
+		        <div class="text-muted small">자재명</div>
+		        <div id="md-matName" class="fw-semibold">-</div>
+		      </div>
+		
+		      <div class="mb-3">
+		        <div class="text-muted small">자재 유형</div>
+		        <div id="md-matType">-</div>
+		      </div>
+		
+		      <div class="mb-3">
+		        <div class="text-muted small">LOT 상태</div>
+		        <div id="md-lotStatus">-</div>
+		      </div>
+		    </div>
+		
+		    <div class="col-sm-6">
+		      <div class="mb-3">
+		        <div class="text-muted small">자재 ID</div>
+		        <div id="md-matId">-</div>
+		      </div>
+		
+		      <div class="mb-3">
+		        <div class="text-muted small">단위</div>
+		        <div id="md-matUnit">-</div>
+		      </div>
+		
+		      <div class="mb-3">
+		        <div class="text-muted small">LOT 유형</div>
+		        <div id="md-lotType">-</div>
+		      </div>
+		
+		      <div class="mb-3">
+		        <div class="text-muted small">LOT 생성일</div>
+		        <div id="md-lotCreatedDate">-</div>
+		      </div>
+		    </div>
+		  </div>
+		
+		  <hr class="my-4"/>
+		
+		  <!-- 자재 관리 정보 -->
+		  <h6 class="fw-semibold mb-3">자재 관리 정보</h6>
+		  <div class="row gx-4">
+		    <div class="col-sm-6 mb-3">
+		      <div class="text-muted small">제조일</div>
+		      <div id="md-manufactureDate">-</div>
+		    </div>
+		
+		    <div class="col-sm-6 mb-3">
+		      <div class="text-muted small">유통기한</div>
+		      <div id="md-expirationDate">-</div>
+		    </div>
+		  </div>
+		
+		  <!-- 재고 상태 요약 -->
+		  <div class="mt-2">
+		    <span id="md-stockBadge" class="badge bg-secondary">-</span>
+		  </div>
+		
+		  <hr class="my-4"/>
+		
+		  <!-- PRODUCT 모드 핵심: 투입수량 -->
+		  <h6 class="fw-semibold mb-2">투입 정보</h6>
+		  <div class="mb-1">
+		    <div class="text-muted small">투입수량(완제품 기준)</div>
+		    <div class="fw-semibold">
+		      <span id="md-usedQty">-</span>
+		      <span id="md-usedUnit" class="text-muted small ms-1"></span>
+		    </div>
+		  </div>
+		</div>
 
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <div class="text-muted small">자재명</div>
-            <div id="md-matName" class="fw-semibold">-</div>
-
-            <div class="mt-2 text-muted small">자재ID</div>
-            <div id="md-matId">-</div>
-
-            <div class="mt-2 text-muted small">자재유형</div>
-            <div id="md-matType">-</div>
-
-            <div class="mt-2 text-muted small">단위</div>
-            <div id="md-matUnit">-</div>
-          </div>
-
-          <div class="col-sm-6">
-            <div class="text-muted small">LOT 번호</div>
-            <div id="md-lotNo" class="fw-semibold">-</div>
-
-            <div class="mt-2 text-muted small">LOT 유형</div>
-            <div id="md-lotType">-</div>
-
-            <div class="mt-2 text-muted small">LOT 상태</div>
-            <div id="md-lotStatus">-</div>
-
-            <div class="mt-2 text-muted small">LOT 생성일</div>
-            <div id="md-lotCreatedDate">-</div>
-          </div>
-        </div>
-
-        <hr class="my-3"/>
-
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <div class="text-muted small">투입수량(완제품 기준)</div>
-            <div id="md-usedQty">-</div>
-
-            <div class="mt-2 text-muted small">입고ID</div>
-            <div id="md-inboundId">-</div>
-
-            <div class="mt-2 text-muted small">입고수량</div>
-            <div id="md-inboundAmount">-</div>
-
-            <div class="mt-2 text-muted small">입고 위치</div>
-            <div id="md-inboundLocationId">-</div>
-          </div>
-
-          <div class="col-sm-6">
-            <div class="text-muted small">재고수량</div>
-            <div id="md-ivAmount">-</div>
-
-            <div class="mt-2 text-muted small">재고상태</div>
-            <div id="md-ivStatus">-</div>
-
-            <div class="mt-2 text-muted small">재고 위치</div>
-            <div id="md-inventoryLocationId">-</div>
-
-            <div class="mt-2 text-muted small">입고일</div>
-            <div id="md-ibDate">-</div>
-          </div>
-        </div>
-
-        <hr class="my-3"/>
-
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <div class="text-muted small">제조일</div>
-            <div id="md-manufactureDate">-</div>
-          </div>
-
-          <div class="col-sm-6">
-            <div class="text-muted small">유통기한</div>
-            <div id="md-expirationDate">-</div>
-          </div>
-        </div>
-
-        <hr class="my-3"/>
-
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <div class="text-muted small">거래처명</div>
-            <div id="md-clientName">-</div>
-
-            <div class="mt-2 text-muted small">거래처ID</div>
-            <div id="md-clientId">-</div>
-          </div>
-
-          <div class="col-sm-6">
-            <div class="text-muted small">사업자번호</div>
-            <div id="md-businessNo">-</div>
-
-            <div class="mt-2 text-muted small">연락처</div>
-            <div id="md-managerTel">-</div>
-          </div>
-        </div>
-      </div>
       
       
 
     </th:block>
 
-    <!-- ========== 자재 LOT ROOT 상세 (MATERIAL 모드) ========== -->
-    <th:block th:if="${materialDetail != null}">
-
-      <div class="row gx-4">
-
-        <!-- 왼쪽 컬럼 -->
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">LOT 코드</div>
-            <div class="fw-semibold" th:text="${materialDetail.lotNo}">LOT-...</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">자재명</div>
-            <div th:text="${materialDetail.matName}">자재명</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">자재 유형</div>
-            <div th:text="${materialDetail.matType}">원자재</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">LOT 상태</div>
-            <div th:text="${materialDetail.lotStatus}">정상</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">LOT 생성일</div>
-            <div th:text="${materialDetail.lotCreatedDate != null ? #temporals.format(materialDetail.lotCreatedDate, 'yyyy-MM-dd HH:mm') : '-'}">2025-01-01</div>
-          </div>
-        </div>
-
-        <!-- 오른쪽 컬럼 -->
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">자재ID</div>
-            <div th:text="${materialDetail.matId}">MAT-001</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">단위</div>
-            <div th:text="${materialDetail.matUnit}">g</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">LOT 유형</div>
-            <div th:text="${materialDetail.lotType}">원자재</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">재고 수량</div>
-            <div>
-              <span th:text="${materialDetail.ivAmount}">1000</span>
-              <span th:text="${materialDetail.matUnit}">g</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <hr class="my-4"/>
-
-      <!-- 입고 정보 -->
-      <h6 class="fw-semibold mb-3">입고 정보</h6>
-      <div class="row gx-4 mb-4">
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">입고ID</div>
-            <div th:text="${materialDetail.inboundId != null ? materialDetail.inboundId : '-'}">-</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">입고 수량</div>
-            <div>
-              <span th:text="${materialDetail.inboundAmount != null ? materialDetail.inboundAmount : '-'}">-</span>
-              <span th:text="${materialDetail.matUnit}">EA</span>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">입고 위치</div>
-            <div th:text="${materialDetail.inboundLocationId != null ? materialDetail.inboundLocationId : '-'}">-</div>
-          </div>
-        </div>
-
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">제조일</div>
-            <div th:text="${materialDetail.manufactureDate != null ? #temporals.format(materialDetail.manufactureDate, 'yyyy-MM-dd') : '-'}">-</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">유통기한</div>
-            <div th:text="${materialDetail.expirationDate != null ? #temporals.format(materialDetail.expirationDate, 'yyyy-MM-dd') : '-'}">-</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">입고일</div>
-            <div th:text="${materialDetail.ibDate != null ? #temporals.format(materialDetail.ibDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</div>
-          </div>
-        </div>
-      </div>
-
-      <hr class="my-4"/>
-
-      <!-- 재고 정보 -->
-      <h6 class="fw-semibold mb-3">재고 정보</h6>
-      <th:block th:if="${materialDetail.ivAmount != null}">
-	      <div class="row gx-4 mb-4">
-	        <div class="col-sm-6">
-	       	  <div class="mb-3">
-			    <div class="text-muted small">재고 수량</div>
-			    <div>
-			      <span th:text="${materialDetail.ivAmount != null ? materialDetail.ivAmount : '-'}">-</span>
-			      <span th:text="${materialDetail.matUnit}">EA</span>
-			    </div>
-			  </div>
+	<!-- ========== 자재 LOT ROOT 상세 (MATERIAL 모드) ========== -->
+	<th:block th:if="${materialDetail != null}">
 	
-	          <div class="mb-3">
-	            <div class="text-muted small">재고 위치</div>
-	            <div th:text="${materialDetail.inventoryLocationId != null ? materialDetail.inventoryLocationId : '-'}">-</div>
-	          </div>
-	        </div>
-	        
-	        <div class="col-sm-6">
-	          <div class="mb-3">
-	            <div class="text-muted small">재고 상태</div>
-	            <div th:text="${materialDetail.ivStatus != null ? materialDetail.ivStatus : '-'}">-</div>
-	          </div>
+	  <!-- ================= LOT 기본 정보 ================= -->
+	  <div class="row gx-4">
+	
+	    <!-- 왼쪽 -->
+	    <div class="col-sm-6">
+	      <div class="mb-3">
+	        <div class="text-muted small">LOT 코드</div>
+	        <div class="fw-semibold" th:text="${materialDetail.lotNo}">LOT-...</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">자재명</div>
+	        <div th:text="${materialDetail.matName}">자재명</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">자재 유형</div>
+	        <div th:text="${materialDetail.matType}">원자재</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">LOT 상태</div>
+	        <div th:text="${materialDetail.lotStatus}">정상</div>
+	      </div>
+	    </div>
+	
+	    <!-- 오른쪽 -->
+	    <div class="col-sm-6">
+	      <div class="mb-3">
+	        <div class="text-muted small">자재 ID</div>
+	        <div th:text="${materialDetail.matId}">MAT-001</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">단위</div>
+	        <div th:text="${materialDetail.matUnit}">g</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">LOT 유형</div>
+	        <div th:text="${materialDetail.lotType}">원자재</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">LOT 생성일</div>
+	        <div
+	          th:text="${materialDetail.lotCreatedDate != null
+	                    ? #temporals.format(materialDetail.lotCreatedDate, 'yyyy-MM-dd HH:mm')
+	                    : '-'}">
+	          2025-01-01
 	        </div>
 	      </div>
-      </th:block>
-      
-      <th:block th:if="${materialDetail.ivAmount == null}">
-		  <div class="d-flex align-items-center gap-2">
-			 <span class="badge bg-dark">소진완료</span>
-		  </div>
-	  </th:block>
+	    </div>
+	  </div>
+	
+	  <hr class="my-4"/>
+	
+	  <!-- ================= 자재 관리 정보 ================= -->
+	  <h6 class="fw-semibold mb-3">자재 관리 정보</h6>
+	
+	  <div class="row gx-4">
+	    <div class="col-sm-6 mb-3">
+	      <div class="text-muted small">제조일</div>
+	      <div
+	        th:text="${materialDetail.manufactureDate != null
+	                  ? #temporals.format(materialDetail.manufactureDate, 'yyyy-MM-dd')
+	                  : '-'}">
+	        -
+	      </div>
+	    </div>
+	
+	    <div class="col-sm-6 mb-3">
+	      <div class="text-muted small">유통기한</div>
+	      <div
+	        th:text="${materialDetail.expirationDate != null
+	                  ? #temporals.format(materialDetail.expirationDate, 'yyyy-MM-dd')
+	                  : '-'}">
+	        -
+	      </div>
+	    </div>
+	  </div>
+	
+	  <!-- 재고 상태 요약 -->
+	  <div class="mt-2">
+	    <th:block th:if="${materialDetail.ivAmount == null}">
+	      <span class="badge bg-secondary">소진 완료</span>
+	    </th:block>
+	    <th:block th:if="${materialDetail.ivAmount != null}">
+	      <span class="badge bg-success">재고 보유</span>
+	    </th:block>
+	  </div>
+	
+	  <hr class="my-4"/>
+	
+	  <!-- ================= 거래처 정보 ================= -->
+	  <h6 class="fw-semibold mb-3">거래처 정보</h6>
+	
+	  <div class="row gx-4">
+	    <div class="col-sm-6">
+	      <div class="mb-3">
+	        <div class="text-muted small">거래처명</div>
+	        <div th:text="${materialDetail.clientName ?: '-'}">-</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">거래처 ID</div>
+	        <div th:text="${materialDetail.clientId ?: '-'}">-</div>
+	      </div>
+	    </div>
+	
+	    <div class="col-sm-6">
+	      <div class="mb-3">
+	        <div class="text-muted small">사업자번호</div>
+	        <div th:text="${materialDetail.businessNo ?: '-'}">-</div>
+	      </div>
+	
+	      <div class="mb-3">
+	        <div class="text-muted small">연락처</div>
+	        <div th:text="${materialDetail.managerTel ?: '-'}">-</div>
+	      </div>
+	    </div>
+	  </div>
+	
+	</th:block>
 
-      <hr class="my-4"/>
-
-      <!-- 거래처 정보 -->
-      <h6 class="fw-semibold mb-3">거래처 정보</h6>
-      <div class="row gx-4">
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">거래처명</div>
-            <div th:text="${materialDetail.clientName != null ? materialDetail.clientName : '-'}">-</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">거래처ID</div>
-            <div th:text="${materialDetail.clientId != null ? materialDetail.clientId : '-'}">-</div>
-          </div>
-        </div>
-
-        <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">사업자번호</div>
-            <div th:text="${materialDetail.businessNo != null ? materialDetail.businessNo : '-'}">-</div>
-          </div>
-
-          <div class="mb-3">
-            <div class="text-muted small">연락처</div>
-            <div th:text="${materialDetail.managerTel != null ? materialDetail.managerTel : '-'}">-</div>
-          </div>
-        </div>
-      </div>
-
-    </th:block>
 
     <!-- 데이터 없을 때 -->
     <th:block th:if="${rootDetail == null && materialDetail == null}">

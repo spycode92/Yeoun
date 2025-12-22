@@ -407,38 +407,48 @@ async function loadMaterialDetail(outputLotNo, inputLotNo) {
   }
 }
 
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;                 
+  el.innerText = (value ?? "-");
+}
+
 function renderMaterialDetail(d) {
   showPanel("material");
 
-  document.getElementById("md-matName").innerText = d.matName || "-";
-  document.getElementById("md-matId").innerText = d.matId || "-";
-  document.getElementById("md-matType").innerText = d.matType || "-";
-  document.getElementById("md-matUnit").innerText = d.matUnit || "-";
+  // ===== LOT/자재 기본 =====
+  setText("md-matName", d.matName);
+  setText("md-matId", d.matId);
+  setText("md-matType", d.matType);
+  setText("md-matUnit", d.matUnit);
 
-  document.getElementById("md-lotNo").innerText = d.lotNo || "-";
-  document.getElementById("md-lotType").innerText = d.lotType || "-";
-  document.getElementById("md-lotStatus").innerText = d.lotStatus || "-";
-  document.getElementById("md-lotCreatedDate").innerText = formatDateTimeSec(d.lotCreatedDate);
+  setText("md-lotNo", d.lotNo);
+  setText("md-lotType", d.lotType);
+  setText("md-lotStatus", d.lotStatus);
+  setText("md-lotCreatedDate", formatDateTimeSec(d.lotCreatedDate));
 
-  document.getElementById("md-usedQty").innerText = (d.usedQty ?? "-");
+  // ===== 자재 관리 =====
+  setText("md-manufactureDate", formatDate(d.manufactureDate));
+  setText("md-expirationDate", formatDate(d.expirationDate));
 
-  document.getElementById("md-inboundId").innerText = d.inboundId || "-";
-  document.getElementById("md-inboundAmount").innerText = (d.inboundAmount ?? "-");
-  document.getElementById("md-inboundLocationId").innerText = d.inboundLocationId || "-";
+  // ===== 재고 배지 =====
+  const badge = document.getElementById("md-stockBadge");
+  if (badge) {
+    const amount = d.ivAmount; // 서버에서 ivAmount 주는 구조 유지
+    if (amount == null || amount === 0) {
+      badge.className = "badge bg-secondary";
+      badge.innerText = "소진 완료";
+    } else {
+      badge.className = "badge bg-success";
+      badge.innerText = "재고 보유";
+    }
+  }
 
-  document.getElementById("md-ivAmount").innerText = (d.ivAmount ?? "-");
-  document.getElementById("md-ivStatus").innerText = d.ivStatus || "-";
-  document.getElementById("md-inventoryLocationId").innerText = d.inventoryLocationId || "-";
-  document.getElementById("md-ibDate").innerText = formatDateTimeSec(d.ibDate);
-
-  document.getElementById("md-manufactureDate").innerText = formatDate(d.manufactureDate);
-  document.getElementById("md-expirationDate").innerText = formatDate(d.expirationDate);
-
-  document.getElementById("md-clientName").innerText = d.clientName || "-";
-  document.getElementById("md-clientId").innerText = d.clientId || "-";
-  document.getElementById("md-businessNo").innerText = d.businessNo || "-";
-  document.getElementById("md-managerTel").innerText = d.managerTel || "-";
+  // ===== 투입 정보(완제품 기준) =====
+  setText("md-usedQty", d.usedQty);
+  setText("md-usedUnit", d.matUnit ? d.matUnit : "");
 }
+
 
 /** ============================================================
  *  날짜 포맷
