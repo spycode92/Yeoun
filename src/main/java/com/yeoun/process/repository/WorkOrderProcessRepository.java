@@ -38,6 +38,18 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
 	// QC 공정 이후 모든 공정 단계 조회 (QC 실패 시 미진행 공정 정리용)
 	List<WorkOrderProcess> findByWorkOrderOrderIdAndStepSeqGreaterThan(String orderId, int qcStepSeq);
 	
+	// 마지막 공정 양품수량 SUM
+	@Query("""
+		    select coalesce(sum(wop.goodQty), 0)
+		    from WorkOrderProcess wop
+		    where wop.workOrder.planId = :planId
+		      and wop.process.processId = :lastProcessId
+		      and wop.status = 'DONE'
+		""")
+	int sumLastStepGoodQtyByPlanId(@Param("planId") String planId,
+	                              @Param("lastProcessId") String lastProcessId);
+
+	
 	// ==========================
 	// 생산관리 대시보드
 	// ==========================

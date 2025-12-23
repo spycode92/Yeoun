@@ -850,24 +850,27 @@ public class WorkOrderProcessService {
     public WorkOrderProcessStepDTO finishStep(String orderId, Integer stepSeq,
     										  Integer goodQty, Integer defectQty, String memo) {
 
+    	// 작업지시 공정 단계 조회
         WorkOrderProcess proc = workOrderProcessRepository
                 .findByWorkOrderOrderIdAndStepSeq(orderId, stepSeq)
                 .orElseThrow(() -> new IllegalArgumentException("해당 공정 단계가 존재하지 않습니다."));
 
+        // 진행 중인 공정만 종료 가능
         if (!"IN_PROGRESS".equals(proc.getStatus())) {
             throw new IllegalStateException("진행중(IN_PROGRESS) 상태인 공정만 종료할 수 있습니다.");
         }
 
         String processId = proc.getProcess().getProcessId();
         
+        // 수량 정보 기록
         proc.setGoodQty(goodQty);
         proc.setDefectQty(defectQty);
         
-        // 1) 공정 상태는 항상 DONE 으로
+        // 공정 상태 종료 처리
         proc.setStatus("DONE");
         proc.setEndTime(LocalDateTime.now());
 
-        // 2) 캡/펌프 공정인 경우에만 QC_RESULT PENDING 생성
+        // 캡/펌프 공정인 경우에만 QC_RESULT PENDING 생성
         if ("PRC-CAP".equals(processId)) {
         	
         	// 1) QC_RESULT PENDING 생성
@@ -889,39 +892,65 @@ public class WorkOrderProcessService {
             alarmService.sendAlarmMessage(AlarmDestination.QC, message);
         }
 
-        // 3) 마지막 단계인지 확인
+        // 마지막 공정 여부 판단
         WorkOrder workOrder = proc.getWorkOrder();
         boolean hasLaterStep =
                 workOrderProcessRepository.existsByWorkOrderOrderIdAndStepSeqGreaterThan(orderId, stepSeq);
 
+        // 마지막 공정이면 작업지시 종료 처리
         if (!hasLaterStep) {
+
             // 1) 작업지시 완료 처리
             workOrder.setStatus("COMPLETED");
             workOrder.setActEndDate(LocalDateTime.now());
 
             String planId = workOrder.getPlanId();
+            
+            // 2) 생산계획 완료 여부 판단
             if (planId != null) {
 
-                // 같은 PLAN_ID 아래에 아직 COMPLETED 아닌 작업지시가 있는지 확인
-                boolean existsNotCompletedWo =
-                        workOrderRepository.existsByPlanIdAndStatusNot(planId, "COMPLETED");
+                // (1) 생산계획 조회 (목표수량/상태 변경 위해 필요)
+                ProductionPlan plan = productionPlanRepository.findById(planId)
+                        .orElseThrow(() -> new IllegalStateException("생산계획을 찾을 수 없습니다. planId=" + planId));
 
-                if (!existsNotCompletedWo) {
-                    // (1) 생산계획 헤더 DONE
-                    ProductionPlan plan = productionPlanRepository.findById(planId)
-                            .orElseThrow(() -> new IllegalStateException("생산계획을 찾을 수 없습니다. planId=" + planId));
+                // (2) 진행 중 작업지시 존재 여부 (CREATED/RELEASED가 남아 있으면 아직 작업 남음)
+                boolean existsActiveWo = workOrderRepository.existsByPlanIdAndStatusIn(
+                        planId, List.of("CREATED", "RELEASED")
+                );
+
+                // (3) 목표수량(계획수량) - DB: PRODUCTION_PLAN.PLAN_QTY
+                int targetQty = plan.getPlanQty();
+
+                // (4) 마지막 공정(PRC-LBL) DONE 양품수량 합 (계획 내 실제 완제품 생산량)
+                int producedGoodQty =
+                        workOrderProcessRepository.sumLastStepGoodQtyByPlanId(planId, "PRC-LBL");
+
+                // (5) 계획 완료 조건:
+                // - 진행 중 작업지시 없고
+                // - 마지막 공정 양품 합이 목표수량 이상이면 DONE
+                boolean isPlanDone = (!existsActiveWo) && (producedGoodQty >= targetQty);
+
+                if (isPlanDone) {
                     plan.setStatus(ProductionStatus.DONE);
 
-                    // (2) 해당 계획의 PlanItem들도 전부 DONE으로 덮어쓰기
-                    List<ProductionPlanItem> items =
-                            productionPlanItemRepository.findByPlanId(planId);
+                    // 생산계획 아이템도 DONE 처리
+                    List<ProductionPlanItem> items = productionPlanItemRepository.findByPlanId(planId);
                     for (ProductionPlanItem item : items) {
                         item.setStatus(ProductionStatus.DONE);
                     }
+
+                    productionPlanRepository.save(plan);
+                    productionPlanItemRepository.saveAll(items);
+
+                } else {
+                    // 목표 미달 or 진행중 WO 존재 -> 생산중 유지 (SCRAPPED 있어도 여기로 올 수 있음)
+                    plan.setStatus(ProductionStatus.IN_PROGRESS);
+                    productionPlanRepository.save(plan);
                 }
             }
-        }
 
+
+        }
         
         // LOT 종료 공통 처리
         handleLotOnStepEnd(workOrder, proc, hasLaterStep);

@@ -43,7 +43,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	Optional<WorkOrder> findByOrderId(String workOrderId);
 	
 	// 같은 PLAN_ID 아래 아직 완료 안 된 작업지시가 있는지 확인
-	boolean existsByPlanIdAndStatusNot(String planId, String status);
+	boolean existsByPlanIdAndStatusIn(String planId, List<String> of);
 	
 	@Query("""
 		    SELECT wo
@@ -75,6 +75,5 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
           and w.createdDate <  :end
     """)
     long countTodayOrders(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
 
 }
