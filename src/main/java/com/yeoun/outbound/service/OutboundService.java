@@ -342,13 +342,33 @@ public class OutboundService {
 	}
 	
 	// 완제품 출고 등록 취소
+//	@Transactional
+//	public void canceledProductOutbound(String shipmentId) {
+//		Outbound outbound = outboundRepository.findByShipmentId(shipmentId)
+//				.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
+//		
+//		// 출고 취소
+//		canceledOutbound(outbound);
+//	}
+	
+	
+	// 완제품 출고 등록 취소 (수정내용) 
 	@Transactional
 	public void canceledProductOutbound(String shipmentId) {
-		Outbound outbound = outboundRepository.findByShipmentId(shipmentId)
-				.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
-		
-		// 출고 취소
-		canceledOutbound(outbound);
+
+	    Optional<Outbound> optionalOutbound =
+	            outboundRepository.findByShipmentId(shipmentId);
+
+	    if (optionalOutbound.isPresent()) {
+	        Outbound outbound = optionalOutbound.get();
+
+	        // 출고 취소 (재고 복원, 상태 변경 등)
+	        canceledOutbound(outbound);
+
+	    } else {
+	        // ✔ 출하지시서가 아직 없는 정상 케이스
+	        log.info("출하지시서 미생성 상태 - shipmentId={}, 출하예약만 취소 처리", shipmentId);
+	    }
 	}
 	
 	private void canceledOutbound(Outbound outbound) {

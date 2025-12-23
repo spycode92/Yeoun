@@ -177,7 +177,7 @@ public class MessengerService {
 	// ========================================================
 	// 새 방 생성
 	@Transactional
-	public MsgRoomDTO createRoom(RoomCreateRequest roomCreateRequestDTO) throws IOException {
+	public MsgRoomDTO createRoom(RoomCreateRequest roomCreateRequestDTO, String id) throws IOException {
 		////////////////////////////////// 파일추가 잊지말것...... /////////////////////////////////
 		boolean hasText = roomCreateRequestDTO.getFirstMessage() != null
 				&& !roomCreateRequestDTO.getFirstMessage().isBlank();
@@ -192,9 +192,10 @@ public class MessengerService {
 
 		// 2) 참여자 relations 저장
 		Set<String> memberIds = new HashSet<>(roomCreateRequestDTO.getMembers());
-		memberIds.add(roomCreateRequestDTO.getCreatedUser());
+		memberIds.add(id);
 
 		for (String empId : memberIds) {
+			System.out.println("empId = [" + empId + "]");
 			MsgRelation relation = new MsgRelation();
 			relation.setRoomId(newRoom);
 			relation.setEmpId(empRepository.getReferenceById(empId));

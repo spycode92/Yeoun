@@ -18,6 +18,7 @@
                 outboundYn = data.outboundYn;
 
                   document.getElementById("detailOrderId").innerText = data.orderId;
+				  document.getElementById("detailPlanId").innerText = data.planId;
                   document.getElementById("detailPrdName").innerText = data.prdName;
                   document.getElementById("detailPlanQty").innerText = data.planQty;
                   document.getElementById("detailPlanDate").innerText = data.planDate;

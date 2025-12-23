@@ -236,6 +236,7 @@ public class OrderQueryService {
 		// DTO 변환 후 반환
 		return WorkOrderDetailDTO.builder()
 				.orderId(id)
+				.planId(order.getPlanId())
 				.prdId(order.getProduct().getPrdId())
 				.prdName(order.getProduct().getPrdName())
 				.status(order.getStatus())

@@ -13,6 +13,7 @@ import java.util.List;
 public class WorkOrderDetailDTO {
 
     private String orderId;     // 작업지시 번호
+    private String planId;		// 생산계획 번호
     private String prdId;       // 제품코드
     private String prdName;     // 품명
     private String status;      // CREATE / IN_PROGRESS / RELEASED

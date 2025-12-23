@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -160,26 +161,66 @@ public class ShipmentService {
     // 출하 예약 취소
     // (RESERVED / PENDING → WAITING)
     // ================================
-    @Transactional
-    public void cancelShipment(String orderId) {
+//    @Transactional
+//    public void cancelShipment(String orderId) {
+//
+//        // 1️⃣ 출하지시서 조회
+//        Shipment shipment = shipmentRepository
+//            .findByOrderIdAndShipmentStatusIn(
+//                orderId,
+//                List.of(
+//                    ShipmentStatus.RESERVED,
+//                    ShipmentStatus.PENDING
+//                )
+//            )
+//            .orElseThrow(() -> new IllegalStateException("취소 가능한 출하 예약이 없습니다."));
+//
+//        // 2️⃣ 완제품 출고 취소 (재고 예정수량 복구 + OUTBOUND → CANCELED)
+//        outboundService.canceledProductOutbound(shipment.getShipmentId());
+//
+//        // 3️⃣ 출하지시 상태 → WAITING (재예약 가능)
+//        shipment.changeStatus(ShipmentStatus.WAITING);
+//    }
+       
+    
+ // ================================
+ // 출하 예약 취소
+ // (출하예약만 있거나 / 출하지시서가 있어도 모두 취소)
+ // ================================
+ @Transactional
+ public void cancelShipment(String orderId) {
 
-        // 1️⃣ 출하지시서 조회
-        Shipment shipment = shipmentRepository
-            .findByOrderIdAndShipmentStatusIn(
-                orderId,
-                List.of(
-                    ShipmentStatus.RESERVED,
-                    ShipmentStatus.PENDING
-                )
-            )
-            .orElseThrow(() -> new IllegalStateException("취소 가능한 출하 예약이 없습니다."));
+     // 1️⃣ 출하지시서 조회 (있을 수도, 없을 수도 있음)
+     Optional<Shipment> optionalShipment =
+             shipmentRepository.findByOrderIdAndShipmentStatusIn(
+                     orderId,
+                     List.of(
+                         ShipmentStatus.RESERVED,
+                         ShipmentStatus.PENDING
+                     )
+             );
 
-        // 2️⃣ 완제품 출고 취소 (재고 예정수량 복구 + OUTBOUND → CANCELED)
-        outboundService.canceledProductOutbound(shipment.getShipmentId());
+     // 2️⃣ 출하지시서가 없는 경우
+     if (optionalShipment.isEmpty()) {
+         log.info("출하지시서 미생성 상태 - orderId={}, 출하예약 취소 처리", orderId);
+         // 👉 출하예약은 '상태' 개념이므로 DB 변경 없이 성공 처리
+         return;
+     }
 
-        // 3️⃣ 출하지시 상태 → WAITING (재예약 가능)
-        shipment.changeStatus(ShipmentStatus.WAITING);
-    }
+     Shipment shipment = optionalShipment.get();
+
+     // 3️⃣ 이미 출하 완료면 취소 불가
+     if (shipment.getShipmentStatus() == ShipmentStatus.SHIPPED) {
+         throw new IllegalStateException("이미 출하 완료된 건은 취소할 수 없습니다.");
+     }
+
+     // 4️⃣ 출하지시서 기반 출고 취소 (있으면만)
+     outboundService.canceledProductOutbound(shipment.getShipmentId());
+
+     // 5️⃣ 출하지시 상태 취소
+     shipment.changeStatus(ShipmentStatus.WAITING);
+ }
+
     
  // ================================
  // 출하 확정 + 운송장번호(TRACKING_NUMBER) 생성

@@ -158,8 +158,8 @@ public class MessengerController {
 	// 메신저 팝업 채팅방 - 새로운 방 생성
 	@ResponseBody
 	@PostMapping(value="/chat")
-	public ResponseEntity<?> createRoom(@RequestBody RoomCreateRequest roomCreateRequest) throws IOException {
-		MsgRoomDTO dto = messengerService.createRoom(roomCreateRequest);
+	public ResponseEntity<?> createRoom(@RequestBody RoomCreateRequest roomCreateRequest, Authentication auth) throws IOException {
+		MsgRoomDTO dto = messengerService.createRoom(roomCreateRequest, auth.getName());
 		// =============================> 파일 추가해야함... 잊지말것..
 		// =============================> 파일 추가해야함... 잊지말것..
 		// =============================> 파일 추가해야함... 잊지말것..
