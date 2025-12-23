@@ -21,7 +21,8 @@ function openPlanDetail(planId) {
                 PLANNING: "검토대기",
                 MATERIAL_PENDING: "자재확보중",
                 IN_PROGRESS: "생산중",
-                DONE: "생산완료"
+                DONE: "생산완료",
+				CANCELLED:"취소"
             };
 
             // 전역에 저장
@@ -87,12 +88,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("modalPlanItemGrid"),
         {
             columnDefs: [
-                { field: "prdId", headerName: "제품ID", width: 120 },
-                { field: "prdName", headerName: "제품명", width: 180 },
-                { field: "planQty", headerName: "계획수량", width: 120 },
-                { field: "bomStatus", headerName: "BOM부족", width: 120 }               
+                { field: "prdId", headerName: "제품ID", width: 200 },
+                { field: "prdName", headerName: "제품명", width: 200 },
+                { field: "planQty", headerName: "계획수량", width: 200 }
+                             
             ],
-            rowSelection: { mode: 'singleRow' },
+			domLayout: "autoHeight",
+            //rowSelection: { mode: 'singleRow' },
             onRowClicked: function(event) {
                 const prdId = event.data.prdId;
                 const orders = orderItemMap[prdId] || [];

@@ -30,15 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
 ======================================================= */
 function initItemGrid() {
     const columnDefs = [
-        { 
-            headerName: "품목ID", 
-            field: "itemId", 
-            width: 100,
-            editable: false
-        },
-
-        {
-            headerName: "카테고리",
+          {
+            headerName: "자재구분",
             field: "matType",
             width: 110,
             editable: false,
@@ -55,6 +48,7 @@ function initItemGrid() {
             headerName: "자재코드",
             width: 130,
             editable: false,
+			cellClass: "text-center",
             valueGetter: p => p.data.materialId || p.data.matId || ""
         },
 

@@ -125,9 +125,9 @@ function renderShipmentDetail(detail) {
                     : "-";
                 
                 tr.innerHTML = `
-                    <td>${item.prdName ?? "-"}</td>
-                    <td>${item.lotNo ?? "-"}</td>
-                    <td class="text-end">${item.outboundAmount ?? 0}</td>
+                    <td class="text-center">${item.prdName ?? "-"}</td>
+                    <td class="text-center">${item.lotNo ?? "-"}</td>
+                    <td class="text-center">${item.outboundAmount ?? 0}</td>
                     <td class="text-center">${outboundDateFormatted}</td>
                 `;
                 completedTbody.appendChild(tr);

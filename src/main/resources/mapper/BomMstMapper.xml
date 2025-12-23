@@ -22,6 +22,8 @@
 			b.MAT_ID = m.MAT_ID
 		WHERE
 			b.PRD_ID = #{prdId}
+		AND 
+			b.USE_YN = 'Y'
 	</select>
 </mapper>
 

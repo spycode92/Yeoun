@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function initPlanGrid() {
 
     const columnDefs = [
-        { headerName: "계획ID", field: "planId", width: 200 },
+        { headerName: "계획번호", field: "planId", width: 200 },
         { headerName: "작성일", field: "createdAt", width: 200 },
         { headerName: "제품명", field: "itemName", width: 180 },
         { headerName: "총수량", field: "totalQty", width: 160 },
@@ -125,7 +125,9 @@ function initPlanGrid() {
         defaultColDef: {
             sortable: true,
             resizable: true,
-            filter: false
+            filter: false,
+			cellClass: "ag-center-cell",      // ⭐ 값 가운데
+			headerClass: "ag-center-header"   // ⭐ 제목 가운데
         }
     };
 

@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function initGrid() {
 
     const columnDefs = [
-        { headerName: "선택", checkboxSelection: true, width: 60 },
+      //  { headerName: "선택", checkboxSelection: true, width: 60 },
 
         // ⭐ rowGroup 제거 - Community 버전에서는 사용 불가
         { 

@@ -95,10 +95,10 @@
                     { header: "작업지시", name: "orderId", align: "left" },
                     { header: "제품", name: "productName", align: "center" },
                     { header: "상태", name: "status", align: "center" },
-                    { header: "시작시간", name: "startDate", align: "center",
+                    { header: "시작시간", name: "startTime", align: "center",
                         formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
                     {
-                        header: "종료시간", name: "endDate", align: "center",
+                        header: "종료시간", name: "endTime", align: "center",
                         formatter: ({value}) => {
                             if (!value) return "";
                             return formatTimeFull(new Date(value));

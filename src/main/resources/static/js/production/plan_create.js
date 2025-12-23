@@ -61,6 +61,7 @@ function initSuggestGrid() {
         {
             headerName: "상세",
             width: 100,
+			flex: 1,   
             cellRenderer: params => {
                 return `
                     <button class="btn btn-sm btn-secondary"
@@ -71,16 +72,25 @@ function initSuggestGrid() {
         }
     ];
 
-    suggestGridApi = agGrid.createGrid(
-        document.getElementById("suggestGrid"),
-        {
-            columnDefs,
-            rowSelection: "multiple",
-            suppressRowClickSelection: true,
-            rowData: [],
-            localeText: { noRowsToShow: "생산목록 조회 중입니다" }
-        }
-    );
+	suggestGridApi = agGrid.createGrid(
+	    document.getElementById("suggestGrid"),
+	    {
+	        columnDefs,
+
+	        rowSelection: "multiple",
+	        suppressRowClickSelection: true,
+	        rowData: [],
+	        localeText: { noRowsToShow: "생산목록 조회 중입니다" },
+
+	        /* ⭐⭐⭐ 이 부분 추가 ⭐⭐⭐ */
+	        defaultColDef: {
+	            headerClass: "ag-center-header",
+	            cellClass: "ag-center-cell",
+	            sortable: false,
+	            resizable: true
+	        }
+	    }
+	);
 
     // ⭐ 추천 목록에서 체크가 변경될 때 동작
     suggestGridApi.addEventListener("selectionChanged", onSuggestProductSelected);
