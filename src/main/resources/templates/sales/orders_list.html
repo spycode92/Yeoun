@@ -20,7 +20,28 @@
 
 <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
-    <h3 class="mb-4">수주 목록</h3>
+    <h3 class="mb-4">수주 관리</h3>
+    
+     <!-- 검색 영역 -->
+    <div class="card mb-4">
+    <div class="search-box mb-3 d-flex flex-wrap gap-2 align-items-center">
+
+        <input type="date" id="startDate" class="form-control" style="width: 160px;">
+        <input type="date" id="endDate" class="form-control" style="width: 160px;">
+
+        <input type="text" id="keyword" class="form-control" placeholder="거래처명 / 제품명 / 담당자명 검색" 
+               style="width: 260px;">
+
+        <button id="btnSearch" class="btn btn-primary">검색</button>
+        <button id="btnReset" class="btn btn-secondary">초기화</button>
+
+        <a th:href="@{/sales/orders/new}" class="btn btn-success ms-auto">
+            신규 수주 등록
+        </a>
+    </div>
+
+</div>
+    
 
  <!-- ===========================================================
      수주 상태 탭 (REQUEST / RECEIVED / CONFIRMED / SHIPPING / CANCEL)
@@ -70,25 +91,7 @@
 </ul>
 
 
-    <!-- 검색 영역 -->
-    <div class="search-box mb-3 d-flex flex-wrap gap-2 align-items-center">
-
-        <input type="date" id="startDate" class="form-control" style="width: 160px;">
-        <input type="date" id="endDate" class="form-control" style="width: 160px;">
-
-        <input type="text" id="keyword" class="form-control" placeholder="거래처명 / 제품명 / 담당자명 검색" 
-               style="width: 260px;">
-
-        <button id="btnSearch" class="btn btn-primary">검색</button>
-        <button id="btnReset" class="btn btn-secondary">초기화</button>
-
-        <a th:href="@{/sales/orders/new}" class="btn btn-success ms-auto">
-            신규 수주 등록
-        </a>
-    </div>
-
-
-
+   
 
     <!-- AG Grid -->
     <div id="orderGrid" class="ag-theme-quartz" style="height: 600px;"></div>

@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.production.enums.ProductionStatus;
 
 import java.time.LocalDate;
@@ -51,9 +52,19 @@ public class ProductionPlan {
     @Comment("생성 시각")
     private LocalDateTime createdAt;
 
-    @Column(name = "CREATED_BY", length = 30)
-    @Comment("생성자 ID")
+    @Column(name = "CREATED_BY")
     private String createdBy;
+
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "CREATED_BY",
+        referencedColumnName = "EMP_ID",
+        insertable = false,
+        updatable = false
+    )
+    private Emp createdByEmp;
+
 
     @LastModifiedDate
     @Column(name = "UPDATED_AT")

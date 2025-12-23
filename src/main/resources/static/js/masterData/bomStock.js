@@ -530,6 +530,18 @@ const grid8 = new Grid({
 	    		perPage: 20
 	  	  }
 });
+//권한관리
+if (!window.isAdmin) {
+    grid1.disable();
+	grid2.disable();
+	grid3.disable();
+	grid4.disable();
+	grid5.disable();
+	grid6.disable();
+	grid7.disable();
+	grid8.disable();
+    console.log("관리자 권한 없음: 그리드 비활성화");
+}
 
 grid2.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)

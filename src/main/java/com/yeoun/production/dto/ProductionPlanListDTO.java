@@ -10,4 +10,5 @@ public interface ProductionPlanListDTO {
     BigDecimal getTotalQty();
     String getStatus();
     String getMemo();
+    String getCreatedByName();
 }

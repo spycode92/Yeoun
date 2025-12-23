@@ -1,5 +1,21 @@
-document.addEventListener('DOMContentLoaded', function () {
+// 비밀번호 보기/숨기기
+function togglePassword(inputId, iconEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
 
+  if (input.type === 'password') {
+    input.type = 'text';
+    iconEl.classList.remove('bx-hide');
+    iconEl.classList.add('bx-show');
+  } else {
+    input.type = 'password';
+    iconEl.classList.remove('bx-show');
+    iconEl.classList.add('bx-hide');
+  }
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
   // ================== 1) Grid 생성 ==================
   const grid = new tui.Grid({
     el: document.getElementById('empGrid'),
@@ -98,143 +114,108 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 
-    // ================== 4) 권한 저장: confirm -> (SYS_ADMIN 추가 confirm) -> 비번 모달 -> verify -> submit ==================
-    const roleForm = document.getElementById('roleAssignForm');
+  // ================== 4) 권한 저장: confirm -> 비번 모달 -> verify -> submit ==================
+  const roleForm = document.getElementById('roleAssignForm');
 
-    const adminPwModalEl = document.getElementById('adminPwModal');
-    const adminPwModal = adminPwModalEl ? new bootstrap.Modal(adminPwModalEl) : null;
-	
-	// 저장 확인 모달
-	const saveConfirmModalEl = document.getElementById('saveConfirmModal');
-	const saveConfirmModal = saveConfirmModalEl ? new bootstrap.Modal(saveConfirmModalEl) : null;
+  const adminPwModalEl = document.getElementById('adminPwModal');
+  const adminPwModal = adminPwModalEl ? new bootstrap.Modal(adminPwModalEl) : null;
 
-	const confirmEmpText   = document.getElementById('confirmEmpText');
-	const confirmRoleBadges = document.getElementById('confirmRoleBadges');
-	const confirmRoleCount = document.getElementById('confirmRoleCount');
-	const confirmSysWarn   = document.getElementById('confirmSysWarn');
-	const confirmNoRole    = document.getElementById('confirmNoRole');
-	const confirmSysAgreeWrap = document.getElementById('confirmSysAgreeWrap');
-	const confirmSysAgree = document.getElementById('confirmSysAgree');
+  // 저장 확인 모달
+  const saveConfirmModalEl = document.getElementById('saveConfirmModal');
+  const saveConfirmModal = saveConfirmModalEl ? new bootstrap.Modal(saveConfirmModalEl) : null;
 
-	const btnOpenPwModal = document.getElementById('btnOpenPwModal');
+  const confirmEmpText    = document.getElementById('confirmEmpText');
+  const confirmRoleBadges = document.getElementById('confirmRoleBadges');
+  const confirmRoleCount  = document.getElementById('confirmRoleCount');
+  const confirmNoRole     = document.getElementById('confirmNoRole');
 
-    const adminPwInput = document.getElementById('adminPassword');
-    const adminPwError = document.getElementById('adminPwError');
-    const btnVerifyAdminPw = document.getElementById('btnVerifyAdminPw');
+  const btnOpenPwModal = document.getElementById('btnOpenPwModal');
 
-	btnSaveRole.addEventListener('click', function () {
+  const adminPwInput = document.getElementById('adminPassword');
+  const adminPwError = document.getElementById('adminPwError');
+  const btnVerifyAdminPw = document.getElementById('btnVerifyAdminPw');
 
-	  // 사원 선택 확인
-	  const empId = formEmpId.value;
-	  const empName = (document.getElementById('sel-empName')?.textContent || '').trim();
-	  const empIdText = (document.getElementById('sel-empId')?.textContent || '').trim();
+  btnSaveRole.addEventListener('click', function () {
 
-	  if (!empId) {
-	    alert('사원을 선택하세요.');
-	    return;
-	  }
+    // 사원 선택 확인
+    const empId = formEmpId.value;
+    const empName = (document.getElementById('sel-empName')?.textContent || '').trim();
+    const empIdText = (document.getElementById('sel-empId')?.textContent || '').trim();
 
-	  // 선택된 권한들
-	  const checked = Array.from(document.querySelectorAll('.role-checkbox:checked'));
-	  const roles = checked.map(cb => {
-	    const label = document.querySelector(`label[for="${cb.id}"]`);
-	    return label ? label.innerText.replace(/\s+/g, ' ').trim() : cb.value;
-	  });
+    if (!empId) {
+      alert('사원을 선택하세요.');
+      return;
+    }
 
-	  // 저장 확인 모달이 없으면 fallback
-	  if (!saveConfirmModal) {
-	    if (!confirm('선택한 권한으로 저장하시겠습니까?')) return;
-	    adminPwInput.value = '';
-	    adminPwError.classList.add('d-none');
-	    adminPwModal.show();
-	    return;
-	  }
+    // 선택된 권한들 (※ 화면에서 SYS_ADMIN 체크박스가 없으니 여기서도 신경 X)
+    const checked = Array.from(document.querySelectorAll('.role-checkbox:checked'));
+    const roles = checked.map(cb => {
+      const label = document.querySelector(`label[for="${cb.id}"]`);
+      return label ? label.innerText.replace(/\s+/g, ' ').trim() : cb.value;
+    });
 
-	  // 모달 내용 채우기
-	  confirmEmpText.textContent = `${empName} (${empIdText})`;
-	  confirmRoleBadges.innerHTML = '';
-	  confirmRoleCount.textContent = roles.length;
+    // 저장 확인 모달이 없으면 fallback
+    if (!saveConfirmModal) {
+      if (!confirm('선택한 권한으로 저장하시겠습니까?')) return;
+      adminPwInput.value = '';
+      adminPwError.classList.add('d-none');
+      adminPwModal.show();
+      return;
+    }
 
-	  const hasSysAdmin = checked.some(cb => cb.value === 'ROLE_SYS_ADMIN');
-	  confirmSysWarn.classList.toggle('d-none', !hasSysAdmin);
-	  
-	  // SYS_ADMIN 동의 체크박스 강제
-	  if (hasSysAdmin) {
-	    confirmSysAgreeWrap?.classList.remove('d-none');
-	    if (confirmSysAgree) {
-	      confirmSysAgree.checked = false;
-	      btnOpenPwModal.disabled = true;
+    // 모달 내용 채우기
+    confirmEmpText.textContent = `${empName} (${empIdText})`;
+    confirmRoleBadges.innerHTML = '';
+    confirmRoleCount.textContent = roles.length;
 
-	      confirmSysAgree.onchange = () => {
-	        btnOpenPwModal.disabled = !confirmSysAgree.checked;
-	      };
-	    }
-	  } else {
-	    confirmSysAgreeWrap?.classList.add('d-none');
-	    btnOpenPwModal.disabled = false;
+    if (roles.length === 0) {
+      confirmNoRole.classList.remove('d-none');
+    } else {
+      confirmNoRole.classList.add('d-none');
 
-	    if (confirmSysAgree) {
-	      confirmSysAgree.checked = false;
-	      confirmSysAgree.onchange = null;
-	    }
-	  }
+      roles.forEach(text => {
+        const span = document.createElement('span');
+        span.className = 'badge rounded-pill bg-light text-dark border';
+        span.textContent = text;
+        confirmRoleBadges.appendChild(span);
+      });
+    }
 
+    // 다음 버튼은 항상 활성
+    if (btnOpenPwModal) btnOpenPwModal.disabled = false;
 
-	  if (roles.length === 0) {
-	    confirmNoRole.classList.remove('d-none');
-	  } else {
-	    confirmNoRole.classList.add('d-none');
+    saveConfirmModal.show();
+  });
 
-	    roles.forEach(text => {
-	      const span = document.createElement('span');
-	      span.className = 'badge rounded-pill bg-light text-dark border';
-	      span.textContent = text;
-	      confirmRoleBadges.appendChild(span);
-	    });
-	  }
+  // 비밀번호 입력하는 모달로 이동
+  btnOpenPwModal?.addEventListener('click', function () {
+    saveConfirmModal.hide();
 
-	  saveConfirmModal.show();
-	});
+    adminPwInput.value = '';
+    adminPwError.classList.add('d-none');
+    adminPwModal.show();
+  });
 
-	// 비밀번호 입력하는 모달로 이동
-	btnOpenPwModal?.addEventListener('click', function () {
-		
-		// 방어: SYS_ADMIN 포함인데 동의 안 했으면 막기
-		const hasSysAdminNow = Array.from(document.querySelectorAll('.role-checkbox:checked'))
-		  .some(cb => cb.value === 'ROLE_SYS_ADMIN');
+  // 비밀번호 입력 모달
+  btnVerifyAdminPw?.addEventListener('click', function () {
+    const pw = (adminPwInput.value || '').trim();
+    if (!pw) {
+      adminPwError.textContent = '비밀번호를 입력하세요.';
+      adminPwError.classList.remove('d-none');
+      return;
+    }
 
-		if (hasSysAdminNow && confirmSysAgree && !confirmSysAgree.checked) {
-		  alert('SYS_ADMIN 부여 동의 체크가 필요합니다.');
-		  return;
-		}
-		
-	  saveConfirmModal.hide();
-
-	  adminPwInput.value = '';
-	  adminPwError.classList.add('d-none');
-	  adminPwModal.show();
-	});
-
-	// 비밀번호 입력 모달
-    btnVerifyAdminPw?.addEventListener('click', function () {
-      const pw = (adminPwInput.value || '').trim();
-      if (!pw) {
-        adminPwError.textContent = '비밀번호를 입력하세요.';
-        adminPwError.classList.remove('d-none');
-        return;
-      }
-
-      // 비밀번호 재확인 API 호출
-      fetch('/auth/manage/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          ...(typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined'
-              ? { [csrfHeader]: csrfToken }
-              : {})
-        },
-        body: new URLSearchParams({ password: pw })
-      })
+    // 비밀번호 재확인 API 호출
+    fetch('/auth/manage/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        ...(typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined'
+          ? { [csrfHeader]: csrfToken }
+          : {})
+      },
+      body: new URLSearchParams({ password: pw })
+    })
       .then(res => res.json())
       .then(data => {
         if (!data || !data.success) {
@@ -251,22 +232,5 @@ document.addEventListener('DOMContentLoaded', function () {
         adminPwError.textContent = '비밀번호 확인 중 오류가 발생했습니다.';
         adminPwError.classList.remove('d-none');
       });
-    });
-
   });
-
-  // 비밀번호 보기/숨기기 (manage 페이지에 없으면 추가)
-  function togglePassword(inputId, iconEl) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-
-    if (input.type === 'password') {
-      input.type = 'text';
-      iconEl.classList.remove('bx-hide');
-      iconEl.classList.add('bx-show');
-    } else {
-      input.type = 'password';
-      iconEl.classList.remove('bx-show');
-      iconEl.classList.add('bx-hide');
-    }
-  }
+});

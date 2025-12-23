@@ -85,6 +85,17 @@
 </th:block>
 </body>
 <th:block layout:fragment="myScript"> 
-		<script th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
-		<script th:inline="javascript" th:src="@{/js/masterData/product.js}"></script>
+	<script th:inline="javascript">
+        // 전역 변수로 선언
+        window.isAdmin = false; 
+    </script>
+
+    <th:block sec:authorize="hasAnyRole('MES_MANAGER', 'SYS_ADMIN')">
+        <script>
+            window.isAdmin = true;
+            console.log("서버 권한 확인: 관리자입니다.");
+        </script>
+    </th:block>
+	<script th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
+	<script th:inline="javascript" th:src="@{/js/masterData/product.js}"></script>
 </th:block>

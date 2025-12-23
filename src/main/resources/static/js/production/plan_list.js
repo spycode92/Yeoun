@@ -28,7 +28,18 @@ function initPlanGrid() {
 
     const columnDefs = [
         { headerName: "계획번호", field: "planId", width: 200 },
-        { headerName: "작성일", field: "createdAt", width: 200 },
+        //{ headerName: "생성일", field: "createdAt", width: 200 },
+		
+		{
+		    headerName: "생성일",
+		    field: "createdAt",   // 실제 필드명
+		    width: 150,
+		    valueFormatter: params => {
+		        if (!params.value) return "";
+		        return params.value.substring(0, 10); // YYYY-MM-DD
+		    }
+		},
+
         { headerName: "제품명", field: "itemName", width: 180 },
         { headerName: "총수량", field: "totalQty", width: 160 },
 

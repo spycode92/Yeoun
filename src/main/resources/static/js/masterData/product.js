@@ -38,6 +38,8 @@ const EFFECTIVE_DATE_MIN = 0;
 const EFFECTIVE_DATE_MAX = 120; // 예: 최대 120개월(10년)
 
 
+
+
 const Grid = tui.Grid;
 
 //g-grid1 완제품(상위품번)
@@ -352,6 +354,12 @@ function productGridAllSearch() {
 		
 		});
 
+}
+
+if (!window.isAdmin) {
+    grid1.disable();
+	grid2.disable();
+    console.log("관리자 권한 없음: 그리드 비활성화");
 }
 
 function materialGridAllSearch() {

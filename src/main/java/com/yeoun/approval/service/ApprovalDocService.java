@@ -38,6 +38,7 @@ import com.yeoun.common.service.FileAttachService;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.Position;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.hr.entity.HrAction;
 import com.yeoun.hr.repository.HrActionRepository;
 import com.yeoun.leave.service.LeaveService;
@@ -61,6 +62,7 @@ public class ApprovalDocService {
 	private final LeaveService leaveService;
 	private final FileUtil fileUtil;
 	private final FileAttachService fileAttachService;
+	private final EmpRepository empRepository;
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	// 기안자 명 불러오기
@@ -214,7 +216,9 @@ public class ApprovalDocService {
 		hrAction.setApprovalId(approvalDoc.getApprovalId());
 
 		// 발령 대상자 (기안자)
-		Emp targetEmp = new Emp();
+		Emp targetEmp = empRepository.findById(empId)
+                .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다. empId=" + empId));
+
 		targetEmp.setEmpId(empId);
 		hrAction.setEmp(targetEmp);
 
@@ -226,6 +230,18 @@ public class ApprovalDocService {
 		// 발령유형 - 직위변경으로 기본 설정
 		hrAction.setActionType("PROMOTION");// 승진
 
+		//발령 효력 시작일 (휴직 시작일 / 복직일 / 퇴직일 공통 사용)
+		LocalDate effectiveDate = parseDateSafely(doc.get("finishDate"));
+		hrAction.setEffectiveDate(effectiveDate);
+		//이전 직급 부서 설정
+		//DEPT_ID
+		//POS_CODE
+        hrAction.setFromDept(targetEmp.getDept());			// 이전 부서
+        hrAction.setFromPosition(targetEmp.getPosition());	// 이전 직급
+		hrAction.setAppliedYn("N");// 발령은 처음 생성될 때 EMP에 미적용
+		hrAction.setAppliedDate(null);     // 적용일자 없음
+
+		
 		// 이후 직급/부서 설정
 		if (doc.get("position") != null && !doc.get("position").isEmpty()) {
 			Position toPosition = new Position();
@@ -359,14 +375,25 @@ public class ApprovalDocService {
 				Approver nextApprover = approverRepository.findByApprovalIdAndOrderApprovers(
 						approvalId, nextApproverOrder.toString());
 
-				// 다음 결재권자의 VIEWING을 Y로 변경
-				nextApprover.setViewing("Y");
+				if (nextApprover != null) {
+					// 다음 결재권자의 VIEWING을 Y로 변경
+					nextApprover.setViewing("Y");
 
-				// approvalDoc의 approver을 다음 결재권자의 EmpId로 변경
-				approvalDoc.setApprover(nextApprover.getEmpId());
+					// approvalDoc의 approver을 다음 결재권자의 EmpId로 변경
+					approvalDoc.setApprover(nextApprover.getEmpId());
 
-				// approvalDoc의 status 변경 (예: "2차 대기")
-				approvalDoc.setDocStatus(nextApprover.getOrderApprovers() + "차 대기");
+					// approvalDoc의 status 변경 (예: "2차 대기")
+					approvalDoc.setDocStatus(nextApprover.getOrderApprovers() + "차 대기");
+				} else {
+					// 다음 결재자가 없는 경우 (최종 승인으로 처리)
+					approvalDoc.setDocStatus("완료");
+					handleAfterFinalApproval(approvalDoc);
+					
+					// 연차신청서 처리
+					if ("연차신청서".equals(approvalDoc.getFormType())) {
+						leaveService.createAnnualLeave(approvalDoc.getApprovalId());
+					}
+				}
 			}
 		}
 	}
@@ -399,11 +426,12 @@ public class ApprovalDocService {
 		// 3) 발령 상태만 '승인완료'로 변경 (EMP 적용 금지)
 		hrAction.setStatus("승인완료");
 
-		// 4) 적용여부는 그대로 'Y'
+		// 4) 적용여부는 그대로 'N'
 		hrAction.setAppliedYn("N");
 
 		// 5) appliedDate NULL
 		hrAction.setAppliedDate(null);
+
 
 	}
 
@@ -422,7 +450,7 @@ public class ApprovalDocService {
 		// 2. APPROVER_STAMP 테이블에서 해당 결재 문서의 모든 도장 이미지 조회
 		List<FileAttach> stampFiles = fileAttachRepository.findByRefTableAndRefId("APPROVER_STAMP", approvalId);
 
-		// 3. 결재권자 정보와 도장 이미지 매칭
+		// 3. 결재권자 정보와 도장 이미지 매칭 (order와 empId 모두 기준으로)
 		for (Approver approver : approverList) {
 			String order = approver.getOrderApprovers(); // "1", "2", "3"
 			String empId = approver.getEmpId();
@@ -448,7 +476,10 @@ public class ApprovalDocService {
 				}
 			}
 			if (bestFile != null && bestFileId != null) {
-				stampImages.put(order, "/files/download/" + bestFileId);
+				// order와 empId 둘 다로 매핑 (JavaScript에서 어느 쪽으로든 찾을 수 있도록)
+				String downloadUrl = "/files/download/" + bestFileId;
+				stampImages.put(order, downloadUrl);        // 순서 기준
+				stampImages.put("emp_" + empId, downloadUrl); // empId 기준
 			}
 		}
 

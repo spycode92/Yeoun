@@ -22,6 +22,8 @@ public class PlanDetailDTO {
     private Integer planQty;   
     private String status;
     private String memo;
+    private String createdByName;
+
 
     private List<ProductionPlanItemDTO> planItems;
     private Map<String, List<OrderItemDTO>> orderItemMap;

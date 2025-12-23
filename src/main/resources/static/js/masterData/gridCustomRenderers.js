@@ -81,8 +81,8 @@ const CODE_MAP = {
 	'RWRK':	'재작업 BOM',
 	
 	//향수 유형
-	'LIQUID': '고체향수', 
-	'SOLID': '액체향수',
+	'LIQUID': '액체향수', 
+	'SOLID': '고체향수',
 	
 	//안전재고 - 정책방식
 	'FIXED_QTY':'고정 계산방식',
@@ -196,7 +196,7 @@ class StatusModifiedRenderer {
     }
 }
 
-// 숫자만 입력 가능하도록 하는 커스텀 에디터 클래스
+// 숫자와 소수점 입력 가능하도록 하는 커스텀 에디터 클래스
 class NumberOnlyEditor {
   constructor(props) {
     const el = document.createElement('input');
@@ -204,9 +204,9 @@ class NumberOnlyEditor {
     this.el = el;
 
     // 초기 값 설정
-    this.el.value = props.value;
+    this.el.value = props.value || '';
 
-    // 입력 이벤트를 감지하여 숫자만 남기는 함수 바인딩
+    // 입력 이벤트를 감지하여 숫자와 소수점만 남기는 함수 바인딩
     this.el.addEventListener('input', this.handleInput.bind(this));
   }
 
@@ -215,13 +215,37 @@ class NumberOnlyEditor {
   }
 
   getValue() {
-    // 최종적으로 저장될 때도 숫자가 아닌 문자는 제거하고 반환합니다.
-    return this.el.value.replace(/[^0-9]/g, ''); 
+    // 최종적으로 저장될 때도 유효한 숫자 형태만 반환합니다.
+    return this.sanitizeNumber(this.el.value);
   }
   
-  // 입력 시마다 실행되어 숫자(0-9)가 아닌 문자를 제거합니다.
+  // 유효한 숫자 형태로 정리하는 메서드
+  sanitizeNumber(value) {
+    // 숫자와 소수점만 남기고, 소수점이 여러 개면 첫 번째만 남김
+    let cleaned = value.replace(/[^0-9.]/g, '');
+    
+    // 소수점이 여러 개 있는 경우 첫 번째만 남기기
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    return cleaned;
+  }
+  
+  // 입력 시마다 실행되어 숫자와 소수점만 남기는 함수
   handleInput() {
-    this.el.value = this.el.value.replace(/[^0-9]/g, ''); 
+    const currentValue = this.el.value;
+    const sanitized = this.sanitizeNumber(currentValue);
+    
+    // 값이 변경되었을 때만 업데이트 (커서 위치 유지)
+    if (currentValue !== sanitized) {
+      const cursorPos = this.el.selectionStart;
+      this.el.value = sanitized;
+      // 커서 위치 복원 (제거된 문자 수만큼 조정)
+      const removedChars = currentValue.length - sanitized.length;
+      this.el.setSelectionRange(cursorPos - removedChars, cursorPos - removedChars);
+    }
   }
 }
 

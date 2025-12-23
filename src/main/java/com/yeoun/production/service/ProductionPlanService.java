@@ -399,6 +399,12 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
                 ? ""
                 : planItems.get(0).getProduct().getPrdName();
 
+     // ⭐ 생성자 이름 조회 (empId → empName)
+        String createdByName = employeeRepository
+                .findById(plan.getCreatedBy())
+                .map(emp -> emp.getEmpName())
+                .orElse("미지정");
+        
         return new PlanDetailDTO(
                 plan.getPlanId(),
                 plan.getCreatedAt().toString(),
@@ -406,6 +412,7 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
                 plan.getPlanQty(),
                 plan.getStatus().name(),
                 plan.getPlanMemo(),
+                createdByName,
                 new ArrayList<>(merged.values()),
                 orderItemMap
         );

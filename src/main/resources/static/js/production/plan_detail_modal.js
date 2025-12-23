@@ -32,8 +32,13 @@ function openPlanDetail(planId) {
             // 🔥 기본 정보 표시
             // ============================
             document.getElementById("d_planId").innerText = data.planId;
-			document.getElementById("d_createdAt").innerText =
-			    data.createdAt?.substring(0, 10);
+			document.getElementById("d_createdAt").innerText =			    
+			data.createdAt
+			        ?.replace("T", " ")
+			        ?.split(".")[0] ?? "";
+			document.getElementById("d_createdBy").innerText =
+				data.createdByName ?? "";
+		
 
 
             // ■ 상태 한글 변환 적용

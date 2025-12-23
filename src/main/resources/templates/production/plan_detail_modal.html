@@ -10,31 +10,40 @@
 
                 <div class="modal-body">
 
-                    <!-- PLAN 기본 정보 -->
-                    <div class="row mb-3">
+                <div class="card mb-3">
+    <div class="card-body">        
 
-                        <div class="col-md-3">
-                            <label>계획ID</label>
-                            <div id="d_planId" class="fw-bold"></div>
-                        </div>
+        <div class="row g-3">
 
-                        <div class="col-md-3">
-                            <label>작성일</label>
-                            <div id="d_createdAt"></div>
-                        </div>
-                        
+            <div class="col-md-3">
+                <div class="text-muted small">계획번호</div>
+                <div id="d_planId" class="fw-bold fs-6"></div>
+            </div>
 
-                        <div class="col-md-3">
-                            <label>상태</label>
-                            <div id="d_status"></div>
-                        </div>
+            <div class="col-md-3">
+                <div class="text-muted small">생성일</div>
+                <div id="d_createdAt" class="fw-semibold"></div>
+            </div>
 
-                        <div class="col-md-12 mt-2">
-                            <label>메모</label>
-                            <div id="d_memo"></div>
-                        </div>
+            <div class="col-md-3">
+                <div class="text-muted small">생성자</div>
+                <div id="d_createdBy" class="fw-semibold"></div>
+            </div>
 
-                    </div>
+            <div class="col-md-3">
+                <div class="text-muted small">상태</div>
+                <div id="d_status"></div>
+            </div>
+
+            <div class="col-12">
+                <div class="text-muted small">메모</div>
+                <div id="d_memo" ></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
                     <hr />
 
                     <!-- PLAN_ITEM 목록 AG Grid -->
