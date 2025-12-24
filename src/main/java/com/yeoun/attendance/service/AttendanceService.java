@@ -102,14 +102,19 @@ public class AttendanceService {
 				return processAccessLog(empId, now, today, emp, attendance);
 			}
 		}
-		// 출근 기록이 있을 경우 
-		if (now.isAfter(standardOut)) {
-			attendance.recordWorkOut(now);
-			return "WORK_OUT";
-		}
+		
 		
 		// 반차 여부 조회
 		boolean halfLeave = leaveHistoryRepository.existsHalf(empId, today);
+		
+		// 출근 기록이 있을 경우 
+		if (now.isAfter(standardOut)) {
+			attendance.recordWorkOut(now);
+			int minutes = calculateWorkDuration(attendance.getWorkIn(), attendance.getWorkOut(), halfLeave, workPolicy);
+			
+			attendance.adjustWorkDuration(minutes);
+			return "WORK_OUT";
+		}
 		
 		// 최종 근무시간 계산
 		int finalMinutes = calculateWorkDuration(attendance.getWorkIn(), attendance.getWorkOut(), halfLeave, workPolicy);
