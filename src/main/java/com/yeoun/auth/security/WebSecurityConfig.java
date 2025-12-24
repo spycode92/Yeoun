@@ -121,10 +121,10 @@ public class WebSecurityConfig {
 					.hasAnyRole("SYS_ADMIN", "LOG_ADMIN")
 					// 재고조회
 					.requestMatchers("/inventory/list/**")
-					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "LOG_USER")
 					// 재고이력
 					.requestMatchers("/inventory/history/**")
-					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "LOG_USER")
 					// 재고실사
 					.requestMatchers("/inventory/stock-take/**")
 					.hasAnyRole("SYS_ADMIN", "LOG_USER")

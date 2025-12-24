@@ -203,7 +203,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN', 'MES_USER')">
+            <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN', 'MES_USER', 'LOG_USER')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></i>
@@ -217,13 +217,13 @@
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER', 'LOG_USER')">
                         <a th:href="@{/inventory/list}" class="menu-link">
                             <div data-i18n="Menu2" class="menu-link-sub">재고조회</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER', 'LOG_USER')">
                         <a th:href="@{/inventory/history}" class="menu-link">
                             <div data-i18n="Menu3" class="menu-link-sub">재고이력</div>
                         </a>
