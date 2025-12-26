@@ -4,6 +4,7 @@ let inventorySafetyStockInfo; // 안전재고 정보
 let todayInboundData; // 입고정보
 let todayOutboundData; // 입고정보
 let chartData; // 가공한차트데이터
+let chartMaxAmount; // 차트데이터중 가장 큰 값
 let orderData; //작업지시서데이터
 let ivOrderCheckData;
 
@@ -43,8 +44,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 	todayOutboundData = await fetchTodayOutboundData();
 	// 차트데이터
 	const RawChartData = await fetchIvHistoryData();
+//	console.log(RawChartData);
 	// 차트데이터 가공
 	chartData = normalizeIvHistory(RawChartData);
+//	console.log(chartData);
 	// 작업지시서 데이터
 	orderData = await fetchOrderListData();
 	// 발주체크 데이터
@@ -153,19 +156,61 @@ document.addEventListener('DOMContentLoaded', async function () {
 	trendChart = new ApexCharts(document.querySelector("#trendChart"), trendOptions);
 	trendChart.render();
 	
-	const aggregated = aggregateByMode(chartData, viewMode);
-	const { labels, series } = buildChartSeries(aggregated);
+	const aggregated = await aggregateByMode(chartData, viewMode);
+//	console.log("aggregated : ", aggregated);
+	const { labels, series } = await buildChartSeries(aggregated);
 	
-	trendChart.updateOptions({
-	    labels: labels,
-	    xaxis: { type: 'category' },
-	    series: series
-	}, false, true);
+	updateChartOptions(labels, series)
 	
 	
 	//스피너  off
 	hideSpinner();	
 });
+
+// 차트 옵션 세팅
+async function updateChartOptions(labels, series) {
+	// 자릿수
+	const magnitude = Math.pow(10, Math.floor(Math.log10(chartMaxAmount)));
+	// 가장 앞자리 수를 1만큼 올림 처리
+	const niceMax = Math.ceil(chartMaxAmount / magnitude) * magnitude;
+	// 간격 지정
+	const interval = magnitude;
+	// 앞자리 수 만큼 눈금 갯수 지정  
+	const tickAmount = niceMax / magnitude;  // 11, 6, 25 등 앞자리 수만큼
+	
+	await trendChart.updateOptions({
+	    labels: labels,
+	    xaxis: { type: 'category' },
+		yaxis: { min: 0, max: niceMax,
+				 tickAmount: tickAmount,
+				 labels: {
+				     formatter: function(value) {
+				         if (interval >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+				         if (interval >= 1000) return (value / 1000).toFixed(0) + 'K';
+				         return value.toLocaleString();
+				     }
+				 }
+				
+		},
+	    series: series
+	}, false, true);
+}
+
+// 차트 인터벌 구하기 함수
+async function getInterval(maxValue) {
+    if (maxValue === 0) return 1;
+    
+	// 자릿수 파악
+	const magnitude = Math.pow(10, Math.floor(Math.log10(maxValue)));
+
+	// 최대값을 magnitude로 올림 (10,983,300 → 11,000,000)
+	const niceMax = Math.ceil(maxValue / magnitude) * magnitude;
+
+	// 10등분 간격 계산
+	const interval = niceMax / 10;
+
+	return interval;
+}
 
 // ------------------------------------
 // 차트옵션
@@ -331,7 +376,7 @@ function getGroupKey(dateStr, mode) {
 }
 
 // 재집계 함수
-function aggregateByMode(chartData, mode) {
+async function aggregateByMode(chartData, mode) {
     const groups = new Map(); // key: groupKey + '_' + workType
 
     chartData.forEach(row => {
@@ -359,7 +404,7 @@ function aggregateByMode(chartData, mode) {
 
 // 재집계함수를 토대로 차트에 넣어줄 데이터 생성함수
 // aggregatedData : aggregateByMode(chartData, mode)
-function buildChartSeries(aggregatedData) {
+async function buildChartSeries(aggregatedData) {
 	// 라벨설정 : 재집계함수의 groupKey = mode별로 가공된 날짜데이터
     const labels = [...new Set(aggregatedData.map(row => row.groupKey))];
 	// 날짜데이터 정렬
@@ -367,6 +412,8 @@ function buildChartSeries(aggregatedData) {
 	
 	// 재집계함수를 필요한 데이터로 가공하기 위한 맵 객체
     const map = new Map();
+	
+	chartMaxAmount = 0;
 	
     aggregatedData.forEach(row => {
 		// 키설정 : 날짜_워크타입
@@ -382,6 +429,13 @@ function buildChartSeries(aggregatedData) {
             value = row.sumPrev - row.sumCurrent;
         }
         map.set(key, value);
+
+		console.log("이전 맥스 amount : ", chartMaxAmount);
+		// 차트에서 가장 큰 수 찾기
+		if (chartMaxAmount < value ) {
+			chartMaxAmount = value;
+		}
+		console.log("바뀐 맥스 amount : ", chartMaxAmount);
     });
 	// 차트에 입력할 입고,출고,폐기 데이터리스트 객체
     const inboundData = [];
@@ -407,7 +461,7 @@ function buildChartSeries(aggregatedData) {
 
 // ------------------------------------------------------------------
 // 차트 타입 변경 함수
-function onChartTypeClick(event) {
+async function onChartTypeClick(event) {
 	// 선택된 버튼
     const clicked = event.currentTarget;
     const mode = clicked.id === 'btnMonth'
@@ -427,16 +481,18 @@ function onChartTypeClick(event) {
     clicked.classList.add('active');
 	
 	// 재고내역 데이터를 비어있는 날자를 채워서 재가공
-	const aggregated = aggregateByMode(chartData, viewMode);
+	const aggregated = await aggregateByMode(chartData, viewMode);
+//	console.log("aggregated : ", aggregated);
 	// 차트를 그리기위한 날짜,옵션,데이터 설정
-	const { labels, series } = buildChartSeries(aggregated);
+	const { labels, series } = await buildChartSeries(aggregated);
 	
+	updateChartOptions(labels, series);
 	// 차트 옵션,데이터 업데이트
-	trendChart.updateOptions({
-	    labels: labels,
-	    xaxis: { type: 'category' },
-	    series: series
-	}, false, true);
+//	trendChart.updateOptions({
+//	    labels: labels,
+//	    xaxis: { type: 'category' },
+//	    series: series
+//	}, false, true);
 }
 
 // -----------------------------------------------------------------------
