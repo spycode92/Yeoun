@@ -1769,7 +1769,8 @@ const grid1 = new Grid({
 		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
 		, { header: '결재권한자', name: 'approver_name', align: 'center' }
 		, { header: '생성일', name: 'created_date', align: 'center' }
-		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110,sortable: true}
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110, sortable: true
+		}//상태가 대기이면서 3일전 날짜일때만 상태에 시계아이콘
 		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
 		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
 		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
@@ -2105,11 +2106,7 @@ function draftValFn(ev) {
 	console.log("draft_doc", draft_doc);
 	//양식종류에따라 보여지는 화면이 다름
 	document.getElementById('approvalCompanionBtn').style.display = "none";//반려
-	document.getElementById('approvalCheckBtn').style.display = "none";//결재확인
-	
-	console.log("draft_doc----->",draft_doc);
-	// 인사발령신청서 선택시 제목에 '[승진]' 자동 설정
-	
+	document.getElementById('approvalCheckBtn').style.display = "none";//결재확인	
 	formChange(draft_doc);
 
 	formReset();
@@ -2213,7 +2210,7 @@ function defaultPrint() {
 	document.getElementById('form-menu').value = document.getElementById('form-type-defalut').value;//양식종류
 
 	if(document.getElementById('form-type-defalut').value === '인사발령신청서'){
-		document.getElementById('approval-title').placeholder = '[부서이동 또는 승진]만 가능합니다, 제목을입력해주세요!';
+		document.getElementById('approval-title').placeholder = '[승진 또는 전보]만 가능합니다, 제목을입력해주세요!';
 	}
 
 	// 작성 모드용 버튼 설정

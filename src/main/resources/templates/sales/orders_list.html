@@ -24,11 +24,17 @@
     
      <!-- 검색 영역 -->
     <div class="card mb-4">
-    <div class="search-box mb-3 d-flex flex-wrap gap-2 align-items-center">
-
+   <div class="card-body d-flex align-items-end gap-3 flex-wrap">
+   <div>
+		<label class="form-label fw-bold">수주 시작일</label>
         <input type="date" id="startDate" class="form-control" style="width: 160px;">
+     </div>
+     
+     <div>
+         <label class="form-label fw-bold">수주 종료일</label>
         <input type="date" id="endDate" class="form-control" style="width: 160px;">
-
+	</div>  
+	
         <input type="text" id="keyword" class="form-control" placeholder="거래처명 / 제품명 / 담당자명 검색" 
                style="width: 260px;">
 

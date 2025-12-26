@@ -452,47 +452,6 @@
 						</div>						
 					</div>						
 
-
-						<!-- 전결자 클릭시 추가 태그 -->
-						<!-- <div id="jeongyeolja" style="display:none;border: 1px solid #D9DEE5;border-radius: 6px;padding: 12px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
-						
-							<div id="jeongyeolja-content" class="d-flex">
-							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);width:15px;">
-								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="N" checked>
-								<label class="form-check-label" for="radioDefault1" style="margin-left:5px;">
-									없음 
-								</label>
-							</span>
-							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
-								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="전결">
-								<label class="form-check-label" for="radioDefault2" style="margin-left:5px;">
-									전결  
-								</label>
-							</span>
-							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
-								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="대결">
-								<label class="form-check-label" for="radioDefault3" style="margin-left:5px;">
-									대결  
-								</label>
-								</span>
-							<span style="border: 1px solid #D9DEE5;border-radius: 5px;padding:5px 18px 5px 5px;margin:3px;box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);">
-								<input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
-								<label class="form-check-label" for="radioDefault4" style="margin-left:5px;">
-									선결  
-								</label>
-							</span>
-							<div style="margin:13px;">
-								<h6>전결자 지정 </h6>
-								<select id="delegetedApprover" name="delegetedApprover" class="form-select" aria-label="Default select example" style="display:none;">
-								<option selected></option>
-								<option th:each="item, iterStat : ${empList}" 
-											th:value="${item.empId}" 
-											th:text="${item.empName} + '(' + ${item.empId} + ')'">
-								</option> 
-								</select>
-							</div>
-							</div>
-						</div> -->
 				</div>
 				<div class="modal-footer">
 					<div id="fileListContainer" class="d-flex"></div>
@@ -534,6 +493,6 @@
 </body>
 
 <th:block layout:fragment="myScript"> 
-		<script th:inline="javascript" th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
+		<script th:inline="javascript" th:src="@{/js/approval/gridCustomRenderers.js}"></script>
 		<script th:inline="javascript" th:src="@{/js/approval/approvalDoc.js}"></script>
 </th:block>

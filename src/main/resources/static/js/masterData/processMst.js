@@ -158,7 +158,7 @@ const grid3 = new Grid({
         ,{header: 'QC 여부' ,name: 'qcPointYn' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
-					isSelect: false   // ⭐ 이걸로 구분
+					isSelect: true
 				}
 			}
 			,editor: {

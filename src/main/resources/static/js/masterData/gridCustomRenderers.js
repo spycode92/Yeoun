@@ -1,53 +1,6 @@
 /**
  * tui ui 수정스타일변경과 영어표기를 따로 만든 클래스
  */
-//전자결재
-class StatusBadgeRenderer {
-  constructor(props) {
-    const el = document.createElement('div');
-    el.style.textAlign = 'center'; // 가운데 정렬
-    
-    this.el = el;
-    this.render(props);
-  }
-
-  getElement() {
-    return this.el;
-  }
-
-  render(props) {
-    const value = String(props.value || '');
-    let style = { bg: '#F1F3F5', text: '#868E96' }; // 기본 회색
-
-    // '대기'라는 단어만 포함되어 있으면 무조건 파랑 적용
-    if (value.includes('대기')) {
-      style = { bg: '#D0EBFF', text: '#228BE6' };
-    } 
-    else if (value === '완료' || value.includes('승인')) {
-      style = { bg: '#D3F9D8', text: '#40C057' }; // 초록
-    } 
-    else if (value === '반려') {
-      style = { bg: '#FFE3E3', text: '#FA5252' }; // 빨강
-    }
-
-   this.el.innerHTML = `
-      <span style="
-        background-color: ${style.bg};
-        color: ${style.text};
-        padding: 4px 12px;
-        border-radius: 20px; /* 알약 모양 */
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-        min-width: 50px;
-        line-height: 1.4;
-      ">
-        ${value}
-      </span>
-    `;
-  }
-}
-
 // 영어 한글 표기 mes - CODE_MAP
 const CODE_MAP = {
 	//제품유형

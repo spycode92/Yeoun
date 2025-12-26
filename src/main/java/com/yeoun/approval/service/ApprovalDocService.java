@@ -228,8 +228,13 @@ public class ApprovalDocService {
 		hrAction.setCreatedUser(createdUser);
 
 		// 발령유형 - 직위변경으로 기본 설정
-		hrAction.setActionType("PROMOTION");// 승진
-
+		if(targetEmp.getDept().getDeptId().equals(doc.get("toDeptId"))) {
+			hrAction.setActionType("PROMOTION");// 승진:직급상승
+			log.info("[승진] ---> PROMOTION");
+		}else{
+			hrAction.setActionType("TRANSFER");//  전보:동일직급에서 다른부서로
+			log.info("[전보] ---> TRANSFER");
+		}
 		//발령 효력 시작일 (휴직 시작일 / 복직일 / 퇴직일 공통 사용)
 		LocalDate effectiveDate = parseDateSafely(doc.get("finishDate"));
 		hrAction.setEffectiveDate(effectiveDate);

@@ -43,7 +43,7 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		           ON p.prdId = oi.prdId
 		    WHERE (:status IS NULL OR o.orderStatus = :status)
 		      AND (:startDate IS NULL OR o.orderDate >= :startDate)
-		      AND (:endDate IS NULL OR o.deliveryDate <= :endDate)
+		      AND (:endDate IS NULL OR o.orderDate <= :endDate)
 		      AND (
 		            :keyword IS NULL OR
 		            c.clientName LIKE CONCAT('%', :keyword, '%')
