@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/layout.html}">
+<head>
+<link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css}" href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css">
+    <link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css}" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css}" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script th:src="@{/js/common/formatTimeJS.js}"></script>
+  	<link rel="stylesheet" th:href="@{/css/order/common.css}"/>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <div class="title">
+                설비 이력
+            </div>
+        </div>
+
+        <div>
+            <div class="order-card">
+                <div class="order-card-header">
+                </div>
+
+                <!-- 검색 / 필터 영역 -->
+                <div class="mb-2 search-row">
+                    <select id="searchEquipment" class="form-select" style="max-width: 150px;">
+                        <option value="ALL">전체 설비</option>
+                        <option th:each="type : ${equipTypes}"
+                                th:value="${type.equipId}"
+                                th:text="|${type.equipId} (${type.koName})|">
+                        </option>
+                    </select>
+                    <select id="searchLine" class="form-select" style="max-width: 150px;">
+                        <option value="ALL">전체 라인</option>
+                        <option th:each="line : ${lines}"
+                                th:value="${line.lineId}"
+                                th:text="|${line.lineId} (${line.lineName})|">
+                        </option>
+                    </select>
+                    <input type="date" class="form-control" id="startDate" style="max-width: 150px;">
+                    ~
+                    <input type="date" class="form-control" id="endDate" style="max-width: 150px;">
+                </div>
+
+                <div id="historyGrid"></div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+<th:block layout:fragment="myScript">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let historyGrid = null;
+        
+        // 상태 뱃지 포맷
+        function formatStatusBadge(status) {
+
+          const map = {
+            "BREAKDOWN":  { text: "고장",  cls: "status-badge bg-danger" },
+            "REPAIR":     { text: "수리",  cls: "status-badge bg-warning" },
+            "INJECTION":  { text: "점검",  cls: "status-badge bg-success" }
+          };
+
+          const item = map[status] || { text: status, cls: "status-badge" };
+
+          return `<span class="${item.cls}">${item.text}</span>`;
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const gridH = document.getElementById("historyGrid");
+            if (!gridH) {
+                console.error("그리드 요소 없음");
+                return;
+            }
+
+            historyGrid = new tui.Grid({
+                el: gridH,
+                bodyHeight: 450,
+                rowHeaders: ["rowNum"],
+                scrollX: false,
+                scrollY: true,
+                pageOptions: {
+                    useClient: true,
+                    perPage: 10
+                },
+                columnOptions: { resizable: true },
+                columns: [
+                    { header: "설비명", name: "equipName", align: "center" },
+                    { header: "설비타입", name: "equipId", align: "left" },
+                    { header: "작업지시", name: "orderId", align: "left" },
+                    { header: "제품", name: "productName", align: "center" },
+                    { header: "상태", name: "status", align: "center" },
+                    { header: "시작시간", name: "startTime", align: "center",
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
+                    {
+                        header: "종료시간", name: "endTime", align: "center",
+                        formatter: ({value}) => {
+                            if (!value) return "";
+                            return formatTimeFull(new Date(value));
+                        }
+                    }
+                ]
+            })
+
+            loadHistory();
+
+            historyGrid.on("click", (event) => {
+                if (event.columnName !== "btn") return;
+                const row = historyGrid.getRow(event.rowKey);
+                openHistoryDetailModal(row);
+            });
+
+            ["searchEquipment", "searchLine", "startDate", "endDate"].forEach(id => {
+                document.getElementById(id).addEventListener("change", loadHistory);
+            });
+        });
+
+        function loadHistory(){
+            const equip  = document.getElementById("searchEquipment")?.value;
+            const line   = document.getElementById("searchLine")?.value;
+            const start  = document.getElementById("startDate")?.value;
+            const end    = document.getElementById("endDate")?.value;
+
+            const query = new URLSearchParams();
+
+            if (equip !== "ALL")  query.append("equipment", equip);
+            if (line !== "ALL")   query.append("line", line);
+            if (start)  query.append("start", start);
+            if (end) 	query.append("end", end);
+
+            fetch("/equipment/history/data?" + query.toString())
+                .then(response => {
+                    if (!response.ok) throw new Error("HTTP " + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("작업지시 목록 : ", data);
+                    historyGrid.resetData(data);
+                })
+                .catch(err => {
+                    console.error("작업지시 목록 조회 오류", err);
+                    alert("조회 중 오류 발생");
+                });
+        }
+
+
+    </script>
+</th:block>

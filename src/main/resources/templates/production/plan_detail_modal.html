@@ -1,0 +1,68 @@
+<div th:fragment="modal">
+    <div class="modal fade" id="planDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">생산계획 상세 조회</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                <div class="card mb-3">
+    <div class="card-body">        
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <div class="text-muted small">계획번호</div>
+                <div id="d_planId" class="fw-bold fs-6"></div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted small">생성일</div>
+                <div id="d_createdAt" class="fw-semibold"></div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted small">생성자</div>
+                <div id="d_createdBy" class="fw-semibold"></div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted small">상태</div>
+                <div id="d_status"></div>
+            </div>
+
+            <div class="col-12">
+                <div class="text-muted small">메모</div>
+                <div id="d_memo" ></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+                    <hr />
+
+                    <!-- PLAN_ITEM 목록 AG Grid -->
+                    <h6 class="mt-3">생산 상세 목록</h6>
+                    <div class="ag-theme-quartz" style="height: 300px;" id="modalPlanItemGrid"></div>
+
+                    <hr />
+
+                    <!-- 주문 상세 목록 -->
+                    <h6 class="mt-3">해당 제품의 수주 상세 목록</h6>
+                    <div class="ag-theme-quartz" style="height: 300px;" id="modalOrderItemGrid"></div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

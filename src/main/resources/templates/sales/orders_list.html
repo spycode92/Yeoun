@@ -1,0 +1,114 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+<style>
+/* 헤더 제목 가운데 */
+.ag-theme-quartz .ag-header-cell-label {
+    justify-content: center;
+}
+
+/* 셀 값 가운데 */
+.ag-theme-quartz .ag-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+</style>
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <h3 class="mb-4">수주 관리</h3>
+    
+     <!-- 검색 영역 -->
+    <div class="card mb-4">
+   <div class="card-body d-flex align-items-end gap-3 flex-wrap">
+   <div>
+		<label class="form-label fw-bold">수주 시작일</label>
+        <input type="date" id="startDate" class="form-control" style="width: 160px;">
+     </div>
+     
+     <div>
+         <label class="form-label fw-bold">수주 종료일</label>
+        <input type="date" id="endDate" class="form-control" style="width: 160px;">
+	</div>  
+	
+        <input type="text" id="keyword" class="form-control" placeholder="거래처명 / 제품명 / 담당자명 검색" 
+               style="width: 260px;">
+
+        <button id="btnSearch" class="btn btn-primary">검색</button>
+        <button id="btnReset" class="btn btn-secondary">초기화</button>
+
+        <a th:href="@{/sales/orders/new}" class="btn btn-success ms-auto">
+            신규 수주 등록
+        </a>
+    </div>
+
+</div>
+    
+
+ <!-- ===========================================================
+     수주 상태 탭 (REQUEST / RECEIVED / CONFIRMED / SHIPPING / CANCEL)
+=========================================================== -->
+<ul class="nav nav-tabs mb-3">
+
+    <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${status == null or status == ''} ? 'active' : ''"
+           th:href="@{/sales/orders(status='')}">
+            전체
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${status == 'REQUEST'} ? 'active' : ''"
+           th:href="@{/sales/orders(status='REQUEST')}">
+            접수
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${status == 'CONFIRMED'} ? 'active' : ''"
+           th:href="@{/sales/orders(status='CONFIRMED')}">
+            확정
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${status == 'SHIPPED'} ? 'active' : ''"
+           th:href="@{/sales/orders(status='SHIPPED')}">
+            출하
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link"
+           th:classappend="${status == 'CANCEL'} ? 'active' : ''"
+           th:href="@{/sales/orders(status='CANCEL')}">
+            취소
+        </a>
+    </li>
+
+</ul>
+
+
+   
+
+    <!-- AG Grid -->
+    <div id="orderGrid" class="ag-theme-quartz" style="height: 600px;"></div>
+
+    <!-- AG-Grid script -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+    <!-- custom page script -->
+    <script th:src="@{/js/sales/orders_list.js}"></script>
+    
+        </div>
+
+</th:block>
+</th:block>

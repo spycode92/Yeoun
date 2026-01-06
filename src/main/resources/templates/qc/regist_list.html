@@ -1,0 +1,61 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+	
+	<h2>QC 등록</h2>
+	
+	<div class="row g-2 align-items-center">
+		<!-- Search Filter -->
+	    <form id="qcRegistSearchForm">
+	        <div class="row gx-3 gy-2 align-items-end">
+
+			  <!-- 작업지시번호 -->
+			  <div class="col-md-4">
+			    <label class="form-label">작업지시번호</label>
+			    <select class="form-select" id="orderFilter">
+			      <option value="ALL">전체</option>
+			    </select>
+			  </div>
+			
+			  <!-- 제품 -->
+			  <div class="col-md-3">
+			    <label class="form-label">제품</label>
+			    <select class="form-select" id="productFilter">
+			      <option value="ALL">전체</option>
+			    </select>
+			  </div>
+			
+			  <!-- 버튼 영역 -->
+			  <div class="col-md-5 d-flex gap-2">
+			    <button type="button" class="btn btn-outline-secondary" id="btnResetFilter">
+			      초기화
+			    </button>
+			  </div>
+			
+			</div>
+
+	    </form>
+
+	</div>
+
+	<br>
+	
+	<div class="card-body p-0">
+	    <div id="qcRegistGrid"></div>
+    </div>
+    
+    <th:block th:replace="~{/qc/qc_regist_modal :: qc-regist-modal}"></th:block>
+    
+    
+    
+    
+	
+	</div>
+
+<script th:src="@{/js/qc/qc_regist.js}"></script>		
+	
+</th:block>
+</body>

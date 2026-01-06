@@ -2,6 +2,8 @@ package com.yeoun.pay.service;
 
 import com.yeoun.pay.dto.PayrollHistoryProjection;
 import com.yeoun.pay.repository.PayrollHistoryRepository;
+import com.yeoun.pay.repository.PayrollPayslipRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.util.List;
 public class PayrollHistoryService {
 
     private final PayrollHistoryRepository repo;
+    private final PayrollPayslipRepository payslipRepository;
 
     /**
      * 🔥 관리자용 급여 이력 검색
@@ -68,5 +71,12 @@ public class PayrollHistoryService {
     public Long findPayslipId(String empId, String yymm) {
         return repo.findPayslipId(empId, yymm);
     }
+    
+    
+    
+    public Long findConfirmedPayslipId(String empId, String yymm) {
+        return payslipRepository.findConfirmedPayslipId(empId, yymm);
+    }
+
 
 }

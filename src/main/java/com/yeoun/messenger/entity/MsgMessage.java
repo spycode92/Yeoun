@@ -76,18 +76,14 @@ public class MsgMessage implements FileUploadHelpper {
 	public Long getTargetTableId() {
 		return msgId;
 	}
-	
-	@Builder
-	public MsgMessage(Long roomId, String senderId, String msgContent, String msgType) {
-	    this.roomId = MsgRoom.IdOnly().roomId(roomId).build();
-	    
-	    Emp sender = new Emp();
-	    sender.setEmpId(senderId);
-	    this.senderId = sender;
-	    
-	    this.msgContent = msgContent;
-	    this.msgType = msgType;
-	}
+
+    @Builder
+    public MsgMessage(MsgRoom room, Emp sender, String msgContent, String msgType) {
+        this.roomId = room;
+        this.senderId = sender;
+        this.msgContent = msgContent;
+        this.msgType = msgType;
+    }
 
 
 

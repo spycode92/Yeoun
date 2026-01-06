@@ -36,6 +36,20 @@
 
     .badge-soft { background:#eef2ff; color:#4f46e5; }
     .badge-gray { background:#f3f4f6; color:#6b7280; }
+        .modal-dialog {
+  max-height: 90vh;
+  margin: auto;
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 150px);  /* 헤더 + 푸터 제외한 영역 */
+}
   </style>
 
 
@@ -101,15 +115,15 @@
                 </td>
                 <td class="fw-semibold" th:text="${it.itemCode}"></td>
                 <td th:text="${it.itemName}"></td>
-                <td><span class="badge badge-gray" th:text="${it.itemType}"></span></td>
-                <td><span class="badge badge-soft" th:text="${it.itemGroup}"></span></td>
+                <td><span class="badge badge-gray" th:text="${it.itemType.kor}"></span></td>
+                <td><span class="badge badge-soft" th:text="${it.itemGroup.kor}"></span></td>
                 <td class="text-center">
 					     
 					        <span class="badge"
                         th:classappend="${it.taxable.name() == 'Y'} ? 'bg-success' : 'bg-secondary'"
                         th:text="${it.taxable.name() == 'Y' ? '✔' : '✘'}"></span>			
 					</td>
-                <td><span class="badge bg-secondary-subtle text-secondary" th:text="${it.calcMethod}"></span></td>
+                <td><span class="badge bg-secondary-subtle text-secondary" th:text="${it.calcMethod.kor}"></span></td>
                 
                 
                 <td class="text-truncate" style="max-width:240px" th:text="${it.remark}"></td>
@@ -152,43 +166,47 @@
                 </div>
 
                 <div class="col-md-4">
-                  <label class="form-label">항목유형</label>
-                  <select class="form-select" th:field="*{itemType}" required>
-                    <option value="">--선택--</option>
-                    <option value="EARNING">EARNING(지급)</option>
-                    <option value="DEDUCTION">DEDUCTION(공제)</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">항목그룹</label>
-                  <select class="form-select" th:field="*{itemGroup}" required>
-                    <option value="">--선택--</option>                    
-                    <option value="ALLOWANCE">ALLOWANCE</option>
-                    <option value="INCENTIVE">INCENTIVE</option>
-                    <option value="DEDUCTION">DEDUCTION</option>
-                    <option value="TAX">TAX</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">과세여부</label>
-                  <select class="form-select" th:field="*{taxable}" required>
-                    <option value="">--선택--</option>
-                    <option value="Y">Y</option>
-                    <option value="N">N</option>
-                  </select>
-                </div>
+				  <label class="form-label">항목유형</label>
+				  <select class="form-select" th:field="*{itemType}" required>
+				    <option value="">-- 선택 --</option>
+				    <option value="EARNING">지급 (EARNING)</option>
+				    <option value="DEDUCTION">공제 (DEDUCTION)</option>
+				  </select>
+				</div>
 
                 <div class="col-md-4">
-                  <label class="form-label">계산방법</label>
-                  <select class="form-select" th:field="*{calcMethod}" required>
-                    <option value="">--선택--</option>
-                    <option value="FIXED">FIXED</option>
-                    <option value="RATE">RATE</option>
-                    <option value="FORMULA">FORMULA</option>
-                    <option value="EXTERNAL">EXTERNAL</option>
-                  </select>
-                  <div class="form-text">인센티브는 보통 EXTERNAL/FIXED</div>
-                </div>
+				  <label class="form-label">항목그룹</label>
+				  <select class="form-select" th:field="*{itemGroup}" required>
+				    <option value="">-- 선택 --</option>
+				    <option value="ALLOWANCE">수당 (ALLOWANCE)</option>
+				    <option value="INCENTIVE">인센티브 (INCENTIVE)</option>
+				    <option value="DEDUCTION">공제 (DEDUCTION)</option>
+				    <option value="TAX">세금 (TAX)</option>
+				  </select>
+				</div>
+
+                <div class="col-md-4">
+				  <label class="form-label">과세여부</label>
+				  <select class="form-select" th:field="*{taxable}" required>
+				    <option value="">-- 선택 --</option>
+				    <option value="Y">과세 (Y)</option>
+				    <option value="N">비과세 (N)</option>
+				  </select>
+				</div>
+
+
+                <div class="col-md-4">
+				  <label class="form-label">계산방법</label>
+				  <select class="form-select" th:field="*{calcMethod}" required>
+				    <option value="">-- 선택 --</option>
+				    <option value="FIXED">고정금액 (FIXED)</option>
+				    <option value="RATE">비율(%) 계산 (RATE)</option>
+				    <option value="FORMULA">수식 계산 (FORMULA)</option>
+				    <option value="EXTERNAL">외부 계산 (EXTERNAL)</option>
+				  </select>
+				  <div class="form-text">인센티브는 보통 EXTERNAL / FIXED</div>
+				</div>
+
                 <div class="col-md-4">
                   <label class="form-label">정렬순서</label>
                   <input type="number" th:field="*{sortNo}" class="form-control" min="0" step="1" value="0">
@@ -238,38 +256,42 @@
                   </div>
 
                   <div class="col-md-4">
-                    <label class="form-label">항목유형</label>
-                    <select name="itemType" class="form-select" required>
-                      <option value="EARNING" th:selected="${it.itemType=='EARNING'}">EARNING</option>
-                      <option value="DEDUCTION" th:selected="${it.itemType=='DEDUCTION'}">DEDUCTION</option>
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">항목그룹</label>
-                    <select name="itemGroup" class="form-select" required>                      
-                      <option value="ALLOWANCE" th:selected="${it.itemGroup=='ALLOWANCE'}">ALLOWANCE</option>
-                      <option value="INCENTIVE" th:selected="${it.itemGroup=='INCENTIVE'}">INCENTIVE</option>
-                      <option value="DEDUCTION" th:selected="${it.itemGroup=='DEDUCTION'}">DEDUCTION</option>
-                      <option value="TAX" th:selected="${it.itemGroup=='TAX'}">TAX</option>
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">과세여부</label>
-                    <select name="taxable" class="form-select" required>
-                      <option value="Y" th:selected="${it.taxable=='Y'}">Y</option>
-                      <option value="N" th:selected="${it.taxable=='N'}">N</option>
-                    </select>
-                  </div>
+					  <label class="form-label">항목유형</label>
+					  <select name="itemType" class="form-select" required>
+					    <option value="EARNING" th:selected="${it.itemType=='EARNING'}">지급 (EARNING)</option>
+					    <option value="DEDUCTION" th:selected="${it.itemType=='DEDUCTION'}">공제 (DEDUCTION)</option>
+					  </select>
+					</div>
 
                   <div class="col-md-4">
-                    <label class="form-label">계산방법</label>
-                    <select name="calcMethod" class="form-select" required>
-                      <option value="FIXED" th:selected="${it.calcMethod=='FIXED'}">FIXED</option>
-                      <option value="RATE" th:selected="${it.calcMethod=='RATE'}">RATE</option>
-                      <option value="FORMULA" th:selected="${it.calcMethod=='FORMULA'}">FORMULA</option>
-                      <option value="EXTERNAL" th:selected="${it.calcMethod=='EXTERNAL'}">EXTERNAL</option>
-                    </select>
-                  </div>
+					  <label class="form-label">항목그룹</label>
+					  <select name="itemGroup" class="form-select" required>
+					    <option value="ALLOWANCE" th:selected="${it.itemGroup=='ALLOWANCE'}">수당 (ALLOWANCE)</option>
+					    <option value="INCENTIVE" th:selected="${it.itemGroup=='INCENTIVE'}">인센티브 (INCENTIVE)</option>
+					    <option value="DEDUCTION" th:selected="${it.itemGroup=='DEDUCTION'}">공제 (DEDUCTION)</option>
+					    <option value="TAX" th:selected="${it.itemGroup=='TAX'}">세금 (TAX)</option>
+					  </select>
+					</div>
+
+                  <div class="col-md-4">
+					  <label class="form-label">과세여부</label>
+					  <select name="taxable" class="form-select" required>
+					    <option value="Y" th:selected="${it.taxable=='Y'}">과세 (Y)</option>
+					    <option value="N" th:selected="${it.taxable=='N'}">비과세 (N)</option>
+					  </select>
+					</div>
+
+
+                 <div class="col-md-4">
+				  <label class="form-label">계산방법</label>
+				  <select name="calcMethod" class="form-select" required>
+				    <option value="FIXED" th:selected="${it.calcMethod=='FIXED'}">고정금액 (FIXED)</option>
+				    <option value="RATE" th:selected="${it.calcMethod=='RATE'}">비율 계산 (RATE)</option>
+				    <option value="FORMULA" th:selected="${it.calcMethod=='FORMULA'}">수식 계산 (FORMULA)</option>
+				    <option value="EXTERNAL" th:selected="${it.calcMethod=='EXTERNAL'}">외부 계산 (EXTERNAL)</option>
+				  </select>
+				</div>
+
                   <div class="col-md-4">
                     <label class="form-label">정렬순서</label>
                     <input type="number" name="sortNo" class="form-control" min="0" step="1" th:value="${it.sortNo}">
@@ -301,7 +323,7 @@
   </div><!-- /container-xxl -->
 
  <!-- 외부 JS 파일 로드 -->
-  <script src="/js/pay/pay_item.js"></script>
+  <script th:src="@{/js/pay/pay_item.js}"></script>
 
 
 </th:block>

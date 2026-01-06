@@ -36,7 +36,7 @@ public class NoticeRestController {
     //최근 공지사항 조회
     @GetMapping("/last-notice")
     public ResponseEntity<List<NoticeDTO>> getLastNotice(){
-    	Page<NoticeDTO> noticePage = noticeService.getNotice(0, 5, "", "createdDate", "desc");
+    	Page<NoticeDTO> noticePage = noticeService.getLastNotice(0, 5);
     	
         if (noticePage.getContent() == null) { //찾는 공지사항이 없을때
             return ResponseEntity.notFound().build();

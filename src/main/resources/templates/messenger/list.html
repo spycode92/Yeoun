@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Messenger Main</title>
 
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+  <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css}" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css}" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css}" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+  <link th:href="@{https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css}" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/messenger/messenger.css}"/>
   <link rel="stylesheet" th:href="@{/css/messenger/popup.css}"/>
 
@@ -27,7 +26,6 @@
         <i class="bi bi-person-lines-fill active" id="tab-friends"></i>
         <i class="bi bi-chat-dots" id="tab-chats"></i>
       </div>
-      <i class="bi bi-gear"></i>
     </div>
 
     <!-- 우측 내용 -->
@@ -70,24 +68,24 @@
                  th:src="|@{/img/msg_img_}${friend.msgProfile}.png|">
             <span class="status-dot" th:data-status="${friend.status}"></span> <!-- 상태 표시 추가 -->
           </div>
-          <div>
+         <div>
             <p class="mb-0 fw-bold" th:text="${friend.empName}"></p>
             <small class="text-muted" th:text="|${friend.deptName} / ${friend.posName} |"></small>
           </div>
           <div>
           	<!-- ======== 업무 사유 상태메시지 표시 ======== -->
-			<small class="status-msg"
+			<small class="status-msg" th:data-id="${friend.empId}"
 			       th:switch="${friend.manualWorkStat}">
 			       
-			    <span th:case="'WORKING'">근무 중</span>
-			    <span th:case="'MEETING'">회의 중</span>
-			    <span th:case="'CALL'">통화 중</span>
-			    <span th:case="'FOCUS'">집중 업무 중</span>
-			    <span th:case="'LUNCH'">식사 중</span>
-			    <span th:case="'OUTING'">외출 중</span>
-			    <span th:case="'FIELDWORK'">외근 중</span>
-			    <span th:case="'WFH'">재택근무 중</span>
-			    <span th:case="'VACATION'">휴가 중</span>
+			    <th:block th:case="WORKING">근무 중</th:block>
+			    <th:block th:case="MEETING">회의 중</th:block>
+			    <th:block th:case="CALL">통화 중</th:block>
+			    <th:block th:case="FOCUS">집중 업무 중</th:block>
+			    <th:block th:case="LUNCH">식사 중</th:block>
+			    <th:block th:case="OUTING">외출 중</th:block>
+			    <th:block th:case="FIELDWORK">외근 중</th:block>
+			    <th:block th:case="WFH">재택근무 중</th:block>
+			    <th:block th:case="VACATION">휴가 중</th:block>
 			
 			    <!-- 값 없을 때 -->
 			    <span th:case="*">-</span>
@@ -104,9 +102,9 @@
       	
       	<!-- JS가 렌더링할 자리 -->
     	<div class="chat-list"></div>
-        
+
         <!-- 1) 대화방 목록 있는 경우 -->
-        <div th:if="${rooms.size() > 0}">
+        <!--<div th:if="${rooms.size() > 0}">
           <div class="chat-item"
                th:each="room : ${rooms}"
                th:data-id="${room.roomId}">
@@ -130,12 +128,12 @@
           </div>
         </div>
 
-        <!-- 2) 대화방 목록이 아예 없을 때 -->
+         2) 대화방 목록이 아예 없을 때
         <div th:if="${rooms.size() == 0}" class="empty-chat">
           <img th:src="@{/img/empty_chat.png}" alt="empty" class="empty-icon">
           <p class="empty-title">대화방이 없습니다</p>
           <p class="empty-sub">새로운 대화를 시작해보세요.</p>
-        </div>
+        </div>-->
       </div>
     </div>
   </div>
@@ -210,7 +208,7 @@
 	//CSRF Token
 	//==========================
 	const csrfToken = '[[${_csrf.token}]]';
-	const csrfHeaderName = '[[${_csrf.headerName}]]';
+	const csrfHeader = '[[${_csrf.headerName}]]';
   </script>
   <!-- 부트스트랩 JS -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -218,6 +216,7 @@
   <!-- 소켓 JS -->
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script th:src="@{/js/common/connectSocket.js}"></script>
   <script th:src="@{/js/messenger/createRoom.js}"></script>
   <script th:src="@{/js/messenger/list.js}"></script>
 </body>

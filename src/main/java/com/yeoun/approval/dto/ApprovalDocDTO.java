@@ -30,7 +30,7 @@ public class ApprovalDocDTO {
 	private String empId; //사원번호
 	
 	@NotBlank(message="생성일자는 필수 입력값입니다!")
-	private LocalDate createDate; //생성일자 
+	private LocalDate createdDate; //생성일자 
 	
 	@NotBlank(message="완료예정일자는 필수 입력값입니다!")
 	private LocalDate finishDate; //완료예정일자
@@ -50,6 +50,8 @@ public class ApprovalDocDTO {
 	private String toDeptId; //발령부서 - 인사 발령신청서
 	
 	private String leaveType; //연차 유형
+	
+	private String toPosCode;   //직급코드
 	
 	private String expndType; //지출종류 - 지출결의서
 	

@@ -1,5 +1,6 @@
 package com.yeoun.messenger.dto;
 
+import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.messenger.entity.MsgMessage;
 import com.yeoun.messenger.entity.MsgRoom;
@@ -10,8 +11,7 @@ import lombok.ToString;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,8 +19,8 @@ import java.util.Locale;
 @ToString
 public class MsgMessageDTO {
 
-    private long msgId;             // 메시지 ID
-    private long roomId;            // 채팅방 ID
+    private Long msgId;             // 메시지 ID
+    private Long roomId;            // 채팅방 ID
     private String senderId;        // 보낸사람 ID
     private String msgContent;      // 메시지 내용
     private String msgType;         // 메시지 타입
@@ -31,6 +31,8 @@ public class MsgMessageDTO {
     private String senderName;      // 보낸사람 이름 (추가필드)
     private Integer senderProfile;  // 보낸사람 프로필 (추가필드)
     private String sentDateFormatted;	// 전송시간 포맷 (추가필드)
+
+    private List<FileAttachDTO> files; // 추가필드
 
     // ===========================================================
     // DTO <-> Entity 변환 메서드 구현
@@ -47,19 +49,18 @@ public class MsgMessageDTO {
         return entity;
     }
 
-    public static MsgMessageDTO fromEntity(MsgMessage msgMessage) {
-        MsgMessageDTO dto = modelMapper.map(msgMessage, MsgMessageDTO.class);
+    public static MsgMessageDTO fromEntity(MsgMessage msg, List<FileAttachDTO> files) {
+        MsgMessageDTO dto = new MsgMessageDTO();
 
-        dto.setRoomId(msgMessage.getRoomId().getRoomId());
-        dto.setSenderId(msgMessage.getSenderId().getEmpId());
-        dto.setSenderName(msgMessage.getSenderId().getEmpName());
-        
-        // 원하는 모양으로 시간표시 포맷
-        if (msgMessage.getSentDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a h:mm")
-                    .withLocale(Locale.KOREAN);
-            dto.setSentDateFormatted(msgMessage.getSentDate().format(formatter));
-        }
+        dto.setMsgId(msg.getMsgId());
+        dto.setRoomId(msg.getRoomId().getRoomId());
+        dto.setSenderId(msg.getSenderId().getEmpId());
+        dto.setSenderName(msg.getSenderId().getEmpName());
+        dto.setSentDate(msg.getSentDate());
+        dto.setMsgType(msg.getMsgType());
+        dto.setMsgContent(msg.getMsgContent());
+
+        dto.setFiles(files);
 
         return dto;
     }

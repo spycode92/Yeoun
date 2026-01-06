@@ -23,6 +23,7 @@ public interface LeaveHistoryRepository extends JpaRepository<AnnualLeaveHistory
 			        (h.startDate BETWEEN :startOfYear AND :endOfYear)
 			     OR (h.endDate BETWEEN :startOfYear AND :endOfYear)
 			  )
+			 ORDER BY h.startDate DESC
 			""")
 	 List<AnnualLeaveHistory> findAnnualLeaveInYear(
 			 @Param("empId") String empId,

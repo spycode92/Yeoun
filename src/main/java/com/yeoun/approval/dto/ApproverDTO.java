@@ -30,7 +30,7 @@ public class ApproverDTO {
     @NotBlank(message = "결재 순서는 필수 입력값입니다!")
 	private String orderApprovers; //결재 순서
 	
-	private boolean viewing; //결재열람권한 y/n
+	private String viewing; //결재열람권한 y/n
 	
 	private static ModelMapper modelMapper = new ModelMapper();
 	
@@ -41,5 +41,7 @@ public class ApproverDTO {
 	public static ApproverDTO fromEntity(Approver approver) {
 		return modelMapper.map(approver, ApproverDTO.class);
 	}
+
+
     
 }

@@ -1,0 +1,61 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="move_stock_modal">
+
+<!-- Move Stock Modal -->
+<div class="modal fade" id="moveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">재고 이동</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2">
+                	<div class="col mb-3">
+	                	<label for="ivQtyMove" class="form-label">현재수량</label>
+	                	<input type="text" id="ivQtyMove" class="form-control" readonly>
+                	</div>
+                	<div class="col mb-3">
+	                	<label for="exPectObQtyMove" class="form-label">출고예정수량</label>
+	                	<input type="text" id="exPectObQtyMove" class="form-control" readonly>
+                	</div>
+                	<div class="col mb-3">
+	                	<label for="canMoveAmount" class="form-label">이동가능수량</label>
+	                	<input type="text" id="canMoveAmount" class="form-control" readonly>
+                	</div>
+                </div>
+				<div class="row g-2">
+                    <div class="col mb-3">
+                        <label for="moveZone" class="form-label">Zone</label>
+                        <select id="moveZone" class="form-select"></select>
+                    </div>
+                    <div class="col mb-3">
+                        <label for="moveRack" class="form-label">Rack</label>
+                        <select id="moveRack" class="form-select"></select>
+                    </div>
+                    <div class="col mb-3">
+                        <label for="moveRow" class="form-label">Row</label>
+                        <select id="moveRow" class="form-select"></select>
+                    </div>
+                    <div class="col mb-3">
+                        <label for="moveColumn" class="form-label">Column</label>
+                        <select id="moveColumn" class="form-select"></select>
+                    </div>
+                    <input type="hidden" id="locationIdMove">
+                </div>
+                <div class="mb-3">
+                    <label for="moveQty" class="form-label">이동 수량</label>
+                    <input type="number" id="moveQty" class="form-control" placeholder="0">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="moveBtnMove">이동</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script th:src="@{/js/inventory/inventoryMove.js}"></script>

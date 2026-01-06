@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yeoun.process.mapper.ProductionTrendMapper">
+	
+	<!-- =========================================================
+		 DAY (일) : label = YYYY-MM-DD
+		 계획 = WORK_ORDER.PLAN_QTY 합
+		 완료 = 최종공정(6) WORK_ORDER_PROCESS.GOOD_QTY 합
+	 	 ========================================================= -->
+	<select id="plannedByDay" resultType="com.yeoun.production.dto.TrendRowDTO">
+		SELECT TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM-DD') AS label,
+			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
+	    FROM WORK_ORDER w
+	    WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+	    	AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+	    GROUP BY TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM-DD')
+	    ORDER BY label
+	</select>
+	
+	<select id="completedByDay" resultType="com.yeoun.production.dto.TrendRowDTO">
+		WITH planned_orders AS (
+			SELECT w.ORDER_ID, w.PLAN_END_DATE
+			FROM WORK_ORDER w
+			WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+				AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+		)
+		SELECT TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM-DD') AS label,
+			   NVL(SUM(wop.GOOD_QTY), 0) AS cnt
+	    FROM planned_orders p
+	    JOIN WORK_ORDER_PROCESS wop
+    		ON wop.ORDER_ID = p.ORDER_ID
+	    WHERE wop.STEP_SEQ = 6
+	   	 	AND wop.STATUS = 'DONE'
+	  	GROUP BY TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM-DD')
+	  	ORDER BY label
+	</select>
+
+	<!-- =========================================================
+		 WEEK (주) : 월 기준 주차: "MM월 W주차"
+	 	 ========================================================= -->
+	<select id="plannedByWeek" resultType="com.yeoun.production.dto.TrendRowDTO">
+		SELECT TO_CHAR(w.PLAN_END_DATE, 'MM') || '월 ' || TO_CHAR(w.PLAN_END_DATE, 'W') || '주차' AS label,
+			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
+	    FROM WORK_ORDER w
+	    WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+	    	AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+	    GROUP BY TO_CHAR(w.PLAN_END_DATE, 'MM'), TO_CHAR(w.PLAN_END_DATE, 'W')
+ 		ORDER BY TO_CHAR(w.PLAN_END_DATE, 'MM'), TO_CHAR(w.PLAN_END_DATE, 'W')
+	</select>
+
+  	<select id="completedByWeek" resultType="com.yeoun.production.dto.TrendRowDTO">
+ 		WITH planned_orders AS (
+		    SELECT w.ORDER_ID, w.PLAN_END_DATE
+		    FROM WORK_ORDER w
+		    WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+		    	AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+ 		)
+  		SELECT TO_CHAR(p.PLAN_END_DATE, 'MM') || '월 ' || TO_CHAR(p.PLAN_END_DATE, 'W') || '주차' AS label,
+  			   NVL(SUM(wop.GOOD_QTY), 0) AS cnt
+		FROM planned_orders p
+  		JOIN WORK_ORDER_PROCESS wop
+		    ON wop.ORDER_ID = p.ORDER_ID
+	  	WHERE wop.STEP_SEQ = 6
+	    	AND wop.STATUS = 'DONE'
+	  	GROUP BY TO_CHAR(p.PLAN_END_DATE, 'MM'), TO_CHAR(p.PLAN_END_DATE, 'W')
+	  	ORDER BY TO_CHAR(p.PLAN_END_DATE, 'MM'), TO_CHAR(p.PLAN_END_DATE, 'W')
+  	</select>
+
+  	<!-- =========================================================
+         MONTH (월) : label = YYYY-MM
+         ========================================================= -->
+
+ 	<select id="plannedByMonth" resultType="com.yeoun.production.dto.TrendRowDTO">
+		SELECT TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM') AS label,
+			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
+		FROM WORK_ORDER w
+		WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+			AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+		GROUP BY TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM')
+		ORDER BY label
+  	</select>
+
+  	<select id="completedByMonth" resultType="com.yeoun.production.dto.TrendRowDTO">
+	    WITH planned_orders AS (
+	    	SELECT w.ORDER_ID, w.PLAN_END_DATE
+	    	FROM WORK_ORDER w
+	    	WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+	     		AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+	    )
+	    SELECT TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM') AS label,
+	    	   NVL(SUM(wop.GOOD_QTY), 0) AS cnt
+	    FROM planned_orders p
+	    JOIN WORK_ORDER_PROCESS wop
+	    	ON wop.ORDER_ID = p.ORDER_ID
+	    WHERE wop.STEP_SEQ = 6
+	    	AND wop.STATUS = 'DONE'
+	    GROUP BY TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM')
+	    ORDER BY label
+  	</select>
+  	
+    <!-- ***************************************************************************** -->
+    <!--
+    [즉시 조치 리스트]
+    - 1) 지연(DELAY): work_order 기준
+    	 - 작업지시가 진행 중인데 예정종료시간(plan_end_date)을 이미 초과한 건
+         - elapsedMin = (현재 - 예정종료) 분  => 지연 분
+    - 2) QC 대기(QC_PENDING): work_order_process 기준
+    	 - 공정이 끝났는데 QC 대기 상태로 머무는 단계
+         - elapsedMin = (현재 - 공정종료시간(end_time)) 분  => QC 대기 분
+    - 3) 장기 진행(LONG): work_order_process 기준
+         - 공정이 진행중(IN_PROGRESS)인데 오래 걸리는 건
+         - elapsedMin = (현재 - 공정시작시간(start_time)) 분  => 진행 경과 분
+    - priority ASC(지연 먼저) + elapsedMin DESC(더 급한 것 먼저)
+    - FETCH FIRST #{limit} ROWS ONLY : TopN
+  -->
+
+<select id="selectImmediateActions" resultType="com.yeoun.process.dto.ImmediateActionRowDTO">
+WITH current_step AS (
+  /* 작업지시별 "현재 공정" 후보 1건 선정
+     - IN_PROGRESS 우선
+     - 없으면 QC_PENDING
+     - 시간은 최근 기준으로 정렬 */
+  SELECT
+    wop.order_id,
+    pm.process_name,
+    wop.step_seq,
+    wop.status,
+    ROW_NUMBER() OVER (
+      PARTITION BY wop.order_id
+      ORDER BY
+        CASE wop.status
+          WHEN 'IN_PROGRESS' THEN 1
+          WHEN 'QC_PENDING'  THEN 2
+          ELSE 99
+        END,
+        NVL(wop.start_time, wop.end_time) DESC
+    ) AS rn
+  FROM work_order_process wop
+  JOIN process_mst pm ON pm.process_id = wop.process_id
+  WHERE wop.status IN ('IN_PROGRESS', 'QC_PENDING')
+),
+base AS (
+
+  /* 1) 지연(DELAY): 예정종료 초과 + 현재공정 있으면 "공정명 (지연)" */
+  SELECT
+    1 AS priority,
+    'DELAY' AS actionType,
+    wo.order_id AS orderId,
+    p.prd_name AS itemName,
+    p.prd_id   AS itemCode,
+
+    CASE
+      WHEN cs.process_name IS NOT NULL THEN cs.process_name || ' (지연)'
+      ELSE '진행 공정 확인 필요'
+    END AS processName,
+
+    '지연' AS statusLabel,
+    wo.plan_end_date AS planEndTime,
+    (
+      EXTRACT(DAY    FROM (SYSTIMESTAMP - CAST(wo.plan_end_date AS TIMESTAMP))) * 24 * 60 +
+      EXTRACT(HOUR   FROM (SYSTIMESTAMP - CAST(wo.plan_end_date AS TIMESTAMP))) * 60 +
+      EXTRACT(MINUTE FROM (SYSTIMESTAMP - CAST(wo.plan_end_date AS TIMESTAMP)))
+    ) AS elapsedMin,
+
+    cs.step_seq AS stepSeq
+
+  FROM work_order wo
+  JOIN product_mst p ON p.prd_id = wo.prd_id
+  LEFT JOIN current_step cs
+    ON cs.order_id = wo.order_id
+   AND cs.rn = 1
+
+  WHERE wo.status = 'IN_PROGRESS'
+    AND wo.plan_end_date IS NOT NULL
+    AND wo.plan_end_date &lt; SYSDATE
+
+  UNION ALL
+
+  /* 2) QC 대기(QC_PENDING) */
+  SELECT
+    2 AS priority,
+    'QC_PENDING' AS actionType,
+    wop.order_id AS orderId,
+    p.prd_name AS itemName,
+    p.prd_id   AS itemCode,
+    pm.process_name AS processName,
+    'QC 검사 대기' AS statusLabel,        -- 문구만 현업스럽게
+    wo.plan_end_date AS planEndTime,
+    (
+      EXTRACT(DAY    FROM (SYSTIMESTAMP - CAST(wop.end_time AS TIMESTAMP))) * 24 * 60 +
+      EXTRACT(HOUR   FROM (SYSTIMESTAMP - CAST(wop.end_time AS TIMESTAMP))) * 60 +
+      EXTRACT(MINUTE FROM (SYSTIMESTAMP - CAST(wop.end_time AS TIMESTAMP)))
+    ) AS elapsedMin,
+    wop.step_seq AS stepSeq
+  FROM work_order_process wop
+  JOIN work_order wo ON wo.order_id = wop.order_id
+  JOIN product_mst p ON p.prd_id = wo.prd_id
+  JOIN process_mst pm ON pm.process_id = wop.process_id
+  WHERE wo.status = 'IN_PROGRESS'
+    AND wop.status = 'QC_PENDING'
+    AND wop.end_time IS NOT NULL
+
+  UNION ALL
+
+  /* 3) 장기 진행(LONG) */
+  SELECT
+    3 AS priority,
+    'LONG' AS actionType,
+    wop.order_id AS orderId,
+    p.prd_name AS itemName,
+    p.prd_id   AS itemCode,
+    pm.process_name AS processName,
+    '진행' AS statusLabel,
+    wo.plan_end_date AS planEndTime,
+    (
+      EXTRACT(DAY    FROM (SYSTIMESTAMP - CAST(wop.start_time AS TIMESTAMP))) * 24 * 60 +
+      EXTRACT(HOUR   FROM (SYSTIMESTAMP - CAST(wop.start_time AS TIMESTAMP))) * 60 +
+      EXTRACT(MINUTE FROM (SYSTIMESTAMP - CAST(wop.start_time AS TIMESTAMP)))
+    ) AS elapsedMin,
+    wop.step_seq AS stepSeq
+  FROM work_order_process wop
+  JOIN work_order wo ON wo.order_id = wop.order_id
+  JOIN product_mst p ON p.prd_id = wo.prd_id
+  JOIN process_mst pm ON pm.process_id = wop.process_id
+  WHERE wo.status = 'IN_PROGRESS'
+    AND wop.status = 'IN_PROGRESS'
+    AND wop.start_time IS NOT NULL
+),
+ranked AS (
+  SELECT
+    b.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY b.orderId
+      ORDER BY b.priority ASC, b.elapsedMin DESC
+    ) AS rn
+  FROM base b
+)
+SELECT
+  priority, actionType, orderId, itemName, itemCode,
+  processName, statusLabel, planEndTime, elapsedMin, stepSeq
+FROM ranked
+WHERE rn = 1
+ORDER BY priority ASC, elapsedMin DESC
+FETCH FIRST #{limit} ROWS ONLY
+</select>
+
+
+    
+    
+
+</mapper>

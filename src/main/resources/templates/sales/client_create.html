@@ -1,0 +1,169 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout}">
+
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <h2 class="mb-4">신규 거래처 등록</h2>
+
+    <form id="clientForm" th:action="@{/sales/client/create}" th:object="${client}" method="post" class="row g-3">
+
+        <!-- ============================== -->
+        <!--   기본 정보                    -->
+        <!-- ============================== -->
+        <div class="col-md-3">
+            <label class="form-label required">유형</label>
+            <select class="form-select" th:field="*{clientType}" required>
+                <option value="">선택</option>
+                <option value="CUSTOMER">거래처</option>
+                <option value="SUPPLIER">협력사</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label required">거래처명</label>
+            <input type="text" class="form-control" th:field="*{clientName}" required>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label required">사업자번호</label>
+            <div class="input-group">
+                <input type="text" class="form-control" th:field="*{businessNo}" id="businessNo" required>
+                <button class="btn btn-outline-secondary" type="button" onclick="checkBusinessNo()">중복확인</button>
+            </div>
+            <small id="bizMsg" class="text-danger"></small>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label required">대표자명</label>
+            <input type="text" class="form-control" th:field="*{ceoName}" required>
+        </div>
+        
+        <!-- ============================== -->
+			<!--   업태 / 업종 -->
+			<!-- ============================== -->
+			
+			<div class="col-md-4">
+			    <label class="form-label required">업태</label>
+			    <input type="text"
+			           class="form-control"
+			           th:field="*{bizType}"
+			           placeholder="예) 제조업, 도매업" required>
+			</div>
+			
+			<div class="col-md-6">
+			    <label class="form-label required">업종</label>
+			    <input type="text"
+			           class="form-control"
+			           th:field="*{bizItem}"
+			           placeholder="예) 화장품 제조, 향료 도매" required>
+			</div>
+        
+
+
+        <!-- ============================== -->
+        <!--   주소 정보 (카카오 주소 API) -->
+        <!-- ============================== -->
+
+        <h5 class="mt-4 fw-bold">주소 정보</h5>
+
+        <div class="col-md-3">
+            <label class="form-label required">우편번호</label>
+            <div class="input-group">
+                <input type="text" class="form-control" th:field="*{postCode}" id="postcode" readonly required>
+                <button type="button" class="btn btn-outline-secondary" onclick="findAddress()">주소검색</button>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <label class="form-label required">주소</label>
+            <input type="text" class="form-control" th:field="*{addr}" id="address" readonly required>
+        </div>
+
+        <div class="col-md-7">
+            <label class="form-label required">상세주소</label>
+            <input type="text" class="form-control" th:field="*{addrDetail}" id="detailAddress" required>
+        </div>
+
+
+        <!-- ============================== -->
+        <!-- 담당자 정보 -->
+        <!-- ============================== -->
+
+        <h5 class="mt-4 fw-bold">담당자 정보</h5>
+
+        <div class="col-md-4">
+            <label class="form-label required">담당자명</label>
+            <input type="text" class="form-control" th:field="*{managerName}" required>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">부서</label>
+            <input type="text" class="form-control" th:field="*{managerDept}">
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label required">연락처</label>
+            <input type="text" class="form-control" th:field="*{managerTel}" required>
+        </div>
+
+        <div class="col-md-5">
+            <label class="form-label required">이메일</label>
+            <input type="email" class="form-control" th:field="*{managerEmail}" required>
+        </div>
+
+
+        <!-- ============================== -->
+        <!-- 계좌 -->
+        <!-- ============================== -->
+
+        <h5 class="mt-4 fw-bold">정산 계좌 정보</h5>
+
+        <div class="col-md-4">
+            <label class="form-label required">은행명</label>
+            <input type="text" class="form-control" th:field="*{bankName}" required>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label required">계좌번호</label>
+            <input type="text" class="form-control" th:field="*{accountNumber}" required>
+            <div id="accountMsg" class="form-text text-danger"></div>
+            
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label required">예금주</label>
+            <input type="text" class="form-control" th:field="*{accountName}" required>
+        </div>
+        
+        <div class="col-md-3">
+    <label class="form-label required">상태</label>
+    <select class="form-select" th:field="*{statusCode}" required>
+        <option value="ACTIVE">활성</option>
+        <option value="INACTIVE">비활성</option>
+    </select>
+</div>
+
+
+        <!-- ============================== -->
+        <!-- 버튼 -->
+        <!-- ============================== -->
+
+        <div class="col-12 text-end mt-4">
+            <button type="submit" class="btn btn-primary px-4">등록</button>
+            <a th:href="@{/sales/client}" class="btn btn-secondary">목록</a>
+        </div>
+
+    </form>
+</div>
+
+<!-- 🔥 카카오 주소 API - content fragment 안으로 이동 -->
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+<script th:src="@{/js/sales/clientCreate.js}"></script>
+
+</th:block>
+
+</th:block>

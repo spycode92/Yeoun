@@ -47,5 +47,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 			@Param("startDate") LocalDate startDate, 
 			@Param("endDate") LocalDate endDate);
 
+	// 출근 했지만 퇴근하지 않은 사람 조회
+	List<Attendance> findByWorkDateAndWorkOutIsNull(LocalDate targetDate);
+
 
 }

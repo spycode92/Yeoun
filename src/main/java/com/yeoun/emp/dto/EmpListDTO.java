@@ -6,9 +6,11 @@ import com.yeoun.emp.entity.Emp;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class EmpListDTO {
 	
@@ -50,7 +52,7 @@ public class EmpListDTO {
         );
     }
     
-    // searchEmpList, searchActiveEmpList 에서 사용
+    // searchActiveEmpList 에서 사용
     public EmpListDTO(LocalDate hireDate,
                       String empId,
                       String empName,

@@ -3,7 +3,7 @@
 	layout:decorate="~{/layouts/layout.html}">
 <head>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.css}" />
 </head>
 <body>
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
@@ -35,9 +35,9 @@
 				<div class="mb-6">
 					<label class="h5 mt-3">연차 기준 설정</label>
 					<div class="d-flex">
-						<div class="form-check mb-2 ms-3" th:each="commonCode : ${commonCodeDTO}">
-							<input type="radio" id="fiscalYear" th:field="${workPolicyDTO.annualBasis}" class="form-check-input" th:value="${commonCode.codeId}" />
-							<label class="form-check-label" for="fiscalYear" th:text="${commonCode.codeName}"></label>
+						<div class="form-check mb-2 ms-3" th:each="commonCode, stat : ${commonCodeDTO}">
+							<input type="radio" th:id="'fiscalYear_' + ${stat.index}" th:field="${workPolicyDTO.annualBasis}" class="form-check-input" th:value="${commonCode.codeId}" />
+							<label class="form-check-label" th:for="'fiscalYear_' + ${stat.index}"  th:text="${commonCode.codeName}"></label>
 						</div>
 					</div>
 				</div>

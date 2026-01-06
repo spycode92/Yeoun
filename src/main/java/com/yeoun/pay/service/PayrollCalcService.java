@@ -125,7 +125,7 @@ public class PayrollCalcService {
 
         checkMonthLocked(yyyymm);
 
-        // 🔥 확정된(CONFIRMED) 사원은 전체 계산에서 제외한다
+        //  확정된(CONFIRMED) 사원은 전체 계산에서 제외한다
         List<String> editableEmpIds =
                 empNativeRepository.findActiveEmpList().stream()
                         .map(EmpNativeRepository.EmpSimpleProjection::getEmpId)
@@ -199,7 +199,7 @@ public class PayrollCalcService {
     }
 
     /* =====================================================================
-    🔥 핵심 계산 함수 (전체·개별 모두 여기로 모임)
+     핵심 계산 함수 (전체·개별 모두 여기로 모임)
     - targetEmpId = null → 전체 계산
     - editableEmpIds = 확정 제외한 사원 목록 (전체 계산일 때만 사용)
    ===================================================================== */
@@ -614,10 +614,10 @@ public class PayrollCalcService {
         }
 
         /* --------------------------------------------------------------
-            🔥 여기서 근속수당, 연차수당, 직급수당, 일반수당 분리를 수행함
+             여기서 근속수당, 연차수당, 직급수당, 일반수당 분리를 수행함
         -------------------------------------------------------------- */
         
-        // 🔥 근속수당 추가 (item_code = LONGSERV)
+        //  근속수당 추가 (item_code = LONGSERV)
         if ("LONGSERV".equals(cr.getItem().getItemCode())) {
         	LONGSERV = LONGSERV.add(result);
             continue;
@@ -629,11 +629,14 @@ public class PayrollCalcService {
             continue;
         }
 
-        // 직급수당
-        if (cr.getTargetType().name().equals("GRADE")) {
+     // 직급수당: 단, 보너스(BONUS)는 제외
+        if (cr.getTargetType().name().equals("GRADE")
+                && !"BONUS".equals(cr.getItem().getItemCode())) {
+
             incentiveAmt = incentiveAmt.add(result);
             continue;
         }
+
         
      //   보너스
         if ("BONUS".equals(cr.getItem().getItemCode())) {

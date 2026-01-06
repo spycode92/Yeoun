@@ -36,7 +36,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		// empId 를 사용하여 Emp 엔티티 조회
 		Emp emp = empRepository.findByEmpIdWithDeptAndRoles(empId)
                 .orElseThrow(() -> new UsernameNotFoundException(empId + " : 사원 조회 실패!"));
-		log.info(">>>>>>>>>>>>>> 사용자 정보 : " + emp);
+//		log.info(">>>>>>>>>>>>>> 사용자 정보 : " + emp);
 		
 		// ------------------ 재직자만 로그인 허용 --------------------
 		if (!"ACTIVE".equals(emp.getStatus())) {
@@ -69,7 +69,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		// 권한 리스트: LoginDTO.getAuthorities()에서 사용하므로 그대로 세팅
 		loginDTO.setEmpRoles(emp.getEmpRoles());
 		
-		log.info(">>>>>>>>>>>>>> 로그인 결과 LoginDTO : {}", loginDTO);
+//		log.info(">>>>>>>>>>>>>> 로그인 결과 LoginDTO : {}", loginDTO);
 		
 		// 사용자 인증 정보가 저장된 객체(UserDetails 타입) 리턴
 		// UserDetails 의 구현체인 LoginDTO 객체 리턴 시 UserDetails 타입으로 업캐스팅

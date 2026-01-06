@@ -1,10 +1,13 @@
 package com.yeoun.emp.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +21,7 @@ import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
-import com.yeoun.emp.dto.EmpPageResponse;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
@@ -42,7 +45,17 @@ public class EmpController {
 	
 	// 사원 등록/수정 폼 공통 셀렉트 박스 세팅
 	private void setupEmpFormCommon(Model model) {
-		model.addAttribute("deptList", deptRepository.findActive());
+		
+		// 본부(ERP/MES) 리스트
+	    List<Dept> topDeptList = deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+
+	    // 하위부서 리스트
+	    List<Dept> subDeptList =
+	            deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
+
+	    model.addAttribute("topDeptList", topDeptList);
+	    model.addAttribute("subDeptList", subDeptList);
+	    
 		model.addAttribute("positionList", positionRepository.findActive());
 		model.addAttribute("bankList", commonCodeService.getBankList());
 	}
@@ -51,7 +64,8 @@ public class EmpController {
 	// 뷰페이지로 포워딩 시 입력값 검증으로 활용되는 DTO 객체(빈 객체)를 Model 객체에 담아 함께 전달
 	// GET : 사원 등록 폼
 	@GetMapping("/regist")
-	public String registEmp(Model model) {
+	public String registEmp(@AuthenticationPrincipal LoginDTO user,
+							Model model) {
 		
 		if (!model.containsAttribute("empDTO")) {
 	        model.addAttribute("empDTO", new EmpDTO());
@@ -59,9 +73,19 @@ public class EmpController {
 	    if (!model.containsAttribute("mode")) {
 	        model.addAttribute("mode", "create");
 	    }
+	    
+	 	// 급여정보 수정 가능 권한: HR, SYS 관리자만
+	    boolean isHrAdmin     = user.hasRole("HR_ADMIN");
+	    boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean canEditBankInfo = isHrAdmin || isSystemAdmin;
+	    model.addAttribute("canEditBankInfo", canEditBankInfo);
+	    
+	    model.addAttribute("formAction", "/emp/regist");
+	    
+	    model.addAttribute("pageTitle", "인사 신규 등록");
+	    model.addAttribute("isMyPage", false);
 
-		
-		setupEmpFormCommon(model);
+	    setupEmpFormCommon(model);
 		
 		return "emp/emp_form";
 	}
@@ -73,7 +97,7 @@ public class EmpController {
 	// => 체크 결과를 뷰페이지에서 활용하기 위해 뷰페이지에서 접근할 DTO 객체 이름을 @ModelAttribute 어노테이션 속성으로 명시
 	// => 전달된 파라미터들이 EmpDTO 객체에 바인딩되는 시점에 입력값 검증을 수행하고 이 결과를 BindingResult 타입 파라미터에 저장해줌
 	@PostMapping("/regist")
-	public String regist(@ModelAttribute("empDTO") @Valid EmpDTO empDTO,
+	public String regist(@ModelAttribute("empDTO") @Validated(EmpDTO.Regist.class) EmpDTO empDTO,
 						 BindingResult bindingResult,
 						 RedirectAttributes rttr) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
@@ -131,19 +155,35 @@ public class EmpController {
 							  @RequestParam(value = "keyword", required = false) String keyword,
 							  @RequestParam(value = "deptId", required = false) String deptId) {
 		
-		boolean isHr  = user.hasRole("HR_ADMIN") || user.hasRole("SYS_ADMIN");
-	    boolean isMgr = user.hasRole("DEPT_MANAGER");
+		// 권한 체크
+		boolean isHrAdmin  = user.hasRole("HR_ADMIN");
+		boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean isDeptManager = user.hasRole("DEPT_MANAGER");
+	    
+	    boolean isAdmin = isHrAdmin || isSystemAdmin;
 		
-	    if (isMgr && !isHr) {
-	        deptId = user.getDeptId(); // 부서장은 자기 부서만
+	    // 부서장은 자기 부서만 조회 가능
+	    if (isDeptManager && !isAdmin) {
+	        deptId = user.getDeptId();
+	    }
+	    
+	    // 부서 셀렉트 목록
+	    List<Dept> deptList = deptRepository.findActive();
+	    
+	    // 부서장만 있고 관리자 아님 → 자기 부서만 보여주기
+	    if (isDeptManager && !isAdmin) {
+	        String myDeptId = user.getDeptId();
+	        deptList = deptList.stream()
+	                .filter(d -> myDeptId.equals(d.getDeptId()))
+	                .toList();
 	    }
 	    
 	    // 부서 셀렉트 옵션용
-	    model.addAttribute("deptList", deptRepository.findActive());
+	    model.addAttribute("deptList", deptList);
 	    model.addAttribute("keyword", keyword);
 	    model.addAttribute("deptId", deptId);
-	    model.addAttribute("isHr", isHr);
-	    model.addAttribute("isMgr", isMgr);
+	    model.addAttribute("isDeptManager", isDeptManager);
+	    model.addAttribute("isAdmin", isAdmin);
 	    
 		return "/emp/emp_list";
 	}
@@ -151,27 +191,20 @@ public class EmpController {
 	// AJAX 데이터 로딩 + 검색 + 페이징
 	@ResponseBody
 	@GetMapping("/data")
-	public EmpPageResponse getEmpList (@AuthenticationPrincipal LoginDTO user,
-									   @RequestParam(defaultValue = "0", name = "page") int page,
-									   @RequestParam(defaultValue = "10", name = "size") int size,
+	public List<EmpListDTO> getEmpList (@AuthenticationPrincipal LoginDTO user,
 									   @RequestParam(defaultValue = "", name = "keyword") String keyword,
 									   @RequestParam(required = false, name = "deptId") String deptId) {
 		
-		boolean isHr  = user.hasRole("HR_ADMIN") || user.hasRole("SYS_ADMIN");
-	    boolean isMgr = user.hasRole("DEPT_MANAGER");
+		boolean isHrAdmin  = user.hasRole("HR_ADMIN");
+		boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean isDeptManager = user.hasRole("DEPT_MANAGER");
+	    boolean isAdmin = isHrAdmin || isSystemAdmin;
 
-	    if (isMgr && !isHr) {
-	        deptId = user.getDeptId(); // 부서장은 자기 부서만
+	    if (isDeptManager && !isAdmin) {
+	        deptId = user.getDeptId();
 	    }
 		
-		// 서비스에서 Page<EmpListDTO> 받아오기
-		Page<EmpListDTO> empPage = empService.getEmpList(page, size, keyword, deptId);
-		
-		return new EmpPageResponse(empPage.getContent(),
-								   empPage.getNumber(),
-								   empPage.getSize(),
-								   empPage.getTotalElements(),
-								   empPage.getTotalPages());
+	    return empService.getEmpList(keyword, deptId);
 	}
 	
 	
@@ -186,33 +219,110 @@ public class EmpController {
 	// ====================================================================================
 	// 사원 정보 수정
 	@GetMapping("/edit/{empId}")
-	public String editEmp(@PathVariable("empId") String empId, Model model) {
+	public String editEmp(@PathVariable("empId") String empId, 
+						  @AuthenticationPrincipal LoginDTO user,
+						  Model model) {
 		
 		// 수정용 DTO 조회
 	    EmpDTO empDTO = empService.getEmpForEdit(empId);
 	    
+	    // 급여정보 수정 가능 권한: HR, SYS 관리자만
+	    boolean isHrAdmin     = user.hasRole("HR_ADMIN");
+	    boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean canEditBankInfo = isHrAdmin || isSystemAdmin;
+	    model.addAttribute("canEditBankInfo", canEditBankInfo);
+	    
 		// 공통 모델 세팅
 	    model.addAttribute("empDTO", empDTO);
 		model.addAttribute("mode", "edit");
+		model.addAttribute("pageTitle", "사원 정보 수정");  
+		model.addAttribute("isMyPage", false);
+
+		model.addAttribute("formAction", "/emp/edit");
 		
 		setupEmpFormCommon(model);
-		
-		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
-		model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 		
 		return "emp/emp_form";
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO, RedirectAttributes rttr) {
-	    empService.updateEmp(empDTO);
+	public String updateEmp(@AuthenticationPrincipal LoginDTO user,
+							@ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO, 
+							BindingResult bindingResult,
+							Model model,
+							RedirectAttributes rttr) {
+		
+		// 공통: 원본 DTO 한 번 가져오기 (사진/통장 파일 id 유지용)
+	    EmpDTO original = empService.getEmpForEdit(empDTO.getEmpId());
+	    
+	    // 급여정보 수정 가능 여부
+	    boolean isHrAdmin     = user.hasRole("HR_ADMIN");
+	    boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean canEditBankInfo = isHrAdmin || isSystemAdmin;
+		
+		// 입력값 검증 실패 시
+		if (bindingResult.hasErrors()) {
+			empDTO.setRrnMasked(original.getRrnMasked());
+			empDTO.setPhotoFileId(original.getPhotoFileId());
+			empDTO.setFileId(original.getFileId());
+			model.addAttribute("empDTO", empDTO);
+			model.addAttribute("mode", "edit");
+			model.addAttribute("formAction", "/emp/edit");
+			model.addAttribute("pageTitle", "사원 정보 수정");
+			model.addAttribute("isMyPage", false);
+			model.addAttribute("canEditBankInfo", canEditBankInfo);
+			setupEmpFormCommon(model); 
+			
+			return "emp/emp_form";
+		}
+		
+		// ===========================
+	    // 2) 급여정보 수정 권한 없는 경우 → 원본 값으로 돌려놓기
+	    // ===========================
+	    if (!canEditBankInfo) {
+	        empDTO.setBankCode(original.getBankCode());
+	        empDTO.setAccountNo(original.getAccountNo());
+	        empDTO.setFileId(original.getFileId());
+	        empDTO.setBankbookFile(null);   // 새 파일 업로드 무시
+	    }
+		
+		try {
+	        // 2) 서비스 호출 (이메일/연락처 중복 검사 등)
+	        empService.updateEmp(empDTO);
+
+	    } catch (IllegalStateException e) {
+	        String msg = e.getMessage();
+
+	        // 등록이랑 패턴 맞춰서 필드별 에러 매핑
+	        if (msg.contains("이메일")) {
+	            bindingResult.rejectValue("email", "duplicate", msg);
+	        } else if (msg.contains("연락처")) {
+	            bindingResult.rejectValue("mobile", "duplicate", msg);
+	        } else {
+	            bindingResult.reject("empEditError", msg);
+	        }
+
+	        // 에러난 상태로 다시 폼
+	        empDTO.setRrnMasked(original.getRrnMasked());
+	        empDTO.setPhotoFileId(original.getPhotoFileId());
+	        empDTO.setFileId(original.getFileId());
+	        
+	        model.addAttribute("empDTO", empDTO);
+	        model.addAttribute("mode", "edit");
+	        model.addAttribute("formAction", "/emp/edit");
+	        model.addAttribute("pageTitle", "사원 정보 수정");
+	        model.addAttribute("isMyPage", false);
+	        model.addAttribute("canEditBankInfo", canEditBankInfo);
+	        setupEmpFormCommon(model);
+
+	        return "emp/emp_form";
+	    }
+
+	    // 3) 정상 수정 시
 	    rttr.addFlashAttribute("msg", "정보 수정이 완료되었습니다.");
-	    return "redirect:/emp";  
+	    return "redirect:/emp";
 	}
-	
-	
-	
-	
+
 	
 	
 }

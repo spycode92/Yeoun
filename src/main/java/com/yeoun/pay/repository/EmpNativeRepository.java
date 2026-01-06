@@ -3,10 +3,12 @@ package com.yeoun.pay.repository;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.pay.dto.EmpForPayrollProjection;
 import com.yeoun.pay.dto.EmpPayslipDetailDTO;
+import com.yeoun.pay.entity.PayCalcRule;
 
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +18,7 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 	 @Query(value = """
 		        SELECT
 		            e.EMP_ID      AS empId,
-		            e.EMP_NAME    AS empName,
-		            e.ROLE_CODE   AS roleCode,
+		            e.EMP_NAME    AS empName,		            
 		            e.STATUS      AS status,
 		            e.HIRE_DATE   AS hireDate,
 		            e.DEPT_ID     AS deptId
@@ -30,12 +31,11 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 		        """, nativeQuery = true)
 		    List<EmpForPayrollProjection> findActiveEmpForPayroll();
 	 
-	 /** 특정 사원 1명 급여계산용 조회 */
+	 /** 특정 사원 1명 급여계산용 조회   */
 	 @Query(value = """
 	         SELECT
 	             e.EMP_ID      AS empId,
-	             e.EMP_NAME    AS empName,
-	             e.ROLE_CODE   AS roleCode,
+	             e.EMP_NAME    AS empName,	            
 	             e.STATUS      AS status,
 	             e.HIRE_DATE   AS hireDate,
 	             e.DEPT_ID     AS deptId,
@@ -140,6 +140,23 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
                 ORDER BY e.EMP_NAME
                 """, nativeQuery = true)
         List<EmpSimpleProjection> findActiveEmpList();
+
+        @Query(value = """
+                SELECT 
+                    e.EMP_ID   AS empId,
+                    e.EMP_NAME AS empName
+                FROM EMP e
+                WHERE e.STATUS = 'ACTIVE'
+                  AND (
+                        e.EMP_NAME LIKE '%' || :keyword || '%'
+                        OR e.EMP_ID LIKE '%' || :keyword || '%'
+                      )
+                ORDER BY e.EMP_NAME
+                FETCH FIRST 10 ROWS ONLY
+                """,
+                nativeQuery = true)
+        List<EmpNativeRepository.EmpSimpleProjection> searchActiveEmp(@Param("keyword") String keyword);
+
 
 
 

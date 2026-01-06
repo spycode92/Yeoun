@@ -44,7 +44,7 @@ public class FileAttach {
 	private Long refId;
 	
 	// 카테고리
-	@Column(name = "CATEGORY", length = 20)
+	@Column(name = "CATEGORY", length = 255)
 	private String category;
 	
 	// 저장 파일명

@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,12 +19,18 @@ import lombok.Setter;
 // => Emp 엔티티와 Role 엔티티는 다대다(N:M) 관계이므로 중간 완충 역할을 수행
 @Entity
 @Table(name = "EMP_ROLE")
+@SequenceGenerator(
+		name = "EMP_ROLE_SEQ_GENERATOR",
+		sequenceName = "EMP_ROLE_SEQ", 
+		initialValue = 1,
+		allocationSize = 1
+)
 @Getter
 @Setter
 @NoArgsConstructor
 public class EmpRole {
 	
-	@Id @GeneratedValue(strategy = GenerationType.AUTO)
+	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "EMP_ROLE_SEQ_GENERATOR")
 	private Long id;
 	
 	// 사원(EMP) 테이블과 연관관계 설정

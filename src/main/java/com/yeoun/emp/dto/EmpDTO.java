@@ -25,6 +25,10 @@ import lombok.ToString;
 @ToString
 public class EmpDTO {
 	
+	// === 검증 그룹 인터페이스 ===
+    public interface Regist {}  // 등록용
+    public interface Edit {}  // 수정용
+	
 	// ========================
 	// 기본정보
 	// ========================
@@ -32,28 +36,28 @@ public class EmpDTO {
 	private String empId;
 	
 	// 이름
-	@NotBlank(message = "이름은 필수 입력값입니다.")
-	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 입니다.")
+	@NotBlank(message = "이름은 필수 입력값입니다.", groups = {Regist.class, Edit.class})
+	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 입니다.", groups = {Regist.class, Edit.class})
 	private String empName;  			
 	
 	// 성별
-	@NotBlank(message = "성별을 선택해주세요.")
-    @Pattern(regexp = "M|F", message = "성별은 M 또는 F만 가능합니다.")
+	@NotBlank(message = "성별을 선택해주세요.", groups = Regist.class)
+    @Pattern(regexp = "M|F", message = "성별은 M 또는 F만 가능합니다.", groups = Regist.class)
 	private String gender;  
     
     // 주민번호 
-	@NotBlank(message = "주민등록번호는 필수 입력입니다.")
+	@NotBlank(message = "주민등록번호는 필수 입력입니다.", groups = Regist.class)
     @Pattern(
       regexp = "^(\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))-[1-4]\\d{6}$",
-      message = "주민등록번호 형식은 000000-0000000 입니다."
+      message = "주민등록번호 형식은 000000-0000000 입니다.", groups = Regist.class
     )
     private String rrn;
 	
 	private String rrnMasked;
     
 	// 입사일: 필수 + 과거/오늘
-    @NotNull(message = "입사일은 필수입니다.")
-    @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.")
+    @NotNull(message = "입사일은 필수입니다.", groups = Regist.class)
+    @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.", groups = Regist.class)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate hireDate;  
     
@@ -65,20 +69,20 @@ public class EmpDTO {
 	// ========================
 
     // 이메일
-    @NotBlank(message = "이메일은 필수 입력값입니다.")
-    @Email(message = "이메일 형식에 맞게 입력해 주세요.")
+    @NotBlank(message = "이메일은 필수 입력값입니다.", groups = {Regist.class, Edit.class})
+    @Email(message = "이메일 형식에 맞게 입력해 주세요.", groups = {Regist.class, Edit.class})
     private String email;  		
     
     // 연락처
-    @NotBlank(message = "연락처는 필수입니다.")
-    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식은 010-0000-0000 입니다.")
+    @NotBlank(message = "연락처는 필수입니다.", groups = {Regist.class, Edit.class})
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식은 010-0000-0000 입니다.", groups = {Regist.class, Edit.class})
     private String mobile; 	
 	
     // 주소 (우편번호 / 기본주소 + 상세주소)
-	@NotBlank(message = "우편번호는 필수 입력값입니다.") 
+	@NotBlank(message = "우편번호는 필수 입력값입니다.", groups = {Regist.class, Edit.class})
 	private String postCode; 
 	
-	@NotBlank(message = "기본 주소는 필수 입력값입니다.")
+	@NotBlank(message = "기본 주소는 필수 입력값입니다.", groups = {Regist.class, Edit.class})
 	private String address1;  	
 	private String address2;   	
 	
@@ -87,31 +91,31 @@ public class EmpDTO {
 	// ========================
 	
 	// 부서 
-	@NotBlank(message = "부서를 선택해주세요.")
+	@NotBlank(message = "부서를 선택해주세요.", groups = Regist.class)
     private String deptId;
 	
 	// 직급
-	@NotBlank(message = "직급을 선택해주세요.")
+	@NotBlank(message = "직급을 선택해주세요.", groups = Regist.class)
     private String posCode;
 	
     // 재직 상태		
 	private String status; 
-	
+
 	// ========================
 	// 급여통장 정보
 	// ========================
 
 	// 은행 코드 (예: BANK_004)
-	@NotBlank(message = "은행을 선택해주세요.")
+	@NotBlank(message = "은행을 선택해주세요.", groups = {Regist.class, Edit.class})
 	private String bankCode;  
 
 	// 계좌번호
-	@NotBlank(message = "계좌번호를 입력해주세요.")
-	@Pattern(regexp = "^[0-9\\-]{6,20}$", message = "계좌번호는 숫자와 '-'만 사용하여 6~25자 내로 입력해주세요.")
+	@NotBlank(message = "계좌번호를 입력해주세요.", groups = {Regist.class, Edit.class})
+	@Pattern(regexp = "^[0-9\\-]{6,20}$", message = "계좌번호는 숫자와 '-'만 사용하여 6~20자 내로 입력해주세요.", 
+			 groups = {Regist.class, Edit.class})
 	private String accountNo;  
 
 	// 예금주명
-	@NotBlank(message = "예금주명을 입력해주세요.")
 	private String holder; 
 
 	// 통장 사본 파일 ID 

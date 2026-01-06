@@ -6,14 +6,12 @@
 		<h3>출퇴근 현황</h3>
 		<div class="d-flex justify-content-between">
 			<div class="row flex-nowrap">
-				<div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
-					<input type="date" name="srhStrDate" class="form-control" id="startDate">
+				<div class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-3">
+					<input type="date" class="form-control" id="startDate" style="width: 140px;"/>
+					<span>~</span>
+					<input type="date" class="form-control" id="endDate" style="width: 140px;">
 				</div>
-                ~
-                <div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
-	                <input type="date" name="srhEndDate" class="form-control" id="endDate">
-                </div>
-                <div class="mb-6 col-lg-6 col-xl-4 col-12 mb-0">
+                <div>
 	             	<button type="button" class="btn btn-primary" id="searchbtn">조회</button>
                 </div>
 			</div>
@@ -41,7 +39,7 @@
 								<label for="nameWithTitle" class="form-label">사원번호</label>
 								<div class="input-group">
 									<input type="text" id="nameWithTitle" class="form-control" name="empId" />
-									<button type="button" class="btn btn-primary" th:onclick="searchEmp()">검색</button>
+									<button type="button" class="btn btn-primary" th:onclick="searchEmp()" id="searchBtn">검색</button>
 								</div>
 							</div>
 							<div class="col mb-6">
@@ -50,7 +48,7 @@
 							</div>
 							<div class="col mb-6">
 								<label for="inTime" class="form-label">출근시간</label>
-								<input type="time" id="inTime" class="form-control" name="workIn"/>
+								<input type="time" id="inTime" class="form-control" name="workIn" required/>
 							</div>
 							<div class="col mb-6">
 								<label for="endTime" class="form-label">퇴근시간</label>
@@ -62,7 +60,6 @@
 									<option value="">상태</option>
 									<option value="WORKIN">출근</option>
 									<option value="LATE">지각</option>
-									<option value="OFF">휴무</option>
 									<option value="OUTWORK">외근</option>
 								</select>
 							</div>
@@ -76,9 +73,10 @@
 		</div>
 	</div>
 	<th:block layout:fragment="myScript">
+		<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-		<script src="/js/attendance/attendance.js"></script>
-		<script src="/js/attendance/attendanceAdminGrid.js"></script>
+		<script th:src="@{/js/attendance/attendance.js}"></script>
+		<script th:src="@{/js/attendance/attendanceAdminGrid.js}"></script>
 	</th:block>
 </body>
 </th:block>

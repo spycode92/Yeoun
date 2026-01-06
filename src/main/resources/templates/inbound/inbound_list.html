@@ -1,0 +1,184 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+	<head>
+		<style>
+		 /* ===================== 탭 커스텀 ===================== */
+		    .pay-tabs {
+		      border-bottom: 2px solid #e5e7eb; /* 라인 */
+		      margin-bottom: 1.5rem;
+		    }
+		    .pay-tabs .nav-link {
+		      position: relative;
+		      color: #6b7280;
+		      font-weight: 600;
+		      padding: 0.75rem 1.5rem;
+		      border: none;
+		      border-radius: 8px 8px 0 0;
+		      transition: all 0.25s ease;
+		    }
+		    .pay-tabs .nav-link:hover {
+		      color: #0d6efd;
+		      background: #f1f5ff;
+		    }
+		    .pay-tabs .nav-link.active {
+		      color: #0d6efd;
+		      background: #ffffff;
+		      box-shadow: 0 -2px 8px rgba(13,110,253,0.1);
+		    }
+		    .pay-tabs .nav-link.active::after {
+		      content: '';
+		      position: absolute;
+		      left: 0; right: 0; bottom: -2px;
+		      height: 3px;
+		      background: #0d6efd;
+		      border-radius: 2px;
+		      animation: underlineIn 0.3s ease forwards;
+		    }
+		    @keyframes underlineIn {
+		      from {width: 0; margin-left: 50%;}
+		      to {width: 100%; margin-left: 0;}
+		    }
+		    .modal-dialog {
+		  max-height: 90vh;
+		  margin: auto;
+		}
+		
+		.modal-content {
+		  max-height: 90vh;
+		  overflow: hidden;
+		}
+		
+		.modal-body {
+		  overflow-y: auto;
+		  max-height: calc(90vh - 150px);  /* 헤더 + 푸터 제외한 영역 */
+		}
+		
+		#clientResult {
+		    max-height: 180px;
+		    overflow-y: auto;
+		    background-color: white;
+		    z-index: 9999;
+		}
+			
+		#clientSearch:focus {
+		    border-color: #6ea8fe;
+		    box-shadow: 0 0 6px rgba(110, 168, 254, 0.5);
+		}
+		
+		/* 초기 상태: 투명하게 숨김 */
+		.fade-in-content {
+		    opacity: 0;
+		    transition: opacity 0.2s ease-in-out; 
+		}
+		
+		/* 로딩 완료 시 붙일 클래스 */
+		.fade-in-content.loaded {
+		    opacity: 1;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+			<!-- 스피너 -->
+			<div id="loading-overlay" style="display:none; 
+			    position:absolute; top:0; left:0; width:100%; height:100%; 
+			    background:rgba(255,255,255,0.6); 
+			    z-index:99; text-align:center; display:flex; 
+			    align-items:center; justify-content:center;">
+				<div style="margin-top:30vh;">
+					<div class="spinner-border text-primary" role="status">
+					</div>
+					<br>
+					<span class="visually">데이터 불러오는 중...</span>
+				</div>
+			</div>
+			<div class="d-flex">
+				<h2>입고관리</h2>
+				<!-- 오른쪽: 발주 등록 버튼 -->
+				<div class="col-12 col-lg d-flex justify-content-end">
+					<button type="button" class="btn btn-primary px-2 py-0" data-bs-toggle="modal" data-bs-target="#modalCenter"
+						sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN')">
+						발주 등록 
+					</button>
+				</div>
+			</div>
+		  	<ul class="nav pay-tabs">
+		  		<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/materialList}" th:classappend="${activeTab}=='mat' ? 'active'">원재료 입고</a></li>
+		    	<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/reInboundList}" th:classappend="${activeTab}=='re' ? 'active'">재입고</a></li>
+		    	<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/productList}" th:classappend="${activeTab}=='prd' ? 'active'">완제품 입고</a></li>
+		  	</ul>
+<!-- 			<div th:replace="${activeTab == 'mat'} ? ~{inbound/material_list :: material} : ~{inbound/product_list :: product}"></div> -->
+				<div th:replace="${activeTab == 'mat'} ? ~{inbound/material_list :: material} : (${activeTab == 're'} ? ~{inbound/re_material_list :: reMaterial} : ~{inbound/product_list :: product})"></div>
+			<br>
+			<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
+				<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="modalCenterTitle">발주등록</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<div id="purchaseForm">
+								<div class="row mb-6">
+									<div class="col mb-0">
+										<label class="form-label">거래처</label>
+										<div class="position-relative" >
+										    <input type="text" class="form-control" id="clientSearch" placeholder="거래처 검색">
+										    <ul class="list-group position-absolute w-100 shadow-sm mt-1 d-none" id="clientResult"></ul>
+										</div>
+										
+										<input type="hidden" name="clientId" id="clientId">
+									</div>
+									<div class="col mb-0">
+										<label class="form-label">담당자</label>
+										<input class="form-control" type="text" id="managerName" name="managerName" readonly/>
+									</div>
+								</div>
+								<div class="row mb-6">
+									<div class="col mb-0">
+										<label class="form-label">발주품목</label>
+										<select class="form-select" name="materialOrderItem" id="itemSelect" disabled></select>
+									</div>
+									<div class="col mb-0">
+										<label class="form-label">예상도착일</label>
+										<input class="form-control" type="date" id="dueDate" name="dueDate"/>
+									</div>
+								</div>
+								<hr>
+								<table class="table" id="orderTable">
+									<thead>
+										<tr>
+											<th>품목명</th>
+											<th>최소수량</th>
+											<th>단위</th>
+											<th>주문수량</th>
+											<th>단가</th>
+											<th>공급가액</th>
+											<th>부가세</th>
+											<th>합계</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+								</table>
+								<div class="modal-footer mt-3 p-0">
+									<button type="button" class="btn btn-primary" onclick="submitOrder()">등록</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<th:block layout:fragment="myScript">
+			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script th:src="@{/js/inventory/util.js}"></script>
+			<script th:src="@{/js/purchase/purchase_regist.js}"></script>
+			<script th:src="@{/js/inbound/materialGrid.js}"></script>
+			<script th:src="@{/js/inbound/rematerialGrid.js}"></script>
+			<script th:src="@{/js/inbound/productGrid.js}"></script>
+		</th:block>
+	</body>
+</th:block>

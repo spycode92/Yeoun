@@ -65,15 +65,8 @@ public class AttendanceService {
 		// 오늘자 외근 기록 조회
 		List<AccessLog> accessLogs = accessLogRepository.findByEmp_EmpIdAndAccessDate(empId, today);
 		
-		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
-		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
 		LocalTime standardIn  = LocalTime.parse(workPolicy.getInTime());
 		LocalTime standardOut  = LocalTime.parse(workPolicy.getOutTime());
-		
-		// 점심시간에는 출입 기록 하지 않음
-		if (now.isAfter(lunchStart) && now.isBefore(lunchEnd)) {
-			return "LUNCH_TIME";
-		}
 		
 		// 오늘 날짜 기준으로 휴무인지 확인
 		boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(empId, today, today);
@@ -82,9 +75,6 @@ public class AttendanceService {
 		if (isHoliday) {
 			return processAccessLog(empId, now, today, emp, attendance);
 		}
-		
-		// 퇴근 처리 안했을 경우 자동으로 퇴근 처리
-		autoCloseYesterdayWork(empId, today, workPolicy);
 		
 		// 출근 기록이 있고 이미 퇴근을 완료한 경우
 		if (attendance != null && attendance.getWorkOut() != null) {
@@ -112,17 +102,22 @@ public class AttendanceService {
 				return processAccessLog(empId, now, today, emp, attendance);
 			}
 		}
-		// 출근 기록이 있을 경우 
-		if (now.isAfter(standardOut)) {
-			attendance.recordWorkOut(now, null);
-			return "WORK_OUT";
-		}
+		
 		
 		// 반차 여부 조회
 		boolean halfLeave = leaveHistoryRepository.existsHalf(empId, today);
 		
+		// 출근 기록이 있을 경우 
+		if (now.isAfter(standardOut)) {
+			attendance.recordWorkOut(now);
+			int minutes = calculateWorkDuration(attendance.getWorkIn(), attendance.getWorkOut(), halfLeave, workPolicy);
+			
+			attendance.adjustWorkDuration(minutes);
+			return "WORK_OUT";
+		}
+		
 		// 최종 근무시간 계산
-		int finalMinutes = calculateWorkDuration(standardIn, standardOut, halfLeave, workPolicy);
+		int finalMinutes = calculateWorkDuration(attendance.getWorkIn(), attendance.getWorkOut(), halfLeave, workPolicy);
 		
 		attendance.adjustWorkDuration(finalMinutes);
 		
@@ -148,14 +143,16 @@ public class AttendanceService {
 		}
 		
 		// OUT -> IN 복귀 처리
-		if ("OUT".equalsIgnoreCase(lastLog.getAccessType())
-				|| "OUTWORK".equalsIgnoreCase(lastLog.getAccessType())) {
+		if ("OUT".equalsIgnoreCase(lastLog.getAccessType())) {
 			lastLog.accessIn(now, "IN");
 			return "IN";
-		} else {
+		} else if ("IN".equalsIgnoreCase(lastLog.getAccessType())) {
 			// IN -> OUT 외출 처리
 			lastLog.accessOut(now, "OUT");
 			return "OUT";
+		} else {
+			lastLog.accessIn(now, "OUTWORK");
+			return "IN";
 		}
 	}
 	
@@ -185,14 +182,32 @@ public class AttendanceService {
 		if (attendance != null && attendance.getWorkOut() == null) {
 			// 정책 시간으로 자동 퇴근
 			LocalTime autoWorkOut = LocalTime.parse(policy.getOutTime());
-			attendance.recordWorkOut(autoWorkOut, autoWorkOut);
+			attendance.recordWorkOut(autoWorkOut);
 		}
+		
+		// 반차 여부 조회
+		boolean halfLeave = leaveHistoryRepository.existsHalf(empId, today);
+		
+		// 최종 근무시간 계산
+		int finalMinutes = calculateWorkDuration(attendance.getWorkIn(), attendance.getWorkOut(), halfLeave, policy);
+		
+		attendance.adjustWorkDuration(finalMinutes);
 	}
 	
 	// 총근무시간 변경
 	private int calculateWorkDuration(LocalTime in, LocalTime out, boolean halfLeave, WorkPolicy workPolicy) {
 		if (in == null || out == null) {
 			return 0;
+		}
+		
+		// 출근 기준시간
+		LocalTime standardIn = LocalTime.parse(workPolicy.getInTime());
+		// 지각 유예 시간
+		LocalTime lateLimit = standardIn.plusMinutes(workPolicy.getLateLimit()); 
+		
+		// 지각 유예 시간 내에 출근했을 경우 기준 출근 시간으로 보정
+		if (!in.isAfter(lateLimit)) {
+			in = standardIn;
 		}
 		
 		int minutes = (int) ChronoUnit.MINUTES.between(in, out);
@@ -213,6 +228,38 @@ public class AttendanceService {
 		return Math.max(minutes, 0);
 	}
 	
+	@Transactional
+	public void autoCloseAttendance(LocalDate targetDate) {
+		// 근무정책 조회
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
+				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
+		
+		// targetDate에 출근했지만 퇴근을 하지 않은 사람 찾기
+		List<Attendance> list = attendanceRepository.findByWorkDateAndWorkOutIsNull(targetDate);
+		
+		for (Attendance attendance : list) {
+			String empId = attendance.getEmp().getEmpId();
+			
+			// 마지막 OUTWORK 조회
+			LocalTime lastOut = accessLogRepository.findLastOutTime(empId, targetDate)
+					.map(AccessLog::getOutTime)
+					.orElse(null);
+			
+			// 기본 퇴근 시간
+			LocalTime standardOut = LocalTime.parse(workPolicy.getOutTime());
+			
+			LocalTime finalOutTime  = (lastOut != null) ? lastOut : standardOut;
+			
+			attendance.recordWorkOut(finalOutTime);
+			
+			// 총근무시간 다시 계산
+			int finalMinutes = calculateWorkDuration(attendance.getWorkIn(), finalOutTime, false, workPolicy);
+			
+			attendance.adjustWorkDuration(finalMinutes);
+		}
+	}
+	
+	
 	// 출퇴근 수기 등록
 	@Transactional
 	public void registAttendance(AttendanceDTO attendanceDTO, LoginDTO loginDTO) {
@@ -228,6 +275,14 @@ public class AttendanceService {
 		// 직원 조회
 		Emp emp = empRepository.findById(attendanceDTO.getEmpId())
 				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
+		
+		// 오늘 날짜 기준으로 휴무인지 확인
+		boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(emp.getEmpId(), today, today);
+		
+		// 휴무라면 근태 근록 안됨
+		if (isHoliday) {
+			throw new IllegalStateException("해당 날짜는 휴무일이므로 출퇴근 기록을 등록할 수 없습니다.");
+		}
 		
 		attendanceDTO.setWorkDate(today);
 		attendanceDTO.setCreatedUser(loginDTO.getEmpId());
@@ -437,6 +492,14 @@ public class AttendanceService {
 	// 건물 출입 현황
 	public List<AccessLogDTO> getAccessLogList(LocalDate start, LocalDate end) {
 		return accessLogRepository.findByAccessDateBetween(start, end)
+				.stream()
+				.map(AccessLogDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
+
+	// 외근 조회
+	public List<AccessLogDTO> getAllOutwork(LocalDate start, LocalDate end, String empId) {
+		return accessLogRepository.findAllByAccessDateBetweenAndEmp_EmpIdAndAccessType(start, end, empId, "OUTWORK")
 				.stream()
 				.map(AccessLogDTO::fromEntity)
 				.collect(Collectors.toList());

@@ -1,0 +1,101 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<head>
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css}" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.css}" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+</head>
+<th:block layout:fragment="pageCss">
+	<style>
+		.tui-grid-cell:has(.modified-cell-highlight) {
+			/* 부모 셀의 배경색을 덮어씁니다. */
+			background-color: #FFE5E5 !important;
+			color: #000 !important;
+		}
+
+		.modified-cell-highlight {
+			background-color: #FFE5E5 !important;
+			color: #000 !important;
+			width: 100% !important; 
+			height: 100% !important;
+			padding: 0 !important; /* 내부 패딩을 제거하여 가장자리까지 채움 */
+		}
+	</style>
+</th:block>
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<h2>완제품/원재료 정보</h2>
+		<div class="nav-align-top mb-4">
+	         <ul class="nav nav-tabs" role="tablist">
+	           <li class="nav-item">
+	             <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-product-tab" aria-controls="navs-product-tab" aria-selected="true">
+	               완제품
+	             </button>
+	           </li>
+	           <li class="nav-item">
+	             <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-material-tab" aria-controls="navs-material-tab" aria-selected="false">
+	               원재료
+	             </button>
+	           </li>
+	         </ul>
+	         <div class="tab-content" >
+	           <div class="tab-pane fade show active"  id="navs-product-tab" role="tabpanel">
+				<div class="d-flex justify-content-start">
+			    	<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    	<input type="text" id="prdId" name="prdId" class="form-control"  placeholder="품번">
+				    </div>
+					<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    	<input type="text" id="prdName" name="prdName" class="form-control"  placeholder="제품명">
+				    </div>
+			       	<button type="button" class="btn btn-primary" onclick="productGridAllSearch()" style="margin-left:5px;">조회</button>
+				</div>
+	            <div class="d-flex justify-content-end" style="margin:10px;">
+			  		<button id="addProductRowBtn" class="btn btn-primary btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" style="margin-right:5px;">추가</button>
+					<button id="saveProductRowBtn" class="btn btn-success btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" style="margin-right:5px;">저장</button>
+			  		<button id="deleteProductRowBtn" class="btn btn-danger btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button">신규행 삭제</button>
+				 </div>
+				 <div id="productGrid" style="display: grid;margin-right:5px;"></div>
+				</div>
+	           <div class="tab-pane fade" id="navs-material-tab" role="tabpanel">
+				 <div class="d-flex justify-content-start">
+			        	<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    		<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료id">
+						</div>
+						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+							<input type="text" id="matName" name="matName" class="form-control"  placeholder="원재료명">
+						</div>
+			           	<button type="button" class="btn btn-primary" onclick="materialGridAllSearch()" style="margin-left:5px;">조회</button>
+					</div>
+
+	             <div class="d-flex justify-content-end" style="margin:10px;">
+			  		<button id="addMaterialRowBtn" class="btn btn-primary btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
+					<button id="saveMaterialRowBtn" class="btn btn-success btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')" type="button" style="margin-right:5px;">저장</button>
+			  		<button id="deleteMaterialRowBtn" class="btn btn-danger btn-md-sm" sec:authorize="hasAnyRole('MES_MANAGER','SYS_ADMIN')"  type="button">신규행 삭제</button>
+				 </div>
+				 <div id="materialGrid" style="display: grid;margin-right:5px;"></div>
+	           </div>
+	         </div>
+       	</div>
+	</div>
+</th:block>
+</body>
+<th:block layout:fragment="myScript"> 
+	<script th:inline="javascript">
+        // 전역 변수로 선언
+        window.isAdmin = false; 
+    </script>
+
+    <th:block sec:authorize="hasAnyRole('MES_MANAGER', 'SYS_ADMIN')">
+        <script>
+            window.isAdmin = true;
+            console.log("서버 권한 확인: 관리자입니다.");
+        </script>
+    </th:block>
+	<script th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
+	<script th:inline="javascript" th:src="@{/js/masterData/product.js}"></script>
+</th:block>

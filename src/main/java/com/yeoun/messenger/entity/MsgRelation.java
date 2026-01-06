@@ -39,9 +39,8 @@ public class MsgRelation {
     private Emp empId;
 
     // 마지막 조회 메시지 ID
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "LAST_READ_ID")
-    private MsgMessage lastReadId;
+    @Column(name = "LAST_READ_ID")
+    private Long lastReadId;
 
     // 채팅방 고정 여부
     @Column(nullable = false, columnDefinition = "CHAR(1) DEFAULT 'N'")

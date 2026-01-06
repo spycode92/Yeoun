@@ -11,4 +11,9 @@ public class ErrorPageController {
         return "error/403";  
     }
 
+    @GetMapping("/error")
+    public String genericError() {
+        return "error/error";
+    }
+
 }

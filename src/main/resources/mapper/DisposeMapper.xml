@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.common.mapper.DisposeMapper">
+
+	 <select id="searchDisposeList" resultType="com.yeoun.common.dto.DisposeListDTO">
+        SELECT 
+            d.DISPOSE_ID AS disposeId,
+            d.LOT_NO AS lotNo,
+            d.ITEM_ID AS itemId,
+            COALESCE(mm.MAT_NAME, pm.PRD_NAME) AS itemName,
+            d.WORK_TYPE AS workType,
+            d.EMP_ID AS empId,
+            e.EMP_NAME AS empName,
+            d.DISPOSE_AMOUNT AS disposeAmount,
+            d.DISPOSE_REASON AS disposeReason,
+            d.CREATED_DATE AS createdDate
+        FROM DISPOSE d
+        LEFT JOIN MATERIAL_MST mm ON d.ITEM_ID = mm.MAT_ID
+        LEFT JOIN PRODUCT_MST pm ON d.ITEM_ID = pm.PRD_ID
+        LEFT JOIN EMP e ON d.EMP_ID = e.EMP_ID
+        WHERE 1 = 1
+        
+        <if test="startDateTime != null">
+            AND d.CREATED_DATE &gt;= #{startDateTime}
+        </if>
+        <if test="endDateTime != null">
+            AND d.CREATED_DATE &lt;= #{endDateTime}
+        </if>
+        <if test="workType != null and workType != ''">
+            AND d.WORK_TYPE = #{workType}
+        </if>
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+                LOWER(d.LOT_NO) LIKE #{searchKeyword}
+                OR LOWER(d.EMP_ID) LIKE #{searchKeyword}
+                OR LOWER(COALESCE(mm.MAT_NAME, pm.PRD_NAME)) LIKE #{searchKeyword}
+                OR LOWER(e.EMP_NAME) LIKE #{searchKeyword}
+            )
+        </if>
+        
+        ORDER BY d.CREATED_DATE DESC
+    </select>
+
+</mapper>
+
+
+
+
+

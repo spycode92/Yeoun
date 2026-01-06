@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>재고 관리 - 창고관리</title>
+    <!-- Inventory Specific CSS -->
+    <link rel="stylesheet" th:href="@{/css/inventory/inventory.css}" />
+    <style>
+		.rack-list-item.active {
+		    background-color: #eee2f4 !important;
+		    color: #212529 !important;
+		    border-color: #eee2f4 !important;
+		}
+		
+		.rack-list-item.active h6 {
+		    color: #007bff !important;
+		    font-weight: 600;
+		}
+		
+		.rack-list-item.active small,
+		.rack-list-item.active .text-muted {
+		    color: #696cff !important;
+		}
+		
+		.rack-list-item.active .badge {
+		    background-color: #696cff !important;
+		    color: white !important;
+		}
+	
+	      .cell {
+	        background: white;
+	        aspect-ratio: 2/1;
+	        border-radius: 4px;
+	        border: 2px solid #cbd5e1;
+	        display: flex;
+	        flex-direction: column;
+	        align-items: center;
+	        justify-content: center;
+	        font-weight: bold;
+	        cursor: pointer;
+	        transition: 0.2s;
+	        position: relative;
+	      }
+	      .cell:hover {
+	        transform: translateY(-3px);
+	        border-color: var(--primary);
+	        box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
+	        z-index: 10;
+	      }
+	
+	      .has-stock::after {
+	        content: "";
+	        width: 8px;
+	        height: 8px;
+	        background: var(--success);
+	        border-radius: 50%;
+	        position: absolute;
+	        top: 5px;
+	        right: 5px;
+	      }
+	      .cell.disabled {
+	        background: #e2e8f0;
+	        color: #a0aec0;
+	        border: 2px dashed #cbd5e1;
+	        cursor: not-allowed;
+	      }
+	      .cell.disabled:hover {
+	        transform: none;
+	      }
+	
+	      .cell-location-id {
+	        font-size: 0.7rem;
+	        color: #999;
+	        position: absolute;
+	        bottom: 3px;
+	        left: 5px;
+	      }
+	      /* Location Grid */
+		.location-grid {
+		    display: grid;
+		    gap: 8px;
+		    padding: 20px;
+		    background: #f8f9fa;
+		    border-radius: 8px;
+		}
+		
+		.location-cell {
+		    aspect-ratio: 2/1;
+		    border: 2px solid #dee2e6;
+		    border-radius: 6px;
+		    background: white;
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    cursor: pointer;
+		    transition: all 0.2s;
+		    position: relative;
+		    font-weight: 600;
+		}
+		
+		.location-cell:hover {
+		    transform: translateY(-3px);
+		    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+		    border-color: #6c5ce7;
+		}
+		
+		.stock-badge {
+		    position: absolute;
+		    top: 5px;
+		    right: 5px;
+		    background: #28a745;
+		    color: white;
+		    font-size: 0.65rem;
+		    padding: 2px 6px;
+		    border-radius: 10px;
+		    font-weight: bold;
+		}
+		
+		.location-cell.disabled {
+		    background: #e9ecef;
+		    color: #adb5bd;
+		    border-style: dashed;
+		    cursor: not-allowed;
+		}
+		
+		.location-cell.disabled:hover {
+		    transform: none;
+		    box-shadow: none;
+		}
+		
+		.location-cell-id {
+		    font-size: 0.7rem;
+		    color: #6c757d;
+		    position: absolute;
+		    bottom: 3px;
+		    left: 5px;
+		}
+    </style>
+</head>
+<th:block layout:fragment="content">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <!-- 페이지 헤더 -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">기준정보관리 / 창고관리</h4>
+            </div>
+            <button type="button" class="btn btn-primary" id="openWarehouseModal">창고 등록</button>
+        </div>
+
+        <div class="row">
+            <!-- 좌측: 창고 목록 -->
+            <div class="col-lg-4 col-md-5">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">창고 목록</h5>
+              
+                    </div>
+                    <div class="card-body p-0 sidebar-scroll">
+                        <div class="accordion accordion-flush zone-accordion" id="warehouseAccordion">
+                            <!-- Zone/Rack 목록 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측: Rack 상세 정보 -->
+            <div class="col-lg-8 col-md-7">
+                <!-- 선택 전 플레이스홀더 -->
+                <div id="noSelectionPlaceholder" class="card">
+                    <div class="card-body">
+                        <div class="no-selection-placeholder">
+                            <h5>좌측에서 Rack을 선택하세요</h5>
+                            <p class="text-muted">선택한 Rack의 상세 정보와 Location 현황을 확인할 수 있습니다</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rack 상세 컨텐츠 -->
+                <div id="rackDetailContent" style="display: none;">
+                    <!-- 정보 요약 카드 -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0" id="rackPathDisplay"></h5>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-4 col-8">
+                                    <div class="border rounded p-3 text-center">
+                                        <div class="text-muted small mb-1">전체 위치</div>
+                                        <h4 class="mb-0" id="infoTotal">-</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-8">
+                                    <div class="border rounded p-3 text-center">
+                                        <div class="text-muted small mb-1">재고 품목</div>
+                                        <h4 class="mb-0 text-success" id="infoStock">-</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-8">
+                                    <div class="border rounded p-3 text-center">
+                                        <div class="text-muted small mb-1">비활성</div>
+                                        <h4 class="mb-0 text-danger" id="infoDisabled">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 그리드 시각화 카드 -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">위치별 현황</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="locationGrid" class="location-grid">
+                                <!-- Location 그리드 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- 재고 상세 모달 (수정됨) -->
+	<div class="modal fade" id="stockInfoModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-lg modal-dialog-centered">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title" id="stockModalTitle"><span id="stockLocationInfo"></span>
+	                </h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	            </div>
+	            <div class="modal-body">
+	                <!-- 위치 정보 및 상태 변경 -->
+					<div class="d-flex align-items-center justify-content-between mb-3">
+					    <!-- 제목 -->
+					    <h6 class="mb-0">보관 중인 재고 목록</h6>
+					    
+					    <!-- 상태 변경 영역 -->
+					    <div class="d-flex align-items-center gap-2">
+					        <select class="form-select form-select-sm" id="locationStatusInStockModal" style="width: auto;">
+					            <option value="Y">활성</option>
+					            <option value="N">비활성</option>
+					        </select>
+					        <button type="button" class="btn btn-primary btn-sm" id="btnSaveLocationStatusInStockModal">
+					            저장
+					        </button>
+					    </div>
+					</div>
+	                <div class="table-responsive">
+	                    <table class="table table-hover">
+	                        <thead>
+	                            <tr>
+	                                <th>품목코드</th>
+	                                <th>품목명</th>
+	                                <th>현재수량</th>
+	                                <th>상태2</th>
+	                                <th>작업</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody id="modalTBody">
+	                            <tr>
+	                                <td colspan="5" class="text-center py-4">
+	                                    <div class="spinner-border spinner-border-sm" role="status">
+	                                        <span class="visually-hidden">Loading...</span>
+	                                    </div>
+	                                    재고 정보를 불러오는 중...
+	                                </td>
+	                            </tr>
+	                        </tbody>
+	                    </table>
+	                </div>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	    
+    <!-- 재고 이동 모달 -->
+    <th:block th:insert="~{inventory/modal/moveStockModal}"></th:block>
+    <!-- 창고 등록 모달 -->
+    <th:block th:insert="~{inventory/modal/warehouseRegist}"></th:block>
+</th:block>
+<th:block layout:fragment="myScript">
+	<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
+    <script th:src="@{/js/warehouse/warehouse.js}"></script>
+</th:block>
+</html>

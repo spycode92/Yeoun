@@ -199,3 +199,42 @@ document.addEventListener('click', (e)=>{
     if(target){ localStorage.setItem(key, target); }
   });
 })();
+
+/* ========= 모달 자동열기 + 에러 박스 표시 ========= */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const createFlag = document.getElementById("openCreateModal")?.value;
+  const editId = document.getElementById("openEditModalId")?.value;
+
+  // 등록 모달
+  if (createFlag === "true") {
+      const modal = new bootstrap.Modal(document.getElementById("createModal"));
+      modal.show();
+
+      const errBox = document.getElementById("create-error-box");
+      if (errBox) errBox.classList.remove("d-none");
+  }
+
+  // 수정 모달
+  if (editId) {
+      const modal = new bootstrap.Modal(document.getElementById("editModal-" + editId));
+      modal.show();
+
+      const errBox = document.getElementById("edit-error-" + editId);
+      if (errBox) errBox.classList.remove("d-none");
+  }
+});
+
+// 🔹 모든 모달이 닫힐 때 에러 박스 초기화
+document.addEventListener('hidden.bs.modal', (evt) => {
+    const modal = evt.target;
+    if (!modal.classList.contains('modal')) return;
+
+    const errBox = modal.querySelector('.modal-error-box');
+    if (errBox) {
+        errBox.classList.add('d-none');
+        const span = errBox.querySelector('span');
+        if (span) span.textContent = '';
+    }
+});
+

@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
+import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.service.AttendanceService;
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.common.dto.CommonCodeDTO;
@@ -186,7 +187,7 @@ public class AttendanceController {
 		attendanceService.registOutwork(accessLogDTO);
 		redirectAttributes.addFlashAttribute("message", "외근 등록이 완료되었습니다.");
 		
-		return "redirect:/attendance/my";
+		return "redirect:/attendance/outwork";
 	}
 	
 	// 근무정책관리 조회
@@ -246,5 +247,37 @@ public class AttendanceController {
 		List<AccessLogDTO> AccessLogDTOList = attendanceService.getAccessLogList(start, end);
 		
 		return ResponseEntity.ok(AccessLogDTOList);
+	}
+	
+	// 출퇴근 등록 및 수정하는 모달창에서 사용할 정책 데이터 API
+	@GetMapping("/policy/data")
+	public ResponseEntity<Map<String, String>> getMethodName() {
+		WorkPolicyDTO workPolicyDTO = attendanceService.getWorkPolicy();
+		
+		return ResponseEntity.ok(Map.of(
+				"startTime", workPolicyDTO.getInTime(),
+				"endTime", workPolicyDTO.getOutTime()
+		));
+	}
+	
+	// 외근 현황 페이지
+	@GetMapping("/outwork")
+	public String outworkList() {
+		return "attendance/outwork";
+	}
+	
+	// 외근 현황 조회
+	@GetMapping("/outwork/data")
+	public ResponseEntity<List<AccessLogDTO>> getOutwork(
+			@AuthenticationPrincipal LoginDTO loginDTO, 
+			@RequestParam(required = false, name = "startDate") String startDate,  
+			@RequestParam(required = false, name = "endDate") String endDate) {
+		
+		LocalDate start = (startDate != null) ? LocalDate.parse(startDate) : LocalDate.now().withDayOfMonth(1);
+		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+		
+		List<AccessLogDTO> outworkList = attendanceService.getAllOutwork(start, end, loginDTO.getEmpId());
+		
+		return ResponseEntity.ok(outworkList);
 	}
 }

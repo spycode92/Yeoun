@@ -1,0 +1,198 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout}">
+
+<th:block layout:fragment="content">
+<style>
+/* 헤더 제목 가운데 */
+.ag-theme-quartz .ag-header-cell-label {
+    justify-content: center;
+}
+
+/* 셀 값 가운데 */
+.ag-theme-quartz .ag-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+</style>
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+     <h3 class="mb-4">출하 관리</h3>
+    
+    <!-- ================================
+         검색 영역
+    ================================= -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-end gap-3 flex-wrap">
+
+            <div>
+                <label class="form-label fw-bold">납기 시작일</label>
+                <input type="date" id="startDate" class="form-control">
+            </div>
+
+            <div>
+                <label class="form-label fw-bold">납기 종료일</label>
+                <input type="date" id="endDate" class="form-control">
+            </div>
+
+            <div class="flex-grow-1">                
+                <input type="text" id="keyword" class="form-control"
+                       placeholder="수주번호 / 제품명 / 거래처명 검색">
+            </div>
+
+            <button id="btnSearch" class="btn btn-primary">검색</button>
+            <button id="btnReset" class="btn btn-secondary">초기화</button>
+        </div>
+    </div>
+
+    <!-- ================================
+         상태 탭
+    ================================= -->
+    <ul class="nav nav-tabs mb-3" id="shipmentTabs">
+        <li class="nav-item"><a class="nav-link active" th:href="@{#}" href="#" data-status="ALL">전체</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{#}" href="#" data-status="WAITING">대기</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{#}" href="#" data-status="RESERVED_GROUP">예약</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{#}" href="#" data-status="LACK">부족</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{#}" href="#" data-status="SHIPPED">출하완료</a></li>
+    </ul>
+
+    <!-- ================================
+         AG-Grid 영역
+    ================================= -->
+    <div class="card">
+        <div class="card-body">
+            <div id="shipmentGrid" class="ag-theme-quartz" style="height: 600px;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================================
+     출하 상세 모달
+================================ -->
+<div class="modal fade" id="shipmentDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+
+      <!-- 모달 헤더 -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          출하 상세
+          <small class="text-muted ms-2" id="detailOrderId"></small>
+        </h5>
+        <button type="button" class="btn-close"
+                data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- 모달 바디 -->
+      <div class="modal-body">
+
+        <!-- 공통 헤더 정보 -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">거래처</label>
+            <div id="detailClientName" class="fw-semibold"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">납기요청일</label>
+            <div id="detailDueDate"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">출하상태</label>
+            <div id="detailStatusBadge"></div>
+          </div>
+        </div>
+
+        <!-- ================================
+             출하완료 전용 정보
+        ================================= -->
+        <div id="completedShipmentInfo" class="row mb-3 d-none">
+          <div class="col-md-4">
+            <label class="form-label">출하일</label>
+            <div id="detailOutboundDate" class="fw-semibold"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">출하 처리자</label>
+            <div id="detailProcessBy"></div>
+          </div>
+          <div class="col-md-4">
+			    <label class="form-label">운송번호</label>
+			    <div id="detailTrackingNumber" class="fw-semibold">-</div>
+			</div>
+
+			          
+			        </div>
+
+        <!-- ================================
+     출하 전(대기/예약/부족) 품목 정보
+			================================= -->
+			<div id="normalShipmentTable">
+			  <h6 class="mb-2" id="itemInfoLabel">품목 정보</h6>
+			  <div class="table-responsive">
+			    <table class="table table-sm table-bordered align-middle mb-0" id="detailItemTable">
+			      <thead class="table-light">
+			        <tr>
+			          <th class="text-center">제품명</th>
+			          <th class="text-center">수주수량</th>
+			          <th class="text-center">현재재고</th>
+			        </tr>
+			      </thead>
+			      <tbody>
+			        <!-- JS 렌더링 -->
+			      </tbody>
+			    </table>
+			  </div>
+			</div>
+
+
+        <!-- ================================
+             출하완료 LOT 이력 테이블
+        ================================= -->
+        <div id="completedShipmentTable" class="mt-4 d-none">
+          <h6 class="mb-2">출하 이력 (LOT)</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="text-center">제품명</th>
+                  <th class="text-center">LOT 번호</th>
+                  <th class="text-center">출하수량</th>
+                  <th class="text-center">출하일</th>
+                </tr>
+              </thead>
+              <tbody id="completedShipmentTbody">
+                <!-- JS 렌더링 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 모달 푸터 -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+                data-bs-dismiss="modal">닫기</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</th:block>
+
+<!-- ================================
+     SCRIPT
+================================ -->
+<th:block layout:fragment="myScript">
+
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+<script th:src="@{/js/sales/shipment_list.js}"></script>
+<script th:src="@{/js/sales/shipment_detail.js}"></script>
+
+</th:block>
+
+</th:block>

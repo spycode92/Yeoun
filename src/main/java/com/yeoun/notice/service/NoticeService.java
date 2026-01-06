@@ -61,6 +61,8 @@ public class NoticeService {
 	    } else { // 존재하지 않을 시 전체 공지사항 조회
 	    	noticePage = noticeRepository.findByDeleteYN("N", pageRequest);
 	    }
+	    
+//    	System.out.println(noticePage);
 
 	    return noticePage.map(NoticeDTO::fromEntity);
 	}
@@ -144,6 +146,22 @@ public class NoticeService {
 		List<FileAttach> fileList = fileAttachRepository.findByRefTableAndRefId("NOTICE", noticeId);
 		
 		return fileList.stream().map(FileAttachDTO::fromEntity).toList(); 
+	}
+	
+	
+	// 최근 공지사항 목록 불러오기 (메인페이지)
+	public Page<NoticeDTO> getLastNotice(int page, int size) {
+		// 기본 정렬 기준(고정여부, 수정일 내림차순) + 동적정렬기준 해서 정렬객체 생성
+	    Sort sort = Sort.by(Sort.Order.desc("updatedDate"));
+		
+		// 페이징과 정렬을 포함하는 PageRequest 생성
+		PageRequest pageRequest = PageRequest.of(page, size, sort);
+		
+		Page<Notice> noticePage;
+
+    	noticePage = noticeRepository.findByDeleteYN("N", pageRequest);
+
+	    return noticePage.map(NoticeDTO::fromEntity);
 	}
 	
 	

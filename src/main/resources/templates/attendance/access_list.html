@@ -5,15 +5,13 @@
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>건물 출입 기록</h3>
 		<div class="d-flex justify-content-between">
-			<div class="row flex-nowrap">
-				<div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
-					<input type="date" name="srhStrDate" class="form-control" id="startDate">
+			<div class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-3">
+				<div class="d-flex align-items-center gap-2">
+					<input type="date" class="form-control" id="startDate" style="width: 140px;"/>
+					<span>~</span>
+					<input type="date" class="form-control" id="endDate" style="width: 140px;">
 				</div>
-                ~
-                <div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
-	                <input type="date" name="srhEndDate" class="form-control" id="endDate">
-                </div>
-                <div class="mb-6 col-lg-6 col-xl-4 col-12 mb-0">
+                <div>
 	             	<button type="button" class="btn btn-primary" id="searchbtn">조회</button>
                 </div>
 			</div>
@@ -25,8 +23,9 @@
 		</div>
 	</div>
 	<th:block layout:fragment="myScript">
+		<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-s		<script src="/js/attendance/accessList.js"></script>
+s		<script th:src="@{/js/attendance/accessList.js}"></script>
 	</th:block>
 </body>
 </th:block>

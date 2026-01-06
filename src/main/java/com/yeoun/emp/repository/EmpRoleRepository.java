@@ -23,5 +23,9 @@ public interface EmpRoleRepository extends JpaRepository<EmpRole, Long> {
 	
 	// 사번 기준 역할 코드 전체 삭제 (재할당/수정 시 필요)
 	void deleteByEmp_EmpId(String empId);
+	
+	// 해당 사원의 EmpRole 엔티티 전체 조회
+	List<EmpRole> findByEmp_EmpId(String empId);
+
 
 }

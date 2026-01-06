@@ -1,264 +1,191 @@
 // empList.js 
-// 사원 목록 테이블 그리드
+// 사원 목록 테이블 그리드 (Toast Grid 클라이언트 페이징 버전)
 
 let empGrid = null;
 let empDetailModal = null;
 let currentEmpId = null;
-
-// 페이징 상태
-let currentPage = 0;   // 0부터 시작 (Spring Page와 맞춤)
-const pageSize = 10;
+let detailMode   = null; 
 
 document.addEventListener('DOMContentLoaded', () => {
-  
-  const holder = document.getElementById('empMsgHolder');
-  if (holder) {
-    const msg = holder.dataset.msg;
-    if (msg) {
-      alert(msg); // 또는 Toast, SweetAlert 등
-    }
-  }
- 
+	const holder = document.getElementById('empMsgHolder');
+	if (holder) {
+		const msg = holder.dataset.msg;
+		if(msg) {
+			alert(msg);
+		}
+	}
 	
-  empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
-
-  // 수정 버튼 클릭 이벤트 등록
-  const editBtn = document.getElementById('editBtn');
-  if (editBtn) {
-    editBtn.addEventListener('click', () => {
-      if (!currentEmpId) {
-        alert('선택된 사원이 없습니다.');
-        return;
-      }
-      // 수정 화면으로 이동
-      window.location.href = `/emp/edit/${currentEmpId}`;
-      // 컨텍스트 경로 있으면: window.location.href = `${window.contextPath}/emp/edit/${currentEmpId}`;
-    });
-  }
-
-  // 검색 버튼 이벤트
-  const searchBtn = document.getElementById('btnSearch');
-  if (searchBtn) {
-    searchBtn.addEventListener('click', () => {
-      loadEmpList(0);   // 검색 시 항상 첫 페이지부터
-    });
-  }
-  
-  // 엔터 눌렀을 때도 검색 실행
-    const keywordInput = document.getElementById('keyword');
-    if (keywordInput) {
-      keywordInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();   // 폼 submit 막기
-          loadEmpList(0);       // 첫 페이지부터 검색
-        }
-      });
-    }
-
-  // 부서 선택 변경 시 자동 검색
-  const deptSelect = document.getElementById('deptId');
-  if (deptSelect) {
-    deptSelect.addEventListener('change', () => {
-      loadEmpList(0);
-    });
-  }
-
-  // 초기 그리드 + 첫 페이지 데이터 로딩
-  initEmpGrid();
-  loadEmpList(0);
+	empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
+	
+	// 수정 버튼 클릭 이벤트
+	const editBtn = document.getElementById('editBtn');
+	if (editBtn) {
+		editBtn.addEventListener('click', () => {
+			// 사원 목록에서 뜬 상세 모달
+			if (!currentEmpId) {
+				alert('선택된 사원이 없습니다.');
+				return;
+			}
+			// 수정 화면으로 이동
+			window.location.href = `/emp/edit/${currentEmpId}`;
+		});
+	}
+	
+	// 검색 버튼
+	const searchBtn = document.getElementById('btnSearch');
+	if (searchBtn) {
+		searchBtn.addEventListener('click', () => {
+			loadEmpList();   // 다시 전체 불러오기
+		});
+	}	
+	
+	// 엔터 검색
+	const keywordInput = document.getElementById('keyword');
+	if (keywordInput) {
+		keywordInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+		        loadEmpList();
+			}
+		});
+	}
+	
+	// 부서 변경
+	const deptSelect = document.getElementById('deptId');
+	if (deptSelect) {
+		deptSelect.addEventListener('change', () => {
+			loadEmpList();
+		});
+	}
+	
+	initEmpGrid();
+	loadEmpList();
 });
 
 // ================================
-//  사원 목록 불러오기 (서버 페이징)
+//  서버에서 전체 리스트 받아오기
 // ================================
-class StatusBadgeRenderer {
-  constructor(props) {
-    this.el = document.createElement('span');
-    this.render(props);
-  }
+function loadEmpList() {
+	const keywordInput = document.getElementById('keyword');
+  	const deptSelect   = document.getElementById('deptId');
 
-  getElement() {
-    return this.el;
-  }
+	const keyword = keywordInput ? keywordInput.value : '';
+ 	const deptId  = deptSelect   ? deptSelect.value   : '';
 
-  render(props) {
-    const row = props.row || {};
-    const code = row.status;          // 'ACTIVE' / 'LEAVE' / 'RETIRE'
-    const text = row.statusName || ''; // '재직' / '휴직' / '퇴직'
+  	const params = new URLSearchParams({
+    	keyword: keyword,
+    	deptId: deptId
+  	});
 
-    let cls = 'badge bg-secondary';
-
-    if (code === 'ACTIVE') {
-      cls = 'badge bg-success';
-    } else if (code === 'LEAVE') {
-      cls = 'badge bg-warning text-dark';
-    } else if (code === 'RETIRE') {
-      cls = 'badge bg-secondary';
-    }
-
-    this.el.className = cls;
-    this.el.textContent = text;
-  }
+  	fetch(apiUrl(`emp/data?`) + params.toString())
+    	.then(res => res.json())
+    	.then(data => {
+     	 	// data = List<EmpListDTO>
+      		empGrid.resetData(data);
+		})
+    	.catch(err => {
+      		console.error(err);
+      		alert('사원 목록 불러오기 실패');
+    	});
 }
 
-
-function loadEmpList(page) {
-  const keywordInput = document.getElementById('keyword');
-  const deptSelect = document.getElementById('deptId');
-
-  const keyword = keywordInput ? keywordInput.value : '';
-  const deptId = deptSelect ? deptSelect.value : '';
-
-  const params = new URLSearchParams({
-    page: page,
-    size: pageSize,
-    keyword: keyword,
-    deptId: deptId
-  });
-
-  fetch('/emp/data?' + params.toString())
-    .then(res => res.json())
-    .then(data => {
-      // data = EmpPageResponse (content, page, size, totalElements, totalPages)
-      currentPage = data.page;
-
-      // 그리드 데이터 갱신
-      empGrid.resetData(data.content);
-
-      // 페이징 렌더링
-      renderPagination(data.totalPages);
-    })
-    .catch(() => alert('사원 목록 불러오기 실패'));
-}
-
-
 // ================================
-//  Toast Grid 생성 함수
+//  Toast Grid 생성 (클라이언트 페이징)
 // ================================
 function initEmpGrid() {
-  empGrid = new tui.Grid({
-    el: document.getElementById('grid'), // grid가 들어갈 div
-    rowHeaders: [],                      // 왼쪽 번호/체크박스 없음
-    scrollX: true,                       // 가로 스크롤
-    scrollY: true,                       // 세로 스크롤
-    editable: false,                     // 읽기 전용
-//    pageOptions: { 
-//      useClient: false,   // 서버 페이징
-//      perPage: pageSize
-//    },
-    columns: [
-      { 
-		header: '입사일자', 
-		name: 'hireDate', 
-		align: 'center', 
-		sortable: true 
-	  },
-      { 
-		header: '사원번호', 
-		name: 'empId',    
-		align: 'center', 
-		sortable: true 
-	  },
-      { 
-		header: '성명',     
-		name: 'empName',  
-		align: 'center', 
-		sortable: true 
-	  },
-      { 
-		header: '부서',     
-		name: 'deptName', 
-		align: 'center', 
-		sortable: true 
-	  },
-      { 
-		header: '직급',     
-		name: 'posName',  
-		align: 'center', 
-		sortable: true 
-	  },
-	  { 
-	      header: '상태', 
-	      name: 'statusName',   // ACTIVE → 재직, LEAVE → 휴직, RETIRE → 퇴직
-	      align: 'center'
-	  },
-      {
-		header: '전화번호', 
-		name: 'mobile',   
-		align: 'center' 
-	  },
-      { 
-		header: 'Email',    
-		name: 'email',    
-		width: 220 
-	  },
-      {
-        header: ' ',
-        name: 'btn',
-        width: 110,
-        align: 'center',
-        formatter: () => "<button type='button' class='btn btn-info btn-sm'>상세</button>"
-      }
-    ],
+	empGrid = new tui.Grid({
+		el: document.getElementById('grid'),
+    	rowHeaders: [],
+    	scrollX: true,
+    	scrollY: true,
+    	editable: false,
+    	columnOptions: {
+      		resizable: true,
+	  		useClientSort: true
+    	},
+    	pagination: true,         
+    	pageOptions: {
+      		useClient: true,         
+      		perPage: 10            
+    	},
+    	columns: [
+      	{ 
+			header: '입사일자', 
+			name: 'hireDate', 
+			align: 'center', 
+			sortable: true 
+		},
+      	{ 
+			header: '사원번호', 
+			name: 'empId',    
+			align: 'center', 
+			sortable: true 
+		},
+      	{ 
+			header: '성명',     
+			name: 'empName',  
+			align: 'center', 
+			sortable: true 
+		},
+      	{ 
+			header: '부서',     
+			name: 'deptName', 
+			align: 'center', 
+		},
+      	{ 
+			header: '직급',     
+			name: 'posName',  
+			align: 'center', 
+		},
+      	{ 
+			header: '상태',     
+			name: 'statusName', 
+			align: 'center' 
+		},
+      	{ 
+			header: '전화번호', 
+			name: 'mobile',   
+			align: 'center' 
+		},
+      	{ 
+			header: 'Email',    
+			name: 'email',    
+			width: 220 
+		},
+      	{
+        	header: ' ',
+        	name: 'btn',
+        	width: 110,
+        	align: 'center',
+        	formatter: () => "<button type='button' class='btn btn-info btn-sm'>상세</button>"
+      	}
+    	]
   });
 
-  // 버튼 클릭 시 상세조회
+  // 상세 버튼
   empGrid.on('click', ev => {
-    if (ev.columnName !== 'btn') return;
+	if (ev.columnName !== 'btn') return;
     const row = empGrid.getRow(ev.rowKey);
     if (!row || !row.empId) return;
     showEmpDetail(row.empId);
   });
+
 }
 
 // ================================
-//  페이징 렌더링 (부트스트랩 pagination 사용 가정)
-// ================================
-function renderPagination(totalPages) {
-  const container = document.getElementById('empPagination');
-  if (!container) return;
-
-  let html = '';
-
-  // 이전
-  html += `
-    <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-      <button class="page-link" type="button" onclick="loadEmpList(${currentPage - 1})"><</button>
-    </li>
-  `;
-
-  // 페이지 번호
-  for (let i = 0; i < totalPages; i++) {
-    html += `
-      <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <button class="page-link" type="button" onclick="loadEmpList(${i})">${i + 1}</button>
-      </li>
-    `;
-  }
-
-  // 다음
-  html += `
-    <li class="page-item ${currentPage + 1 >= totalPages ? 'disabled' : ''}">
-      <button class="page-link" type="button" onclick="loadEmpList(${currentPage + 1})">></button>
-    </li>
-  `;
-
-  container.innerHTML = html;
-}
-
-// ================================
-//  사원 상세보기
+//  사원 상세보기 (그대로 유지)
 // ================================
 function showEmpDetail(empId) {
-  currentEmpId = empId;	// 수정에 쓸 현재 사번 저장
-  
-  fetch(`/emp/detail/${empId}`)
+  currentEmpId = empId;
+
+  const editBtn = document.getElementById('editBtn');
+  if (editBtn) editBtn.style.display = '';
+
+  fetch(apiUrl(`emp/detail/${empId}`))
     .then(res => res.json())
     .then(d => {
-		
-	  document.getElementById('empDetailModalTitle').innerText = '사원 상세';
-	  
-      // 간단히 값 채우기
+      document.getElementById('empDetailModalTitle').innerText = '사원 상세';
+
       document.getElementById('d-empName').textContent = d.empName;
       document.getElementById('d-empId').textContent = d.empId;
       document.getElementById('d-deptName').textContent = d.deptName;

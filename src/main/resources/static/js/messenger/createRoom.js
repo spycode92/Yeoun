@@ -17,7 +17,7 @@ async function createRoom ({
 	groupName,			// 채팅방 이름
 	firstMessage,		// 첫번째 전송 메시지
 	msgType,			// 첫번째 전송 메시지의 타입
-	csrfHeaderName,
+	csrfHeader,
 	csrfToken
 }) {
 
@@ -32,17 +32,17 @@ async function createRoom ({
 	
 	  try {
 		  
-	    const res = await fetch('/messenger/chat', {
+	    const res = await fetch(apiUrl(`messenger/chat`), {
 			  method: 'POST',
 			  headers: {
 				  		'Content-Type': 'application/json',
-				  		[csrfHeaderName]: csrfToken
+				  		[csrfHeader]: csrfToken
 			      	   },
 			  body: JSON.stringify(bodyData)
 			  });
 	    
 	    const data = await res.json();
-	    return data.roomId;
+	    return data;
 	    
 	  } 
 	  

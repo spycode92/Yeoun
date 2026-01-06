@@ -1,8 +1,8 @@
 /**
 	공지사항 JavaScript 
 **/
-const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+//const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
 const currentUserId = document.getElementById('currentUserId')?.value;
 const currentUserName = document.getElementById('currentUserName')?.value;
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		selectedNoticeId = noticeId;
 		
-		fetch('/api/notices/' + noticeId)
+		fetch(apiUrl(`api/notices/${noticeId}`))
 			.then(response => { // response가 200이 아닐때
 				if (!response.ok) throw new Error('공지사항을 불러올 수 없습니다.');
 		    	
@@ -99,10 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	showNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch(apiUrl(`notices/${selectedNoticeId}`), {
 			method: 'PATCH'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(showNoticeForm)
 		})
@@ -125,10 +125,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		alert("정말 삭제하시겠습니까?");
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch(apiUrl(`notices/${selectedNoticeId}`), {
 			method: 'DELETE'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}			
 		})
 		.then(response => {
@@ -157,10 +157,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	createNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices', {
+		fetch(apiUrl(`notices`), {
 			method: 'POST'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(createNoticeForm)
 		})

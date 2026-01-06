@@ -1,0 +1,70 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+  <th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+      <h2>QC 결과 조회</h2>
+
+      <div class="row g-2 align-items-center">
+
+        <form id="qcResultSearchForm" method="get" action="/qc/result">
+		  <div class="row gx-3 gy-2 align-items-end">
+		
+		    <!-- 검사일자(기간) -->
+		    <div class="col-md-4">
+		      <label class="form-label">검사일자</label>
+		      <div class="d-flex align-items-center gap-2">
+		        <input type="date" class="form-control" id="startDate" name="startDate"
+		               th:value="${param.startDate}">
+		        <span class="text-muted fw-semibold">~</span>
+		        <input type="date" class="form-control" id="endDate" name="endDate"
+		               th:value="${param.endDate}">
+		      </div>
+		    </div>
+		
+		    <!-- 검색어 -->
+		    <div class="col-md-3">
+		      <label class="form-label" for="searchKeyword">검색어</label>
+		      <input type="text" class="form-control"
+		             id="searchKeyword" name="keyword"
+		             th:value="${param.keyword}"
+		             placeholder="작업지시번호 / 제품명">
+		    </div>
+		
+		    <!-- 합격 여부 -->
+		    <div class="col-md-2">
+		      <label class="form-label" for="searchHStatus">합격 여부</label>
+		      <select class="form-select" id="searchHStatus" name="result">
+		        <option value="ALL"  th:selected="${param.result == null || param.result[0] == 'ALL'}">전체</option>
+		        <option value="PASS" th:selected="${param.result != null && param.result[0] == 'PASS'}">합격</option>
+		        <option value="FAIL" th:selected="${param.result != null && param.result[0] == 'FAIL'}">불합격</option>
+		      </select>
+		    </div>
+		
+		    <!-- 버튼 -->
+		    <div class="col-md-3 d-flex gap-2">
+		      <button type="submit" class="btn btn-outline-primary flex-fill">검색</button>
+		      <a th:href="@{/qc/result}" href="/qc/result" class="btn btn-outline-secondary flex-fill">초기화</a>
+		    </div>
+		
+		  </div>
+		</form>
+      </div>
+
+      <br>
+
+      <div class="card-body p-0">
+        <div id="qcResultGrid"></div>
+      </div>
+
+      <th:block th:replace="qc/qc_view_modal :: qcViewModal"></th:block>
+
+    </div>
+
+    <script th:src="@{/js/qc/qc_result.js}"></script>
+
+  </th:block>
+
+</th:block>

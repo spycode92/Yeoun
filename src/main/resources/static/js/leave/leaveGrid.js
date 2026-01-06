@@ -11,7 +11,7 @@ const grid = new tui.Grid({
 		{
 			header: "연차유형",
 			name : "leaveType",
-			filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+			filter: "select"
 		},
 		{
 			header: "휴가시작일",
@@ -42,11 +42,15 @@ const grid = new tui.Grid({
 	columnOptions: {
 		resizable: true
 	},	
+	pageOptions: { 
+		useClient: true,
+		perPage: 10 
+	}
 });
 
 // 데이터 가져오기
 async function loadLeaveList(startDate, endDate) {
-	const LEAVE_LIST = `/leave/my/data?startDate=${startDate}&endDate=${endDate}`;
+	const LEAVE_LIST = apiUrl(`leave/my/data?startDate=${startDate}&endDate=${endDate}`);
 	try {
 		const res = await fetch(LEAVE_LIST, {method: "GET"});
 		

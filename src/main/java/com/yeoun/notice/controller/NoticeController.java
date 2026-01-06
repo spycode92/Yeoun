@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/notices")
+@RequestMapping("/notice")
 public class NoticeController {
 	private final NoticeService noticeService;
 	
@@ -54,7 +54,8 @@ public class NoticeController {
 	    model.addAttribute("orderKey", orderKey);
 	    model.addAttribute("orderMethod", orderMethod);
 	    
-//	    System.out.println("노티스페이지" + noticePage.getContent());
+	    System.out.println("노티스페이지" + noticePage.getContent());
+	    System.out.println("totalPages" + noticePage.getTotalPages());
 		return "/notice/notice";
 	}
 	

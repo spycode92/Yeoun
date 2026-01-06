@@ -53,7 +53,7 @@ public class PayrollCalcQueryService {
         // 1) PAYROLL_PAYSLIP 조회
         PayrollPayslip payslip = payslipRepo
                 .findByPayYymmAndEmpId(yyyymm, empId)
-                .orElseThrow(() -> new IllegalArgumentException("명세서 없음"));
+                .orElseThrow(() -> new IllegalArgumentException("급여계산이 불가능합니다"));
 
         Long payslipId = payslip.getPayslipId();
 

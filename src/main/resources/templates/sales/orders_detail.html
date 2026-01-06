@@ -1,0 +1,208 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+  <th:block layout:fragment="content">
+    <div class="container-xxl py-3">
+
+      <!-- 타이틀 + 우측 담당자 뱃지 -->
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h3 class="fw-bold mb-1">수주상세 정보</h3>
+          <p class="text-muted mb-0">수주상세 정보 화면입니다.</p>
+        </div>
+
+        <!-- ✅ 수주 담당자 표시 (DTO에 empName 실어줘야 함) -->
+        <span class="badge rounded-pill text-bg-primary px-3 py-2"
+			      th:text="|수주 담당자: ${order.empName}|">
+			</span>
+
+      </div>
+
+      <!-- 기본정보 테이블 (2번 스타일) -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-0">
+          <table class="table table-bordered align-middle mb-0 text-center">
+            <tbody>
+            <tr>
+              <th class="bg-light fw-semibold" style="width:170px">수주번호</th>
+              <td th:text="${order.orderId}"></td>
+
+              <th class="bg-light fw-semibold" style="width:170px">거래처명</th>
+              <td th:text="${order.clientName}"></td>
+            </tr>
+
+            <tr>
+              <th class="bg-light fw-semibold">담당자</th>
+              <td th:text="${order.managerName}"></td>
+
+              <th class="bg-light fw-semibold">전화번호</th>
+              <td th:text="${order.managerTel}"></td>
+            </tr>          
+
+
+            <tr>
+              <th class="bg-light fw-semibold">수주일자</th>
+              <td th:text="${order.orderDate}"></td>
+
+              <th class="bg-light fw-semibold">납기요청일</th>
+              <td th:text="${order.deliveryDate}"></td>
+            </tr>
+            
+             <tr>
+				  <th class="bg-light fw-semibold">배송주소</th>
+				  <td th:text="|(${order.postcode}) ${order.addr} ${order.addrDetail}|">
+				  </td>
+            
+    
+			    <th class="bg-light fw-semibold">수주 담당자</th>
+			    <td colspan="3">
+			        <i class="bi bi-person-circle me-1 text-secondary"></i>
+			        <span th:text="${order.empName}"></span>
+			    </td>
+			</tr>
+            
+
+           <tr>
+			  <th class="bg-light fw-semibold">수주상태</th>
+			
+			  <td class="text-center">
+			
+			    <!-- ✅ 상태 텍스트 (enum 코드 그대로) -->
+			    <span id="orderStatusText"
+			          class="fw-semibold"
+			          th:text="${order.orderStatus}">
+			    </span>
+			
+			    <!-- ✅ REQUEST 상태일 때만 버튼 표시 -->
+			    <span th:if="${order.orderStatus == 'REQUEST'}" class="ms-2">
+			
+			      <button type="button"
+			              class="btn btn-sm btn-warning rounded-pill"
+			              th:data-order-id="${order.orderId}"
+			              onclick="confirmPayment(this)">
+			        입금확인
+			      </button>
+			
+			      <button type="button"
+			              class="btn btn-sm btn-danger rounded-pill ms-1"
+			              th:data-order-id="${order.orderId}"
+			              onclick="cancelOrder(this)">
+			        취소
+			      </button>
+			
+			    </span>
+			
+			  </td>
+			
+			  <th class="bg-light fw-semibold">메모</th>
+			  <td th:text="${#strings.isEmpty(order.orderMemo) ? '-' : order.orderMemo}"></td>
+			</tr>
+
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 수주 상세 내역 -->
+      <h5 class="fw-bold mb-2">수주 상세 내역</h5>
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-0">
+          <table class="table table-bordered align-middle mb-0 text-center">
+            <thead>
+            <tr>
+              <th style="width:80px">No</th>
+              <th>제품명</th>
+              <th style="width:140px">수량</th>
+              <th style="width:160px">단가</th>
+              <th style="width:180px">합계</th>
+              <th style="width:180px">비고</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="item, stat : ${order.items}">
+              <td th:text="${stat.count}"></td>
+              <td th:text="${item.prdName}"></td>
+              <td th:text="${item.orderQty}"></td>
+
+              <!-- ✅ 필드명은 네 DTO에 맞춰 수정 -->
+              <td th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')}"></td>
+              <td th:text="${#numbers.formatInteger(item.totalPrice, 0, 'COMMA')}"></td>
+              <td th:text="${item.itemMemo}"></td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(order.items)}">
+              <td colspan="6" class="text-muted py-4">수주 품목이 없습니다.</td>
+            </tr>
+
+            <!-- ✅ 총 합계 (필드가 없으면 컨트롤러에서 totalAmount 내려주기 추천) -->
+            <tr th:if="${!#lists.isEmpty(order.items)}">
+              <th colspan="4" class="bg-light">총 합계</th>
+              <th class="text-danger"
+                  th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA')}"></th>
+              <td></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+<!-- 출하 이력 섹션 -->
+<h5 class="fw-bold mb-2">출하 이력</h5>
+<div class="card shadow-sm mb-4">
+  <div class="card-body p-0">
+    <table class="table table-bordered align-middle mb-0 text-center">
+      <thead>
+      <tr>
+        <th style="width:80px">No</th>
+        <th style="width:140px">제품명</th>
+        <th style="width:140px">출하수량</th>
+        <th style="width:200px">LOT</th>
+        <th style="width:140px">출하일자</th>
+        <th style="width:180px">출하번호</th>
+        <th style="width:140px">출하상태</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- 🔥 출하 이력이 있을 때 -->
+      <tr th:each="history, stat : ${order.shipmentHistories}">
+        <td th:text="${stat.count}"></td>
+        <td th:text="${history.prdName}"></td>
+        <td th:text="${history.outboundAmount}"></td>
+        <td th:text="${history.lotNo ?: '-'}"></td>
+        <td th:text="${history.outboundDate != null ? #strings.substring(history.outboundDate.toString(), 0, 16).replace('T', ' ') : '-'}"></td>
+        <td th:text="${history.shipmentId}"></td>
+        <td>
+          <span th:if="${history.shipmentStatus == 'SHIPPED'}" 
+                class="badge bg-success">출하완료</span>
+          <span th:if="${history.shipmentStatus == 'RESERVED'}" 
+                class="badge bg-primary">예약</span>
+          <span th:if="${history.shipmentStatus == 'PENDING'}" 
+                class="badge bg-secondary">대기</span>
+          <span th:if="${history.shipmentStatus == 'LACK'}" 
+                class="badge bg-danger">부족</span>
+        </td>
+      </tr>
+      
+      <!-- 🔥 출하 이력이 없을 때 -->
+      <tr th:if="${#lists.isEmpty(order.shipmentHistories)}">
+        <td colspan="7" class="text-muted py-4">출하 이력이 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+      <!-- 하단 버튼 -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <a th:href="@{/sales/orders}" class="btn btn-outline-secondary rounded-pill px-4">목록으로</a>
+      </div>
+
+    </div>
+ <script th:src="@{/js/sales/order_detail.js}"></script>
+
+
+  </th:block>
+</th:block>

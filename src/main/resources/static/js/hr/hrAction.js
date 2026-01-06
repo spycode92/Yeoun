@@ -3,10 +3,6 @@
 let empGrid = null;
 //let originalEmpList = [];
 
-// CSRF 토큰 읽기 (전역)
-const csrfToken = document.querySelector("meta[name='_csrf_token']")?.content;
-const csrfHeader = document.querySelector("meta[name='_csrf_headerName']")?.content;
-
 document.addEventListener('DOMContentLoaded', function() {
 	
 	// 페이지 로드되면 사원 목록 불러오기
@@ -14,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	// 결재자 셀렉트박스 옵션 로드
 	initApproverView();
+	
+	// 결재선 박스 기본 숨김
+	setApprovalLineVisible(false);
 	
 	// 검색 이벤트
 	const btnSearch = document.getElementById('btnSearchEmp');
@@ -32,6 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	if (selPos) {
 		selPos.addEventListener('change', () => onSearchEmp());
 	}
+	
+	// 재직상태 선택 바뀌면 바로 필터링
+	const selStatus = document.getElementById('searchStatus');
+	if (selStatus) {
+		selStatus.addEventListener('change', () => onSearchEmp());
+	}
 
 	// 이름/사번 입력 후 엔터 누르면 검색
 	const inputKeyword = document.getElementById('searchKeyword');
@@ -41,11 +46,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 	
-	// 발령 등록 버튼 이벤트 - DOMContentLoaded에서 바로 등록!
+	// 발령 등록 버튼 이벤트 - DOMContentLoaded에서 바로 등록
 	const btnSubmit = document.getElementById('btnSubmit');
 	if (btnSubmit) {
 		btnSubmit.addEventListener('click', handleSubmitAction);
 	}
+	
+	// 발령 구분 변경 시 부서/직급 막기
+	const selActionType = document.querySelector("select[name='actionType']");
+    if (selActionType) {
+        selActionType.addEventListener('change', handleActionTypeChange);
+    }
+	
+	// 페이지 로딩 시 초기상태도 통일
+    handleActionTypeChange();
 });
 
 // 0. 검색 실행 함수
@@ -58,14 +72,16 @@ function loadEmpListForHrAction() {
 
 	const dept = document.getElementById('searchDept')?.value || '';
 	const pos = document.getElementById('searchPos')?.value || '';
+	const status  = document.getElementById('searchStatus')?.value || '';
 	const keyword = document.getElementById('searchKeyword')?.value.trim() || '';
 
 	const params = new URLSearchParams();
 	if (dept) params.append('deptId', dept);
 	if (pos) params.append('posCode', pos);
+	if (status)  params.append('status', status);
 	if (keyword) params.append('keyword', keyword);
 
-	const url = '/api/hr/employees' + (params.toString() ? ('?' + params.toString()) : '');
+	const url = apiUrl(`api/hr/employees`) + (params.toString() ? ('?' + params.toString()) : '');
 
 	fetch(url)
 		.then(res => {
@@ -97,6 +113,9 @@ function buildEmpGrid(rows) {
 		scrollY: true,
 		bodyHeight: 500,
 		rowHeaders: ['rowNum'],
+		columnOptions: {
+		  resizable: true
+		},
 		columns: [
 			{ 
 				header: '사번', 
@@ -116,6 +135,11 @@ function buildEmpGrid(rows) {
 			{ 
 				header: '직급', 
 				name: 'posName',
+				align: 'center'
+			},
+			{
+				header: '상태',
+				name: 'statusName',
 				align: 'center'
 			},
 			{ 
@@ -146,11 +170,14 @@ function buildEmpGrid(rows) {
 function handleSubmitAction(e) {
 	e.preventDefault(); // 폼 기본 제출 막기
 	
+	const actionType = document.querySelector("select[name='actionType']").value;
+	
 	// DTO 구성
 	const dto = {
 		empId: document.getElementById("empId").value,
-		actionType: document.querySelector("select[name='actionType']").value,
+		actionType: actionType,
 		effectiveDate: document.querySelector("input[name='effectiveDate']").value,
+		leaveEndDate: document.querySelector("input[name='leaveEndDate']").value,
 		toDeptId: document.querySelector("select[name='toDeptId']").value,
 		toPosCode: document.querySelector("select[name='toPosCode']").value,
 		actionReason: document.querySelector("textarea[name='actionReason']").value,
@@ -166,21 +193,32 @@ function handleSubmitAction(e) {
 		return;
 	}
 	if (!dto.effectiveDate) {
-		alert("발령일자를 입력하세요!");
+		alert("발령 효력일을 입력하세요!");
 		return;
 	}
-	if (!dto.toDeptId) {
-		alert("부서를 선택하세요!");
+
+	// 휴직일 때는 종료 예정일 필수
+	if (actionType === 'LEAVE_ACT' && !dto.leaveEndDate) {
+		alert("휴직 종료 예정일을 입력하세요!")
 		return;
-	}
-	if (!dto.toPosCode) {
-		alert("직급을 선택하세요!");
-		return;
-	}
+	}	
+	
+	
+	// 퇴직이 아닐 때만 부서/직급 필수
+    if (actionType !== 'RETIRE_ACT' && actionType !== 'LEAVE_ACT' && actionType !== 'RETURN_ACT') {
+      if (!dto.toDeptId) {
+        alert("부서를 선택하세요!");
+        return;
+      }
+      if (!dto.toPosCode) {
+        alert("직급을 선택하세요!");
+        return;
+      }
+    }
 	
 	
 	// REST API POST
-	fetch("/api/hr/actions", {
+	fetch(apiUrl(`api/hr/actions`), {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -219,10 +257,11 @@ function loadApproverOptions(empId) {
   // 아직 사원 선택 안 했으면 비우기만
   if (!empId) {
     initApproverView();
+	setApprovalLineVisible(false);
     return;
   }
 
-  fetch(`/api/hr/approvers?formName=인사발령신청서&empId=${encodeURIComponent(empId)}`)
+  fetch(apiUrl(`api/hr/approvers?formName=인사발령신청서&empId=${encodeURIComponent(empId)}`))
     .then(res => {
       if (!res.ok) {
         throw new Error("결재자 API 호출 실패");
@@ -240,21 +279,55 @@ function loadApproverOptions(empId) {
       if (list[0] && a1) a1.textContent = `${list[0].empName} (${list[0].deptName})`;
       if (list[1] && a2) a2.textContent = `${list[1].empName} (${list[1].deptName})`;
       if (list[2] && a3) a3.textContent = `${list[2].empName} (${list[2].deptName})`;
+	  
+	  setApprovalLineVisible(true);
     })
     .catch(err => {
       console.error("결재자 로드 실패:", err);
       // 에러 난 경우도 깔끔하게 표시
       const a1 = document.getElementById("appr1");
       if (a1) a1.textContent = "결재선 로드 실패";
+	  
+	  setApprovalLineVisible(false);
     });
 }
 
-// 결재선 초기화 (처음 로딩 시)
-function initApproverView() {
-  const a1 = document.getElementById("appr1");
-  const a2 = document.getElementById("appr2");
-  const a3 = document.getElementById("appr3");
-  if (a1) a1.textContent = "-";
-  if (a2) a2.textContent = "-";
-  if (a3) a3.textContent = "-";
+// 5. 발령타입
+function handleActionTypeChange() {
+    const actionType = document.querySelector("select[name='actionType']").value;
+    const deptSelect = document.querySelector("select[name='toDeptId']");
+    const posSelect = document.querySelector("select[name='toPosCode']");
+	const leaveEndInput = document.querySelector("input[name='leaveEndDate']");
+
+    if (!deptSelect || !posSelect || !leaveEndInput) return;
+
+	// 퇴직 및 휴직일 때 부서/직급 비활성화
+    if (actionType === 'RETIRE_ACT' || actionType === 'LEAVE_ACT' || actionType === 'RETURN_ACT') {
+        deptSelect.disabled = true;
+        posSelect.disabled = true;
+        deptSelect.value = '';
+        posSelect.value = '';
+    } else {
+        // 다른 발령일 때 되돌리기
+        deptSelect.disabled = false;
+        posSelect.disabled = false;
+    }
+	
+	// 휴직일 때만 휴직 종료 예정일 활성화
+	if (actionType === 'LEAVE_ACT') {
+		leaveEndInput.disabled = false;
+	} else {
+		leaveEndInput.disabled = true;
+		leaveEndInput.value = "";
+	}
+	
 }
+
+// 6. 결재선 박스 show/hide
+function setApprovalLineVisible(show) {
+	const box = document.getElementById('approvalLineBox');
+	if (!box) return;
+	
+	box.style.display = show ? 'block' : 'none';
+}
+

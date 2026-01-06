@@ -6,110 +6,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css}" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css}" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/messenger/chat.css}">
 </head>
 
 <body>
 
-<div class="chat-window" >
+<div class="chat-window">
 
-  <!-- ======================= 상단바 ======================= -->
+  <!-- =======================================
+       상단바
+  ======================================== -->
   <div class="chat-header header-purple">
     <div class="chat-header-left">
-      <!-- 그룹채팅인 경우 -->
-      <div class="chat-title"
-           th:if="${groupYn == 'Y'}"
-           th:text="${groupName}">
-        그룹채팅 이름
-      </div>
-
-      <!-- 1:1 채팅인 경우 -->
-      <div class="chat-title"
-           th:if="${groupYn != 'Y'}"
-           th:text="${targetName} + ' ' + ${targetPos}">
-        상대방 이름 직급
-      </div>
-	  <!-- 방 이름 수정 -->
-	  <i class="bi bi-pencil-square" id="rename-room"></i>
+      <div class="chat-title" th:text="${groupName}"></div>
+      <i class="bi bi-pencil-square" id="rename-room" th:if="${roomId != null}"></i>
     </div>
 
     <div class="chat-header-right">
-	    <!-- 참여자 패널 -->
-	    <i class="bi bi-people-fill" id="toggle-members"></i>
-	
-	    <!-- 핀 아이콘 -->
-	    <i class="bi bi-pin-angle-fill pin-icon" id="pin-room"></i>
-	    	
-	    <!-- 방 나가기 -->
-	    <i class="bi bi-box-arrow-right" id="exit-room"></i>
-	</div>
-
+      <i class="bi bi-people-fill" id="toggle-members"></i>
+      <i class="bi bi-pin-angle-fill pin-icon" id="pin-room"></i>
+      <i class="bi bi-box-arrow-right" id="exit-room"></i>
+    </div>
   </div>
 
-  <!-- ======================= 메시지 영역 ======================= -->
+  <!-- =======================================
+       메시지 영역
+  ======================================== -->
   <div class="chat-body" id="chat-body">
+
+    <input type="hidden" id="groupYn" th:value="${groupYn}">
 
     <!-- 새 방 안내 -->
     <div class="new-room-empty" id="new-room-empty" th:if="${roomId == null}">
-      <div class="empty-guide">
-        <span>대화를 시작해보세요.</span>
-      </div>
+      <div class="empty-guide"><span>대화를 시작해보세요.</span></div>
     </div>
 
     <!-- 메시지 반복 -->
     <div th:each="msg : ${msgList}"
          class="msg-row"
-         th:classappend="${msg.senderId} == ${#authentication.principal.empId} ? ' right' : ' left'"
+         th:classappend="${msg.msgType=='SYSTEM'} ? 'system' :
+                         (${msg.senderId} == ${#authentication.principal.empId} ? 'right' : 'left')"
          th:attr="data-msg-id=${msg.msgId}">
 
-      <!-- ===================== 왼쪽 메시지(상대) ===================== -->
-      <th:block th:if="${msg.senderId} != ${#authentication.principal.empId}">
-        <img src="/images/default_profile.png" class="profile-img">
+      <!-- SYSTEM 메시지 -->
+      <th:block th:if="${msg.msgType=='SYSTEM'}">
+        <div class="system-text" th:text="${msg.msgContent}"></div>
+      </th:block>
+
+      <!-- 상대 메시지 -->
+      <th:block th:if="${msg.msgType!='SYSTEM' and msg.senderId != #authentication.principal.empId}">
+        <img th:src="|@{'/img/msg_img_' + ${msg.senderProfile} + '.png'}|" class="profile-img">
 
         <div class="msg-main">
           <div class="sender-name" th:text="${msg.senderName}"></div>
-          <div class="msg-bubble msg-left" th:text="${msg.msgContent}"></div>
+
+          <!-- 텍스트 -->
+          <div class="msg-bubble msg-left" th:if="${msg.msgType=='TEXT'}"
+               th:text="${msg.msgContent}"></div>
+
+          <!-- 파일 -->
+          <div class="file-bundle" th:if="${msg.msgType=='FILE'}">
+            <div class="file-item" th:each="f : ${msg.files}">
+              <!-- 이미지 -->
+              <th:block th:if="${f.category.startsWith('image')}">
+                <a th:href="@{|/files/download/${f.fileId}|}" target="_blank">
+                  <img th:src="@{|/uploads/${f.filePath}/${f.fileName}|}" class="file-thumb">
+                </a>
+                <span th:text="${f.originFileName}" class="file-name"></span>
+                <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
+              </th:block>
+
+              <!-- 그 외 -->
+              <th:block th:unless="${f.category.startsWith('image')}">
+                <i class="bi bi-file-earmark"></i>
+                <span class="file-name" th:text="${f.originFileName}"></span>
+                <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
+              </th:block>
+            </div>
+          </div>
         </div>
 
         <div class="msg-time msg-time-left"
              th:text="${#temporals.format(msg.sentDate, 'yyyy-MM-dd a h:mm')}"></div>
       </th:block>
 
-      <!-- ===================== 오른쪽 메시지(나) ===================== -->
-      <th:block th:if="${msg.senderId} == ${#authentication.principal.empId}">
+
+      <!-- 내 메시지 -->
+      <th:block th:if="${msg.msgType!='SYSTEM' and msg.senderId == #authentication.principal.empId}">
         <div class="msg-meta">
           <span th:text="${#temporals.format(msg.sentDate, 'yyyy-MM-dd a h:mm')}"></span>
-          <i class="bi bi-check2-all"></i>
+          <i class="bi bi-check2-all read-check"></i>
         </div>
 
-        <div class="msg-bubble msg-right" th:text="${msg.msgContent}"></div>
+        <!-- 텍스트 -->
+        <div class="msg-bubble msg-right" th:if="${msg.msgType=='TEXT'}"
+             th:text="${msg.msgContent}"></div>
+
+        <!-- 파일 -->
+        <div class="file-bundle" th:if="${msg.msgType=='FILE'}">
+          <div class="file-item" th:each="f : ${msg.files}">
+            <th:block th:if="${f.category.startsWith('image')}">
+              <a th:href="@{|/files/download/${f.fileId}|}" target="_blank">
+                <img th:src="@{|/uploads/${f.filePath}/${f.fileName}|}" class="file-thumb">
+              </a>
+              <span class="file-name" th:text="${f.originFileName}"></span>
+              <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
+            </th:block>
+
+            <th:block th:unless="${f.category.startsWith('image')}">
+              <i class="bi bi-file-earmark"></i>
+              <span class="file-name" th:text="${f.originFileName}"></span>
+              <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
+            </th:block>
+          </div>
+        </div>
       </th:block>
 
     </div>
-
-
   </div>
 
-  <!-- ======================= 입력 영역 ======================= -->
+
+  <!-- =======================================
+       입력 + 파일 미리보기
+  ======================================== -->
+  <div id="attachment-preview"></div>
+
   <div class="chat-footer">
-	<label class="file-btn">
-	  <i class="bi bi-paperclip"></i>
-	  <input type="file" id="fileInput" hidden>
-	</label>
+    <label class="file-btn">
+      <i class="bi bi-paperclip"></i>
+      <input type="file" id="fileInput" hidden multiple>
+    </label>
+
     <textarea id="message" placeholder="메시지를 입력하세요"></textarea>
+
     <button id="send" class="send-btn">
       <i class="bi bi-send-fill"></i>
     </button>
   </div>
-
 </div>
-<!-- ===================================================== -->
-<!--  슬라이드 참여자 패널  -->
-<!-- ===================================================== -->
-<div class="member-panel" id="member-panel">
 
+<!-- =======================================
+     참여자 패널
+======================================= -->
+<div class="member-panel" id="member-panel">
   <div class="member-panel-header">
     <span>참여자</span>
     <i class="bi bi-x-lg" id="close-member-panel"></i>
@@ -117,7 +158,7 @@
 
   <div class="member-panel-body">
     <div class="member-item" th:each="m : ${members}">
-      <img th:src="|@{/img/msg_img_}${m.msgProfile}.png|" class="member-avatar">
+      <img th:src="@{'/img/msg_img_' + ${m.msgProfile} + '.png'}" class="member-avatar">
       <div class="info">
         <p class="name" th:text="${m.empName}"></p>
         <small th:text="|${m.department} / ${m.position}|"></small>
@@ -126,32 +167,32 @@
   </div>
 </div>
 
-<!-- 방 이름 수정 모달 -->
+<!-- =======================================
+     방 이름 수정 모달
+======================================= -->
 <div class="modal fade" id="renameModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
-
       <div class="modal-header">
         <h5 class="modal-title">방 이름 수정</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body">
-        <input type="text" class="form-control" id="renameInput"
-               placeholder="새 그룹명을 입력하세요">
+        <input type="text" class="form-control" id="renameInput" placeholder="새 그룹명을 입력하세요">
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-light" data-bs-dismiss="modal">취소</button>
         <button class="btn btn-primary" id="renameSubmit">변경</button>
       </div>
-
     </div>
   </div>
 </div>
-<!-- ============================
+
+<!-- =======================================
      방 나가기 모달
-============================ -->
+======================================= -->
 <div class="modal fade" id="exitModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
@@ -162,29 +203,29 @@
       </div>
 
       <div class="modal-body text-center">
-        <p class="mb-0" style="font-weight:500; color:#444;">
-          정말 방을 나가겠습니까?
-        </p>
-        <small style="color:#777;">나간 이후 대화 내용은 다시 볼 수 없습니다.</small>
+        <p class="mb-0 fw-semibold">정말 방을 나가겠습니까?</p>
+        <small>나간 이후 대화 내용은 다시 볼 수 없습니다.</small>
       </div>
 
-      <div class="modal-footer border-0 d-flex justify-content-end">
+      <div class="modal-footer border-0">
         <button class="btn btn-light px-3" data-bs-dismiss="modal">취소</button>
         <button class="btn btn-danger px-3" id="exitSubmit">나가기</button>
       </div>
-
     </div>
   </div>
 </div>
 
-
+<!-- =======================================
+     JS
+======================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/js/messenger/createRoom.js}"></script>
-<script th:src="@{/js/common/formatTimeJS.js}"></script>
 <!-- 소켓 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:src="@{/js/common/connectSocket.js}"></script>
+<script th:src="@{/js/messenger/createRoom.js}"></script>
+<script th:src="@{/js/common/formatTimeJS.js}"></script>
 <script th:inline="javascript">
   const chatBody = document.getElementById('chat-body');
   const textarea = document.getElementById('message');
@@ -195,125 +236,17 @@
   window.roomId         = /*[[${roomId}]]*/ null;
   window.targetEmpId    = /*[[${targetEmpId}]]*/ null;
   window.csrfToken      = /*[[${_csrf.token}]]*/ '';
-  window.csrfHeaderName = /*[[${_csrf.headerName}]]*/ '';
+  window.csrfHeader = /*[[${_csrf.headerName}]]*/ '';
   window.senderId       = /*[[${#authentication.principal.empId}]]*/ '';
 
   console.log("roomId.... : ", roomId);
   console.log("target..... : ", targetEmpId);
   console.log("token..... : ", csrfToken);
-  console.log("headerName..... : ", csrfHeaderName);
+  console.log("header..... : ", csrfHeader);
 
-  /*
-  function isNewRoom() {
-    return roomId === null || roomId === undefined;
-  }
 
-  function hideNewRoomGuide() {
-    if (emptyView) emptyView.style.display = 'none';
-  } 
 
- function formatTime() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-
-    let hour = now.getHours();
-    const minute = String(now.getMinutes()).padStart(2, '0');
-
-    const ampm = hour >= 12 ? '오후' : '오전';
-    hour = hour % 12 || 12;
-
-    return `${year}-${month}-${day} ${ampm} ${hour}:${minute}`;
-  } 
-
-  // 내 메시지 DOM 생성
- function appendMyMessage(msg) {
-    hideNewRoomGuide();
-
-    const row = document.createElement('div');
-    row.className = 'msg-row right';
-
-    row.innerHTML = `
-      <div class="msg-meta">
-        <span>${formatTime()}</span>
-        <i class="bi bi-check2 read-check"></i>
-      </div>
-      <div class="msg-bubble msg-right">
-        ${msg}
-      </div>
-    `;
-
-    chatBody.appendChild(row);
-    chatBody.scrollTop = chatBody.scrollHeight;
-
-    // 체크 → 읽음 표시 바꾸기 (샘플) =====================> 소켓 수정 필요 부분
-    setTimeout(() => {
-      const icon = row.querySelector('.read-check');
-      if (!icon) return;
-      icon.classList.remove('bi-check2');
-      icon.classList.add('bi-check2-all');
-      icon.style.color = '#6a5acd';
-    }, 1500);
-  } 
-
-  // 메시지 전송 로직
- async function sendMessage() {
-    const msg = textarea.value.trim();
-    if (!msg) return;
-
-    textarea.value = '';
-    // height 초기화 후 다시 input 이벤트에서 재계산
-    textarea.style.height = '40px';
-
-    appendMyMessage(msg);
-
-    if (isNewRoom()) {
-      console.log("신규 채팅방 생성 요청 진입....");
-    
-      const newRoomId = await createRoom({
-    	 members: [targetEmpId],
-    	 groupYn: 'N',
-    	 firstMessage: msg,
-    	 csrfHeaderName: csrfHeaderName,
-    	 csrfToken: csrfToken
-      });
-
-      return;
-    }
-
-    // 기존 방: 메시지만 저장
-    try {
-      const bodyData = {
-        msgContent: msg,
-        msgType: "TEXT"
-      }
-
-      await fetch(`/messenger/chat/${roomId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          [csrfHeaderName]: csrfToken
-        },
-        body: JSON.stringify(bodyData)
-      });
-    } catch (e) {
-      console.error('메시지 전송 실패:', e);
-    }
-  } 
-
-  // Enter로 전송
- textarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  sendBtn.addEventListener('click', sendMessage); */
-
-//한 줄 높이(px)
+  //한 줄 높이(px)
 const baseHeight = 40;
 
 textarea.addEventListener("input", function () {
@@ -352,38 +285,47 @@ if (closeBtn && memberPanel) {
   });
 }
 
-// 파일선택
-document.getElementById('fileInput').addEventListener('change', () => {
-    const file = document.getElementById('fileInput').files[0];
-    if (!file) return;
+  // ================================
+  // 방 이름 수정 모달 열기
+  // ================================
+  document.getElementById('rename-room')?.addEventListener('click', () => {
 
-    alert("파일 업로드 준비됨: " + file.name);
+    console.log("방 이름 클릭!!!!!");
 
-    // 나중에 여기서 FormData → fetch로 백엔드 전송하면 된다!
-});
+    const modal = new bootstrap.Modal(document.getElementById('renameModal'));
+
+    // 기존 제목 불러오기
+    const title = document.querySelector('.chat-header-left .chat-title')?.textContent.trim();
+    document.getElementById('renameInput').value = title || "";
+
+    modal.show();
+  });
 
 // 방 이름 수정 모달 컨트롤
-document.getElementById('rename-room').addEventListener('click', () => {
-	
-	console.log("방 이름 클릭!!!!!");
-    const modal = new bootstrap.Modal(document.getElementById('renameModal'));
-    document.getElementById('renameInput').value =
-        document.querySelector('.chat-header-left .chat-title').textContent;
-    modal.show();
-});
-
-// 변경 버튼 클릭 시 화면 즉시 반영
-document.getElementById('renameSubmit').addEventListener('click', () => {
+  document.getElementById('renameSubmit').addEventListener('click', () => {
     const newName = document.getElementById('renameInput').value.trim();
     if (!newName) return;
 
+    // 화면 즉시 변환
     document.querySelector('.chat-header-left .chat-title').textContent = newName;
 
-    // 백엔드 전송은 나중에 붙이기
-    // fetch(`/messenger/rename/${newName}`, ...)
+    // ===== 서버 호출 =====
+    fetch(`/messenger/room/${roomId}/rename`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        [csrfHeader]: csrfToken
+      },
+      body: JSON.stringify({ groupName: newName })
+    })
+            .then(res => res.text())
+            .then(text => console.log("방이름 수정 완료:", text))
+            .catch(err => console.error("방 이름 수정 오류:", err));
 
+    // 모달 닫기
     bootstrap.Modal.getInstance(document.getElementById('renameModal')).hide();
-});
+  });
+
 
 // 핀 버튼 클릭 시 토글
 
@@ -393,8 +335,6 @@ document.getElementById('pin-room').addEventListener('click', () => {
 
     // 나중에 방 고정 로직 백엔드 연결 가능
 });
-
-
 
 //방 나가기 버튼 → 모달 열기
 document.getElementById('exit-room').addEventListener('click', () => {
@@ -407,12 +347,14 @@ document.getElementById('exitSubmit').addEventListener('click', async () => {
 
     if (!roomId) return;
 
+    leaveRoom();
+
     try {
         await fetch(`/messenger/room/${roomId}/member`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
+                [csrfHeader]: csrfToken
             }
         });
 
@@ -425,52 +367,7 @@ document.getElementById('exitSubmit').addEventListener('click', async () => {
     }
 });
 
-
-
-
-
-//-------------------------------------------------------
-//**여기부터 읽음 처리 코드**
-//-------------------------------------------------------
-
-//1) 마지막 메시지 ID 추출 함수
-/* function getLastMessageId() {
-	const rows = document.querySelectorAll('.msg-row');
-	if (rows.length === 0) return null;
-	return rows[rows.length - 1].getAttribute('data-msg-id');
-}
-
-//2) 읽음 처리 PATCH 호출
-async function updateReadMessage() {
-	if (!roomId) return;  // 신규 방이면 스킵
-	
-	const lastMsgId = getLastMessageId();
-	if (!lastMsgId) return;
-	
-	try {
-	 await fetch(`/messenger/chat/${roomId}`, {
-	   method: "PATCH",
-	   headers: {
-	     "Content-Type": "application/json",
-	     [csrfHeaderName]: csrfToken
-	   },
-	   body: JSON.stringify({ lastReadId: lastMsgId })
-	});
-	
-	 console.log("읽음 처리 성공:", lastMsgId);
-	} catch (e) {
-	 console.error("읽음 처리 실패:", e);
-	}
-}
-
-//3) 방 들어오자마자 자동 읽음 처리
-document.addEventListener("DOMContentLoaded", () => {
-	updateReadMessage();
-}); */
-// ===============================> 다시 확인
-
-
 </script>
-<script th:src="@{/js/messenger/messenger.js}"></script>
+<script th:src="@{/js/messenger/chat.js}"></script>
 </body>
 </html>

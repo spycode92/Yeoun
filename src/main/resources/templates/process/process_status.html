@@ -1,0 +1,190 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+
+	<style>
+	  /* ===================== 탭 커스텀 ===================== */
+	  .pay-tabs {
+	    border-bottom: 2px solid #e5e7eb;
+	    margin-bottom: 1.5rem;
+	  }
+	  .pay-tabs .nav-link {
+	    position: relative;
+	    color: #6b7280;
+	    font-weight: 600;
+	    padding: 0.75rem 1.5rem;
+	    border: none;
+	    border-radius: 8px 8px 0 0;
+	    transition: all 0.25s ease;
+	  }
+	  .pay-tabs .nav-link:hover {
+	    color: #0d6efd;
+	    background: #f1f5ff;
+	  }
+	  .pay-tabs .nav-link.active {
+	    color: #0d6efd;
+	    background: #ffffff;
+	    box-shadow: 0 -2px 8px rgba(13,110,253,0.1);
+	  }
+	  .pay-tabs .nav-link.active::after {
+	    content: '';
+	    position: absolute;
+	    left: 0; right: 0; bottom: -2px;
+	    height: 3px;
+	    background: #0d6efd;
+	    border-radius: 2px;
+	    animation: underlineIn 0.3s ease forwards;
+	  }
+	  @keyframes underlineIn {
+	    from {width: 0; margin-left: 50%;}
+	    to {width: 100%; margin-left: 0;}
+	  }
+	  
+	  #detailLoadingOverlay{
+	  	position: absolute;
+	  	inset: 0;
+	  	background: rgba(255,255,255,.6);
+	  	z-index: 50;
+	  	display: flex;
+	  	align-items: center;
+	  	justify-content: center;
+	  	pointer-events:auto;
+	  }
+	  #detailLoadingOverlay.d-none{
+	    display: none !important;
+	  }
+	</style>
+
+  <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <h2>공정 현황</h2>
+
+    <!-- 탭 -->
+    <ul class="nav pay-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link"
+           th:href="@{/process/status(tab='live')}"
+           th:classappend="${activeTab}=='live' ? ' active'">
+          진행 현황
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"
+           th:href="@{/process/status(tab='done')}"
+           th:classappend="${activeTab}=='done' ? ' active'">
+          완료 내역
+        </a>
+      </li>
+    </ul>
+
+    <!-- 탭 내용 교체 -->
+    <div th:replace="${activeTab == 'live'}
+          ? ~{process/status_live :: live}
+          : ~{process/status_done :: done}">
+    </div>
+    
+    <!-- DETAIL MODAL -->
+	  <div class="modal fade" id="detailModal" tabindex="-1">
+	    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+	      <div class="modal-content">
+	        <div class="modal-body position-relative">
+	        
+			  <div id="detailLoadingOverlay" class="d-none">
+			    <div class="text-center">
+			      <div class="spinner-border text-primary" role="status"></div>
+			      <div class="mt-2 text-muted small">처리 중...</div>
+			    </div>
+			  </div>
+			  
+	        <div class="modal-header">
+	          <h5 class="modal-title">작업지시 공정 상세</h5>
+	          <button class="btn-close" data-bs-dismiss="modal"></button>
+	        </div>
+	        
+	          <div class="row g-2 mb-3 small" id="summaryGrid"></div>
+	
+	          <div class="table-responsive small">
+	            <table class="table table-bordered table-sm" id="stepTable">
+	              <thead class="table-light">
+	                <tr>
+	                  <th style="width: 50px;">단계</th>
+	                  <th style="width: 60px;">공정명</th>
+	                  <th style="width: 50px;">상태</th>
+	                  <th style="width: 130px;">시작</th>
+	                  <th style="width: 130px;">종료</th>
+	                  <th style="width: 60px;">예상</th>
+	                  <th style="width: 60px;">지연</th>
+	                  <th style="width: 70px;">양품수량</th>
+	                  <th style="width: 70px;">불량수량</th>
+	                  <th style="width: 90px;">작업</th>
+	                  <th>특이사항</th>
+	                </tr>
+	              </thead>
+	              <tbody></tbody>
+	            </table>
+	          </div>
+	
+	        </div>
+	        <div class="modal-footer">
+	          <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	  
+	  <!-- FINISH MODAL (공정 종료 수량 입력) -->
+		<div class="modal fade" id="finishModal" tabindex="-1">
+		  <div class="modal-dialog modal-md modal-dialog-centered">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">공정 종료</h5>
+		        <button class="btn-close" data-bs-dismiss="modal"></button>
+		      </div>
+		
+		      <div class="modal-body">
+		        <!-- hidden -->
+		        <input type="hidden" id="finish-orderId">
+		        <input type="hidden" id="finish-stepSeq">
+		
+		        <div class="row g-2">
+		          <div class="col-12">
+		            <label class="form-label">계획 수량</label>
+		            <input type="text" class="form-control" id="finish-planQty" readonly>
+		          </div>
+		
+		          <div class="col-12">
+		            <label class="form-label" id="finish-standardLabel">기준값</label>
+		            <input type="text" class="form-control" id="finish-standardQty" readonly>
+		            <div class="form-text" id="finish-standardHelp"></div>
+		          </div>
+		
+		          <div class="col-6">
+		            <label class="form-label">양품 수량</label>
+		            <input type="number" class="form-control" id="finish-goodQty" min="0">
+		          </div>
+		
+		          <div class="col-6">
+		            <label class="form-label">불량 수량</label>
+		            <input type="number" class="form-control" id="finish-defectQty" min="0">
+		          </div>
+		        </div>
+		      </div>
+		
+		      <div class="modal-footer">
+		        <button class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+		        <button class="btn btn-success" type="button" id="btnFinishSubmit">종료 처리</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+			  
+
+  </div>
+</th:block>
+</th:block>
+
+
+<script th:src="@{/js/process/processStatus.js}"></script>
+<script th:src="@{/js/process/processDone.js}"></script> 

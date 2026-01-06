@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.common.dto.AlarmDTO;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
@@ -50,6 +52,7 @@ public class ScheduleService {
 	private final ScheduleMapper scheduleMapper;
 	private final ScheduleSharerRepository scheduleSharerRepository;
 	private final RepeatScheduleRepository repeatScheduleRepository;
+	private final AlarmService alarmService;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -72,6 +75,7 @@ public class ScheduleService {
 
 		Schedule schedule = scheduleDTO.toEntity();
 		schedule.setEmp(emp);
+		String scheduleTitle =schedule.getScheduleTitle();
 		// 여기서 Schedule테이블 정보 저장
 		log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ schedule : " + schedule);
 		scheduleRepository.save(schedule);
@@ -89,8 +93,20 @@ public class ScheduleService {
 				scheduleSharer.setSchedule(schedule);
 				scheduleSharer.setSharedEmp(sharerEmp);
 				// 엔티티 값 저장
-				log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scheduleSharer : " + scheduleSharer);
 				scheduleSharerRepository.save(scheduleSharer);
+				
+				// 공유일정 공유자들에게 알림 설정
+				String alarmMessage = """
+				        새로운 공유 일정이 등록되었습니다.['%s']
+						""".formatted(scheduleTitle);
+				
+				AlarmDTO alarmDTO = AlarmDTO.builder()
+						.empId(sharerEmp.getEmpId())
+						.alarmMessage(alarmMessage)
+						.alarmStatus("N")
+						.alarmLink("/main")
+						.build();
+				alarmService.sendPersonalMessage(alarmDTO);
 			}
 		}
 
@@ -163,6 +179,7 @@ public class ScheduleService {
 		// 입력된 스케줄id로 기존 스케줄로우 정보 받아오기
 		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
 		
+		String scheduleTitle = schedule.getScheduleTitle();
 		// changeSchedule 메서드 사용해서 수정된 정보 저장
 		schedule.changeSchedule(scheduleDTO);
 		
@@ -177,13 +194,26 @@ public class ScheduleService {
 				// save할 객체 생성
 				ScheduleSharer scheduleSharer = new ScheduleSharer();
 				// sharer에 공유된 empId로 emp객체 찾기
-				Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));;
+				Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));;
 				
 				// scheduleSharer엔티티에 schedule객체, emp 객체 추가 
 				scheduleSharer.setSchedule(schedule);
 				scheduleSharer.setSharedEmp(sharerEmp);
 				// 엔티티 값 저장
 				scheduleSharerRepository.save(scheduleSharer);
+				
+				// 공유일정 공유자들에게 알림 설정
+				String alarmMessage = """
+				        새로운 공유 일정이 등록되었습니다.['%s']
+						""".formatted(scheduleTitle);
+				
+				AlarmDTO alarmDTO = AlarmDTO.builder()
+						.empId(sharerEmp.getEmpId())
+						.alarmMessage(alarmMessage)
+						.alarmStatus("N")
+						.alarmLink("/main")
+						.build();
+				alarmService.sendPersonalMessage(alarmDTO);
 			}
 		}
 	}
@@ -191,7 +221,8 @@ public class ScheduleService {
 	//일정 정보 삭제
 	@Transactional
 	public void deleteSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
-		Schedule schedule = scheduleDTO.toEntity();
+		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지않는 일정입니다!!"));
+		
 		scheduleRepository.delete(schedule);
 	}
 	

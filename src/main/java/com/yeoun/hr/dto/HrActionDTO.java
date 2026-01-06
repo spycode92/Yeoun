@@ -31,6 +31,9 @@ public class HrActionDTO {
 	// 효력일
 	private LocalDate effectiveDate; 
 	
+	// 휴직 종료 예정일
+	private LocalDate leaveEndDate;
+	
 	// 이전 부서명
 	private String fromDeptName;
 	

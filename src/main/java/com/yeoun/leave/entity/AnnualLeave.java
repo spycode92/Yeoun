@@ -39,7 +39,7 @@ import lombok.Setter;
 @SequenceGenerator(
 		name = "ANNUAL_LEAVE_SEQ_GENERATOR",
 		sequenceName = "ANNUAL_LEAVE_SEQ", 
-		initialValue = 1,
+		initialValue = 70,
 		allocationSize = 1
 )
 @Getter
@@ -108,7 +108,7 @@ public class AnnualLeave {
 			return (int) Math.min(month, 11); // 법적 최대치(11) 초과하지 않도록 제한
 		} else {
 			int extra = (int) ((year - 1) / 2); // 2년마다 1일씩 추가
-			return Math.min(15 + extra, 25); // 최대 25일까지 부여
+			return Math.min(15 + extra, 25); // 법적으로 근속 연수에 따라서 최소한 25일까지 부여
 		}
 	}
 	
@@ -151,11 +151,26 @@ public class AnnualLeave {
 	
 	// 연차 수정했을 경우
 	public void modifyAnnual(String userId, LeaveChangeRequestDTO leaveChangeRequestDTO) {
+		
+		// 증감을 알 수 있는 타입
+		String type = leaveChangeRequestDTO.getChangeType();
+		// 변경된 연차 갯수
+		int changeDays = leaveChangeRequestDTO.getChangeDays();
+		
+		// 차감일 경우 총 연차에서 변경된 연차 갯수 비교해서 부족한 경우 에러 처리
+		if ("decrease".equals(type)) {
+			if (this.totalDays - changeDays < this.usedDays) {
+				throw new IllegalArgumentException("차감할 수 있는 연차가 부족합니다.");
+			}
+		}
+		
 		// 증감에 따라 총 연차 수정
-		if (leaveChangeRequestDTO.getChangeType().equals("increase")) {
-			this.totalDays += leaveChangeRequestDTO.getChangeDays();
+		if ("increase".equals(type)) {
+			this.totalDays += changeDays;
+			this.remainDays = this.totalDays - this.usedDays;
 		} else {
-			this.totalDays -= leaveChangeRequestDTO.getChangeDays();
+			this.totalDays -= changeDays;
+			this.remainDays = this.totalDays - this.usedDays;
 		}
 		
 		this.updatedUser = userId;

@@ -73,7 +73,7 @@ async function openDetail(empId) {
     const mm = document.getElementById("calc_month").value;
 
     try {
-        const res = await fetch(`/pay/calc/detail?yyyymm=${mm}&empId=${empId}`);
+        const res = await fetch(apiUrl(`pay/calc/detail?yyyymm=${mm}&empId=${empId}`));
         const data = await res.json();
 
         document.getElementById("d-empId").innerText = data.empId ?? "";
@@ -119,7 +119,7 @@ async function openDetail(empId) {
 
 async function refreshStatus(mm) {
     try {
-        const res = await fetch(`/pay/calc/status?yyyymm=${mm}`);
+        const res = await fetch(apiUrl(`pay/calc/status?yyyymm=${mm}`));
         if (!res.ok) return;
 
         const s = await res.json();

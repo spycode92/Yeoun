@@ -1,0 +1,107 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="inventory_detail_modal">
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel1">재고 상세 정보</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <input type="hidden" id="detailIvId">
+            </div>
+            <div class="modal-body">
+                <div class="row g-2">
+                    <div class="col mb-3">
+                        <label for="detailLotNo" class="form-label">LOT 번호</label>
+                        <input type="text" id="detailLotNo" class="form-control" readonly>
+                    </div>
+                   	<div class="col mb-3">
+                        <label for="detailStatus" class="form-label">상태</label>
+                        <input type="text" id="detailStatus" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col mb-3">
+                        <label for="detailProdName" class="form-label">상품명</label>
+                        <input type="text" id="detailProdName" class="form-control" readonly>
+                    </div>
+                   	<div class="col mb-3">
+                        <label for="detailCategory" class="form-label">타입</label>
+                        <input type="text" id="detailCategory" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col mb-3">
+                        <label for="detailQty" class="form-label">현재 수량</label>
+                        <div class="d-flex">
+	                        <input type="text" id="detailAmount" class="form-control me-2 flex-grow-1" readonly>
+                        </div>
+                    </div>
+                    <div class="col mb-3">
+                        <label for="detailExpectObAmount" class="form-label">출고예정 수량</label>
+                        <div class="d-flex">
+	                        <input type="text" id="detailExpectObAmount" class="form-control me-2 flex-grow-1" readonly>
+                        </div>
+                    </div>
+                    <div class="col mb-3">
+                    	<label class="form-label d-block">&nbsp;</label>
+                        <div class="d-flex">
+							<button type="button" class="btn btn-warning ms-2 flex-grow-0" id="adjustBtn" 
+							sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')" style="width:120px;">
+		                    	수량 조절
+		                    </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col mb-3">
+                        <label for="detailLocation" class="form-label">위치 (Zone-Rack-Row-Col)</label>
+                        <input type="text" id="detailLocation" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="row g-2" >
+                    <div class="col mb-3">
+                        <label for="detailExpiry" class="form-label">유통기한</label>
+                        <input type="text" id="detailExpiry" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <!-- Same LOT Locations Table -->
+                <div class="mb-3" id="detailSameLotSection">
+                    <label class="form-label fw-bold">동일 LOT 다른 위치 정보</label>
+                    <div class="table-responsive text-nowrap border rounded">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Zone</th>
+                                    <th>Rack</th>
+                                    <th>Row</th>
+                                    <th>Col</th>
+                                    <th>수량</th>
+                                    <th>출고예정수량</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sameLotTableBody">
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" id="detailBtnMove" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
+                	재고 이동
+                </button>
+                <button type="button" class="btn btn-danger" id="detailBtnDisposal" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
+                	폐기
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/js/inventory/inventoryDetail.js}"></script>

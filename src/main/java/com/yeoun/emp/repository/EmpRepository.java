@@ -25,6 +25,10 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	boolean existsByMobile(String mobile);		// 전화번호
 	boolean existsByRrn(String rrn);			// 주민등록번호
 	
+	// 수정용(내 empId는 제외)
+    boolean existsByEmailAndEmpIdNot(String email, String empId);
+    boolean existsByMobileAndEmpIdNot(String mobile, String empId);
+	
 	// 사원번호 + 부서 + 역할
 	@Query("""
 			  SELECT e
@@ -77,7 +81,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 						            Pageable pageable);
 	
 	
-	// 재직자 공용 조회 (HR발령 + 권한관리 둘 다 여기 사용)
+	// 재직자 공용 조회 (권한관리)
 	@Query("""
 	    SELECT new com.yeoun.emp.dto.EmpListDTO(
 	        e.hireDate,
@@ -106,10 +110,49 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	List<EmpListDTO> searchActiveEmpList(@Param("deptId") String deptId,
 									     @Param("posCode") String posCode,
 									     @Param("keyword") String keyword);
+	
+	// HR 발령 화면용: 재직 + 휴직 조회
+	@Query("""
+	    SELECT new com.yeoun.emp.dto.EmpListDTO(
+	        e.hireDate,
+	        e.empId,
+	        e.empName,
+	        d.deptName,
+	        p.posName,
+	        p.rankOrder,
+	        e.mobile,
+	        e.email,
+	        e.status,
+	        cc.codeName  
+	    )
+	    FROM Emp e
+	    JOIN e.dept d
+	    JOIN e.position p
+	    LEFT JOIN CommonCode cc
+	      ON cc.codeId = e.status
+	     AND cc.parent.codeId = 'EMP_STATUS'
+	     AND cc.useYn = 'Y'
+	    WHERE (e.status IS NULL OR e.status IN ('ACTIVE','LEAVE'))
+	      AND (:status IS NULL OR :status = '' OR e.status = :status)
+	      AND (:deptId  IS NULL OR :deptId  = '' OR d.deptId  = :deptId)
+	      AND (:posCode IS NULL OR :posCode = '' OR p.posCode = :posCode)
+	      AND (
+	            :keyword IS NULL OR :keyword = '' OR
+	            e.empName LIKE concat('%', :keyword, '%') OR
+	            e.empId   LIKE concat('%', :keyword, '%')
+	          )
+	    ORDER BY cc.codeSeq ASC, d.deptName, e.hireDate DESC
+	""")
+	List<EmpListDTO> searchEmpForHrAction(@Param("deptId") String deptId,
+	                                      @Param("posCode") String posCode,
+	                                      @Param("status") String status,
+	                                      @Param("keyword") String keyword);
+
 
 	
 	List<Emp> findByEmpIdIn(List<String> approverIds);
 
+	List<Emp> findByDept_DeptId(String deptId);
 
 
 }

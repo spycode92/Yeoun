@@ -1,0 +1,31 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="product">
+	<div class="row g-2 align-items-center">
+		<!-- 검색 조건들 묶음 -->
+		<div
+			class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-2">
+			<!-- 날짜 -->
+			<div class="d-flex align-items-center gap-2">
+				<input type="date" class="form-control" id="prdStartDate"
+					style="width: 140px;"> <span>~</span> <input type="date"
+					class="form-control" id="prdEndDate" style="width: 140px;">
+			</div>
+			<select class="form-select"  name="prdSearchType"  style="width: 150px;">
+				<option value="mat">상품명</option>
+				<option value="lot">LOT</option>
+			</select>
+			<!-- 키워드 -->
+			<input type="text" class="form-control" placeholder="상품 또는 LOT번호"
+				id="prdKeyword" style="width: 200px;">
+			<!-- 조회 버튼 -->
+			<button class="btn btn-outline-primary" id="prdBtnSearch">검색</button>
+		</div>
+	</div>
+	<br>
+	<div class="card-body p-0">
+		<div id="productGrid"></div>
+	</div>
+	<br>
+	<nav aria-label="">
+		<ul class="pagination justify-content-center" id=""></ul>
+	</nav>
+</th:block>

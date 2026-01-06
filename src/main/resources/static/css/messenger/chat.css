@@ -357,5 +357,122 @@ body {
 }
 
 
+/* ============================
+   시스템 메시지 (퇴장, 입장 등)
+============================ */
+.msg-row.system {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 12px 0;
+  position: relative;
+}
+
+.system-text {
+  font-size: 13px;
+  color: #666;
+  padding: 6px 14px;
+  background: #f0f0f0;
+  border-radius: 14px;
+  line-height: 1.4;
+  box-shadow: 0 0 6px rgba(0,0,0,0.05);
+}
+
+/* ===================== 전송 전 첨부 미리보기 ===================== */
+.attachment-preview {
+  display: none;              /* 기본은 숨김 */
+  padding: 8px 12px;
+  border-top: 1px solid #e8e2ff;
+  border-bottom: 1px solid #e8e2ff;
+  background: #faf7ff;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #dcd4ff;
+  font-size: 12px;
+  max-width: 180px;
+}
+
+.preview-chip .thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0ecff;
+}
+
+.preview-chip .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-chip .name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-chip .remove {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  color: #a091c8;
+}
+.preview-chip .remove:hover {
+  color: #6a5acd;
+}
+
+.drag-active {
+  outline: 2px dashed #6a5acd;
+  outline-offset: -6px;
+  background: #f1edff;
+}
+
+.file-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.file-name {
+  display: block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-thumb {
+  width: 120px;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.file-download {
+  color: #6a5acd;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 
 

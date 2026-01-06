@@ -13,6 +13,8 @@
 		<Property name="LAYOUT_PATTERN">
 			%d{yyyy-MM-dd HH:mm:ss} %highlight{{%-5p}}: %style{[%c]}{CYAN} %m%n
 		</Property>
+<!-- 				<Property name="LOG_DIR">D:/logs/mylog</Property> -->
+		<Property name="LOG_DIR">/usr/local/tomcat/logs/mylog</Property>
 	</Properties>
 	
 	<!-- 로그 설정 - Appenders, Loggers 설정 -->
@@ -29,7 +31,45 @@
 <!-- 			<PatternLayout pattern="${LAYOUT_PATTERN}" disableAnsi="false" noConsoleNoAnsi="false"/> -->
 			<PatternLayout pattern="${LAYOUT_PATTERN}" disableAnsi="false" noConsoleNoAnsi="false"/>
 		</Console>
-		<!-- 2) <RollingFile> : 로그 파일 출력 설정 -->
+		
+		<!-- 2) <RollingFile> : 순환 로그 파일 출력 설정(로그 파일을 일정 갯수만큼 지정해놓고 순환식으로 관리) -->
+		<!-- => 순환 규칙 : 날짜별로 분리, 동일한 날짜 내에서는 로그 파일 1개당 100KB 제한 -->
+		<!--                순환 파일명은 mylog-연-월-일-순서번호.log 형태로 패턴 지정-->
+		<RollingFile name="rollingFile"
+					fileName="${LOG_DIR}/mylog.log"
+					filePattern="${LOG_DIR}/mylog-%d{yyyy-MM-dd}-%i.log">
+			<!-- 로그 메세지 레이아웃 설정 -->
+			<PatternLayout pattern="${LAYOUT_PATTERN}" />
+			<!-- 로그 메세지가 저장되는 순환 파일의 순환 정책(규칙) 설정 -->
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+			<!-- 특정 로그 레벨에 대한 필터링 설정 -->
+			<!-- ERROR 레벨 이상의 로그만 허용, 나머지는 제외 -->
+			<Filters>
+				<ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT" />
+			</Filters>
+		</RollingFile>
+		
+		<RollingFile name="rollingFileError"
+					fileName="${LOG_DIR}/mylog_error.log"
+					filePattern="${LOG_DIR}/mylog_error-%d{yyyy-MM-dd}-%i.log">
+			<!-- 로그 메세지 레이아웃 설정 -->
+			<PatternLayout pattern="${LAYOUT_PATTERN}" />
+			<!-- 로그 메세지가 저장되는 순환 파일의 순환 정책(규칙) 설정 -->
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+			<!-- 특정 로그 레벨에 대한 필터링 설정 -->
+			<!-- ERROR 레벨 이상의 로그만 허용, 나머지는 제외 -->
+			<Filters>
+				<ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+			</Filters>
+		</RollingFile>
 	</Appenders>
 	
 	<!-- 2. Loggers : 로그 출력할 대상 설정 -->
@@ -40,19 +80,23 @@
 		<!-- Root 로거 : 기본 시스템 로그 및 사용자 출력 로그 모두 담당 -->
         <Root level="INFO">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
+            <AppenderRef ref="rollingFileError" />
         </Root>
         
         <!-- Logger 로거 : 개발자가 지정한 대상의 로그 처리 담당 -->
         <!-- Logger 태그 name 속성으로 대상 패키지 또는 클래스 지정, level 속성으로 심각도, additivity 로 중복 로그 표시 여부 설정 -->
         <!-- 현재 프로젝트 내의 특정 패키지(시스템 패키지 or 사용자 패키지)에 대한 로그 설정 -->
-        <Logger name="com.itwillbs.test5" level="INFO" additivity="false">
-        	<AppenderRef ref="console"/>
-        </Logger>
+<!--         <Logger name="com.yeoun" level="INFO" additivity="false"> -->
+<!--         	<AppenderRef ref="console"/> -->
+<!--         	<AppenderRef ref="rollingFile"/> -->
+<!--         </Logger> -->
 
 		<!-- 스프링 시큐리티 패키지 전용 로거 => 디버깅을 위한 DEBUG 레벨로 출력(시큐리티 필터링 현황 등 확인 가능) -->
 <!--         <Logger name="org.springframework.security" level="DEBUG" additivity="false"> -->
         <Logger name="org.springframework.security" level="INFO" additivity="false">
         	<AppenderRef ref="console"/>
+        	<AppenderRef ref="rollingFile"/>
         </Logger>
         
         

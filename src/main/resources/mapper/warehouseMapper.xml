@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.warehouse.mapper.WarehouseMapper">
+	<!-- 창고 조회 (전체 조회 및 count로 재고에서 사용하는지 확인 -->
+	<select id="findAllLocations" resultType="com.yeoun.inventory.dto.WarehouseLocationDTO">
+		SELECT
+			w.LOCATION_ID
+			, w.RACK
+			, w.ZONE
+			, w.RACK_COL
+			, w.RACK_ROW
+			, w.USE_YN
+			, COUNT(i.IV_ID) as stockCount
+		FROM
+			WAREHOUSE_LOCATION w
+		LEFT JOIN
+			INVENTORY i
+		ON
+			w.LOCATION_ID = i.LOCATION_ID
+		GROUP BY
+			w.LOCATION_ID
+			, w.RACK
+			, w.ZONE
+			, w.RACK_COL
+			, w.RACK_ROW
+			, w.USE_YN
+	</select>
+</mapper>
+
+
+
+
+

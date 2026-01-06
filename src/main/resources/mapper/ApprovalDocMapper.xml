@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.approval.mapper.ApprovalDocMapper">
+
+	<!-- 결재문서 그리드1 - 결재사항 불러오기 -->	
+	<select id="searchApprovalItems" 
+        parameterType="java.util.Map" 
+        resultType="com.yeoun.approval.dto.ApprovalDocGridDTO">
+			-- 결재사항 
+	   		 SELECT 
+		               ROWNUM AS row_no
+		             , ade.approval_id AS approval_id
+		             , ade.approval_title AS approval_title
+                     , ade.form_type AS form_type
+		             , ade.emp_id AS emp_id
+		             , ade.emp_name AS emp_name
+		             , ade.dept_id AS dept_id
+		             , ade.dept_name AS dept_name
+		             , ade.approver AS approver
+		             , e.emp_name AS approver_name
+		             , ade.pos_code AS pos_code
+		             , ade.pos_name AS pos_name
+		             , ade.created_date AS created_date
+		             , ade.finish_date AS finish_date
+		             , ade.start_date AS start_date
+		             , ade.end_date AS end_date
+		             , ade.leave_type AS leave_type
+                     , ade.to_pos_code AS to_pos_code -- 변경되는 기안자 직급
+		             , ade.to_dept_id AS to_dept_id
+		             , ade.expnd_type AS expnd_type
+		             , ade.reason AS reason
+		             , ade.doc_status AS doc_status
+		        FROM emp e
+		           , (
+		                SELECT
+		                       ad.approval_id
+		                     , ad.approval_title
+                             , ad.form_type
+		                     , ad.emp_id
+		                     , e.emp_name
+		                     , e.dept_id
+		                     , d.dept_name
+		                     , ad.approver
+		                     , p.pos_code
+		                     , p.pos_name
+		                     , ad.created_date
+		                     , ad.finish_date
+		                     , ad.start_date   -- 휴가 시작
+		                     , ad.end_date     -- 휴가 종료
+		                     , ad.leave_type   -- 휴가 유형
+                             , ad.to_pos_code  -- 변경되는 기안자 직급
+		                     , ad.to_dept_id   -- 발령 부서
+		                     , ad.expnd_type   -- 지출 종류
+		                     , ad.reason       -- 사유
+		                     , ad.doc_status
+		                FROM approval_doc ad
+		                   , emp e
+		                   , dept d
+		                   , position p
+		                WHERE ad.emp_id = e.emp_id
+		                  AND e.dept_id = d.dept_id
+		                  AND e.pos_code = p.pos_code
+		                  AND ad.approver = #{empId}       -- 결재권자 = 로그인 사번
+		                  AND ad.doc_status NOT IN ('완료','반려') -- 진행중/대기만
+		             ) ade
+		        WHERE ade.approver = e.emp_id      -- 결재자 정보 조인
+		      	<if test="createDateFilter != null and createDateFilter != ''">
+				    AND ade.created_date &gt;= TO_DATE(#{createDateFilter, jdbcType=VARCHAR}, 'YYYY-MM-DD')
+				</if>
+				<if test="finishDateFilter != null and finishDateFilter != ''">
+				    AND ade.created_date &lt;= TO_DATE(#{finishDateFilter, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+				</if>
+				<if test="empNameTitleFilter != null and empNameTitleFilter != ''">
+				    AND (
+				        ade.emp_name LIKE '%' || #{empNameTitleFilter} || '%'
+				        OR ade.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
+				    )
+				</if>
+				ORDER BY ade.finish_date DESC
+	</select>
+	<select id="searchAllApproval" 
+		parameterType="java.util.Map" 
+		resultType="com.yeoun.approval.dto.ApprovalDocGridDTO">
+	   		-- 전체결재
+				SELECT rownum AS row_no
+					,adre.approval_id AS approval_id 
+					,adre.approval_title AS approval_title
+                    ,adre.form_type AS form_type
+					,adre.emp_id AS emp_id
+					,adre.emp_name AS emp_name
+					,adre.dept_id AS dept_id
+					,adre.dept_name AS dept_name
+					,adre.approver	AS approver
+					,e.emp_name AS approver_name
+					,adre.pos_code AS pos_code
+					,adre.pos_name AS pos_name
+					,adre.created_date AS created_date
+					,adre.finish_date AS finish_date
+					,adre.start_date AS start_date
+					,adre.end_date AS end_date
+					,adre.leave_type AS leave_type
+					,adre.to_pos_code AS to_pos_code
+					,adre.to_dept_id AS to_dept_id
+					,adre.expnd_type AS expnd_type
+					,adre.reason AS reason
+					,adre.doc_status AS doc_status
+				FROM
+						(SELECT 
+								adr.approval_id
+								,adr.approval_title
+								,adr.form_type
+								,adr.emp_id
+								,e.emp_name
+								,e.dept_id
+								,d.dept_name
+								,adr.approver
+								,p.pos_code
+								,p.pos_name
+								,adr.created_date
+								,adr.finish_date
+								,adr.start_date
+								,adr.end_date
+								,adr.leave_type
+								,adr.to_pos_code
+								,adr.to_dept_id
+								,adr.expnd_type
+								,adr.reason
+								,adr.doc_status
+							FROM emp e, dept d,position p,
+							( SELECT distinct 
+									ad.approval_id
+									,ad.approval_title
+									,ad.form_type
+									,ad.emp_id
+									,ad.approver
+									,ad.created_date
+									,ad.finish_date
+									,ad.start_date -- 휴가시작날짜
+									,ad.end_date -- 휴가종료날짜
+									,ad.leave_type-- 연차유형,휴가종류
+									,ad.to_pos_code
+									,ad.to_dept_id-- 발령부서
+									,ad.expnd_type-- 지출종류
+									,ad.reason-- 결재사유내용
+									,ad.doc_status
+								FROM approval_doc ad,approver ar
+								WHERE (ad.approver is not null
+									and ad.approver = ar.emp_id 
+									and ar.viewing = 'Y'
+									and ar.emp_id= #{empId}) 
+								OR ad.emp_id = #{empId} ) adr
+								WHERE e.emp_id = adr.emp_id 
+								and e.dept_id = d.dept_id
+								and e.pos_code = p.pos_code) adre,emp e
+							WHERE adre.approver = e.emp_id
+				<if test="createDateFilter != null and createDateFilter != ''">
+				    AND adre.created_date &gt;= TO_DATE(#{createDateFilter, jdbcType=VARCHAR}, 'YYYY-MM-DD')
+				</if>
+				<if test="finishDateFilter != null and finishDateFilter != ''">
+				    AND adre.created_date &lt;= TO_DATE(#{finishDateFilter, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+				</if>
+				<if test="empNameTitleFilter != null and empNameTitleFilter != ''">
+				    AND (
+				        adre.emp_name LIKE '%' || #{empNameTitleFilter} || '%'
+				        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
+				    )
+				</if>
+				ORDER BY adre.finish_date DESC
+	</select>
+	<select id="searchMyApprovalList" 
+		parameterType="java.util.Map" 
+		resultType="com.yeoun.approval.dto.ApprovalDocGridDTO">
+	   		-- 내결재목록
+			   SELECT rownum AS row_no
+                    ,adre.approval_id AS approval_id
+                    ,adre.approval_title AS approval_title
+                    ,adre.form_type AS form_type
+                    ,adre.emp_id AS emp_id
+                    ,adre.emp_name 	AS emp_name
+                    ,adre.dept_id AS dept_id
+                    ,adre.dept_name AS dept_name
+                    ,adre.approver AS approver
+                    ,e.emp_name AS approver_name
+                    ,adre.pos_code AS pos_code
+                    ,adre.pos_name AS pos_name
+                    ,adre.created_date AS created_date
+                    ,adre.finish_date AS finish_date
+                    ,adre.start_date AS start_date
+                    ,adre.end_date AS end_date
+                    ,adre.leave_type AS leave_type
+					,adre.to_pos_code AS to_pos_code
+                    ,adre.to_dept_id AS to_dept_id
+                    ,adre.expnd_type AS expnd_type
+                    ,adre.reason AS reason
+                    ,adre.doc_status AS doc_status
+            FROM (SELECT 
+      				ad.approval_id
+      				,ad.approval_title
+                    ,ad.form_type
+      				,ad.emp_id
+      				,e.emp_name
+      				,e.dept_id
+      				,d.dept_name
+      				,ad.approver
+      				,p.pos_code
+      				,p.pos_name
+      				,ad.created_date
+      				,ad.finish_date
+                    ,ad.start_date -- 휴가시작날짜
+                    ,ad.end_date -- 휴가종료날짜
+                    ,ad.leave_type-- 연차유형,휴가종류
+					,ad.to_pos_code -- 변경직급
+                    ,ad.to_dept_id-- 발령부서
+                    ,ad.expnd_type-- 지출종류
+                    ,ad.reason-- 결재사유내용
+      				,ad.doc_status
+				FROM approval_doc ad, emp e, dept d, position p
+				WHERE ad.emp_id = e.emp_id 
+				AND e.dept_id = d.dept_id
+				AND e.pos_code = p.pos_code
+				AND e.emp_id = #{empId}) adre, emp e
+            WHERE adre.approver = e.emp_id
+                
+			<if test="createDateFilter != null and createDateFilter != ''">
+			    AND adre.created_date &gt;= TO_DATE(#{createDateFilter, jdbcType=VARCHAR}, 'YYYY-MM-DD')
+			</if>
+			<if test="finishDateFilter != null and finishDateFilter != ''">
+			    AND adre.created_date &lt;= TO_DATE(#{finishDateFilter, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+			</if>
+			<if test="empNameTitleFilter != null and empNameTitleFilter != ''">
+			    AND (
+			        adre.emp_name LIKE '%' || #{empNameTitleFilter} || '%'
+			        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
+			    )
+			</if>
+			ORDER BY adre.finish_date DESC
+	</select>
+	<select id="searchPendingApproval" 
+		parameterType="java.util.Map" 
+		resultType="com.yeoun.approval.dto.ApprovalDocGridDTO">
+	   		-- 결재대기
+				SELECT  rownum AS row_no
+		            	,adre.approval_id
+		            	,adre.approval_title
+		            	,adre.form_type
+		            	,adre.emp_id
+		            	,adre.emp_name
+		            	,adre.dept_id
+		            	,adre.dept_name
+		            	,adre.approver
+		            	,e.emp_name as approver_name
+		            	,adre.pos_code
+		            	,adre.pos_name
+		            	,adre.created_date
+		            	,adre.finish_date
+		            	,adre.start_date
+		            	,adre.end_date
+		            	,adre.leave_type
+						,adre.to_pos_code
+		            	,adre.to_dept_id
+		            	,adre.expnd_type
+		            	,adre.reason
+		            	,adre.doc_status
+		    		FROM (SELECT
+						adr.approval_id
+						,adr.approval_title
+                    	,adr.form_type
+						,adr.emp_id
+						,e.emp_name
+						,d.dept_id
+						,d.dept_name
+						,adr.approver
+						,p.pos_code
+						,p.pos_name
+						,adr.created_date
+						,adr.finish_date
+                    	,adr.start_date -- 휴가시작날짜
+                    	,adr.end_date -- 휴가종료날짜
+                    	,adr.leave_type-- 연차유형,휴가종류
+						,adr.to_pos_code -- 변경직급
+                    	,adr.to_dept_id-- 발령부서
+                    	,adr.expnd_type-- 지출종류
+                    	,adr.reason-- 결재사유내용
+						,adr.doc_status
+						,adr.viewing
+			FROM emp e, dept d, position p, 
+               ( SELECT  distinct
+                            ad.approval_id -- 문서id
+							,ad.approval_title --문서제목
+                            ,ad.form_type -- 문서양식
+							,ad.emp_id --문서작성자
+							,ad.approver  -- 결재권한자
+							,ad.created_date --결재시작일시
+							,ad.finish_date --결재완료일시
+                            ,ad.start_date -- 휴가시작날짜
+                            ,ad.end_date -- 휴가종료날짜
+                            ,ad.leave_type-- 연차유형,휴가종류
+							,ad.to_pos_code -- 변경직급
+                            ,ad.to_dept_id-- 발령부서
+                            ,ad.expnd_type-- 지출종류
+                            ,ad.reason-- 결재사유내용
+							,ad.doc_status --결재문서상태
+                            ,ar.viewing -- 결재권한자의 문서열람권한
+					FROM approval_doc ad                     
+                    INNER JOIN approver ar
+                    ON ad.doc_status NOT LIKE '%완료%'  -- 공통- 문서작성자이면서, 결재권한자 일때
+                    WHERE (ar.viewing ='Y' and ad.emp_id = #{empId})--문서작성자일떄--ar.viewing의 경우에는 Y나N을 안걸어주면 뻥튀기되서2배로나옴
+                    OR (ad.approval_id = ar.approval_id       -- 결재권한자일때
+                    AND ar.viewing ='Y' AND ar.emp_id = #{empId})) adr -- 박경찬 문서작성자이면서, 결재권한자일떄 
+            WHERE adr.emp_id = e.emp_id
+			AND e.dept_id = d.dept_id
+			AND e.pos_code = p.pos_code) adre, emp e
+        WHERE adre.approver = e.emp_id
+		<if test="createDateFilter != null and createDateFilter != ''">
+		    AND adre.created_date &gt;= TO_DATE(#{createDateFilter, jdbcType=VARCHAR}, 'YYYY-MM-DD')
+		</if>
+		<if test="finishDateFilter != null and finishDateFilter != ''">
+		    AND adre.created_date &lt;= TO_DATE(#{finishDateFilter, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+		</if>
+		<if test="empNameTitleFilter != null and empNameTitleFilter != ''">
+		    AND (
+		        adre.emp_name LIKE '%' || #{empNameTitleFilter} || '%'
+		        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
+		    )
+		</if>
+		ORDER BY adre.finish_date DESC
+	</select>
+	<select id="searchCompletedApproval" 
+		parameterType="java.util.Map" 
+		resultType="com.yeoun.approval.dto.ApprovalDocGridDTO">
+	   		-- 결재완료
+			SELECT  ROWNUM  AS row_no
+            			,adre.approval_id AS approval_id
+            			,adre.approval_title AS approval_title
+            			,adre.form_type AS form_type
+            			,adre.emp_id AS emp_id
+            			,adre.emp_name AS emp_name
+            			,adre.dept_id AS dept_id
+            			,adre.dept_name AS dept_name
+            			,adre.approver AS approver
+            			,e.emp_name AS approver_name
+            			,adre.pos_code AS pos_code
+            			,adre.pos_name AS pos_name
+            			,adre.created_date AS created_date
+            			,adre.finish_date AS finish_date
+            			,adre.start_date AS start_date
+            			,adre.end_date AS end_date
+            			,adre.leave_type AS leave_type
+						,adre.to_pos_code AS to_pos_code
+            			,adre.to_dept_id AS to_dept_id
+            			,adre.expnd_type AS expnd_type
+            			,adre.reason AS reason
+            			,adre.doc_status AS doc_status
+            		FROM (SELECT 
+			        			adr.approval_id
+			        			,adr.approval_title
+                    			,adr.form_type
+			        			,adr.emp_id
+			        			,e.emp_name
+			        			,e.dept_id
+			        			,d.dept_name
+			        			,adr.approver
+			        			,p.pos_code
+			        			,p.pos_name
+			        			,adr.created_date
+			        			,adr.finish_date
+                    			,adr.start_date -- 휴가시작날짜
+                    			,adr.end_date -- 휴가종료날짜
+                    			,adr.leave_type -- 연차유형,휴가종류
+								,adr.to_pos_code -- 변경직급
+                    			,adr.to_dept_id-- 발령부서
+                    			,adr.expnd_type-- 지출종류
+                    			,adr.reason-- 결재사유내용
+			        			,adr.doc_status
+					FROM emp e,dept d,position p,
+						(SELECT distinct ad.approval_id
+						        	,ad.approval_title
+                                	,ad.form_type
+						        	,ad.approver
+						        	,ad.emp_id
+						        	,ad.created_date
+						        	,ad.finish_date
+                                	,ad.start_date -- 휴가시작날짜
+                                	,ad.end_date -- 휴가종료날짜
+                                	,ad.leave_type-- 연차유형,휴가종류\
+									,ad.to_pos_code -- 변경직급
+                                	,ad.to_dept_id-- 발령부서
+                                	,ad.expnd_type-- 지출종류
+                                	,ad.reason-- 결재사유내용
+						        	,ad.doc_status
+							FROM approval_doc ad,approver ar
+							WHERE (ad.doc_status = '완료'
+							AND ad.approval_id = ar.approval_id 
+							AND ar.emp_id = #{empId}
+							AND ar.viewing = 'Y')
+							OR(ad.doc_status = '완료' and ad.emp_id = #{empId})) adr
+					WHERE e.emp_id = adr.emp_id
+					AND e.dept_id = d.dept_id
+					AND e.pos_code = p.pos_code) adre, emp e
+        	WHERE adre.approver = e.emp_id
+
+			<if test="createDateFilter != null and createDateFilter != ''">
+			    AND adre.created_date &gt;= TO_DATE(#{createDateFilter, jdbcType=VARCHAR}, 'YYYY-MM-DD')
+			</if>
+			<if test="finishDateFilter != null and finishDateFilter != ''">
+			    AND adre.created_date &lt;= TO_DATE(#{finishDateFilter, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+			</if>
+			<if test="empNameTitleFilter != null and empNameTitleFilter != ''">
+			    AND (
+			        adre.emp_name LIKE '%' || #{empNameTitleFilter} || '%'
+			        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
+			    )
+			</if>
+			ORDER BY adre.finish_date DESC
+	</select>
+
+</mapper>

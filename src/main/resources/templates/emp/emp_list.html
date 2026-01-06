@@ -20,8 +20,8 @@
           
           	<!-- 부서 셀렉트 -->
             <div class="col-6 col-md-auto">
-              <select class="form-select" id="deptId" name="deptId">
-                <option value="">부서 전체</option>
+              <select class="form-select" id="deptId" name="deptId" th:disabled="${isDeptManager and !isAdmin}">
+                <option value="" th:if="${isAdmin}">부서 전체</option>
                 <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}"
                         th:selected="${deptId != null and deptId == d.deptId}"
                         th:if="${d.parentDeptId != null}">
@@ -41,7 +41,7 @@
           </form>
         </div>
         <div class="col-12 col-lg-3 d-grid d-lg-flex justify-content-lg-end">
-          <a href="/emp/regist" class="btn btn-primary" 
+          <a th:href="@{/emp/regist}" href="/emp/regist" class="btn btn-primary" 
           	th:if="${#authorization.expression('hasRole(''HR_ADMIN'') or hasRole(''SYS_ADMIN'')')}">
           	인사 등록
           </a>
@@ -69,7 +69,7 @@
   const initialEmpList = /*[[${empList}]]*/ [];
 </script>    
 
-<script src="/js/emp/empList.js"></script>
+<script th:src="@{/js/emp/empList.js}"></script>
 
 </th:block>
 </body>

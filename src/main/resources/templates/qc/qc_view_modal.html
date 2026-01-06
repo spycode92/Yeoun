@@ -1,0 +1,125 @@
+<!-- /templates/qc/qc_view_modal.html -->
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="qcViewModal">
+
+  <!-- 검사결과 조회 모달 -->
+  <div class="modal fade" id="qcViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+
+	      <div class="modal-header">
+	        <h5 class="modal-title">
+	          QC 결과 –
+	          <span id="qcViewTitleOrder"></span> /
+	          <span id="qcViewTitleProductName"></span>
+	          <small class="text-muted" id="qcViewTitleProductCode"></small>
+	        </h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+	
+	      <div class="modal-body">
+	
+	        <!-- hidden -->
+	        <input type="hidden" id="qcViewResultId">
+	        <input type="hidden" id="qcViewOrderId">
+	
+	        <!-- 1행 : 기본 작업 정보 (등록 모달과 동일 col 구조) -->
+	        <div class="row mb-3">
+	          <div class="col-md-3">
+	            <label class="form-label">작업지시번호</label>
+	            <div id="qcViewOrderIdText" class="fw-semibold"></div>
+	          </div>
+	          <div class="col-md-2">
+	            <label class="form-label">제품</label>
+	            <div id="qcViewProductText"></div>
+	          </div>
+	          <div class="col-md-2">
+	            <label class="form-label">지시수량</label>
+	            <div id="qcViewPlanQtyText"></div>
+	          </div>
+	          <div class="col-md-3">
+	            <label class="form-label">LOT 번호</label>
+	            <div id="qcViewLotNoText">-</div>
+	          </div>
+	        </div>
+	
+	        <!-- 2행 : 검사/수량 정보 (등록 모달의 검사일자/검사자 + 양품/불량에 맞춰 정리) -->
+	        <div class="row mb-3 g-3">
+	          <div class="col-md-3">
+	            <label class="form-label">검사일자</label>
+	            <div id="qcViewInspectionDateText"
+	                 class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+	          </div>
+	          <div class="col-md-3">
+	            <label class="form-label">검사자</label>
+	            <div id="qcViewInspectorNameText"
+	                 class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+	          </div>
+	          <div class="col-md-3">
+	            <label class="form-label">양품 수량(EA)</label>
+	            <div id="qcViewGoodQtyText"
+	                 class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+	          </div>
+	          <div class="col-md-3">
+	            <label class="form-label">불량 수량(EA)</label>
+	            <div id="qcViewDefectQtyText"
+	                 class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+	          </div>
+	        </div>
+	
+	        <!-- 디테일 테이블 : 컬럼 구성/폭을 등록 모달과 동일하게 + 첨부 컬럼 추가 -->
+	        <div class="table-responsive mb-3">
+	          <table class="table table-sm table-bordered align-middle">
+	            <thead class="table-light">
+	            <tr>
+	              <th style="width: 60px;">QC 항목명</th>
+	              <th style="width: 10px;">단위</th>
+	              <th style="width: 120px;">기준값</th>
+	              <th style="width: 120px;">측정값</th>
+	              <th style="width: 5px;">판정</th>
+	              <th style="width: 150px;">비고</th>
+	              <th style="width: 100px;">첨부</th>
+	            </tr>
+	            </thead>
+	            <tbody id="qcViewDetailTbody"></tbody>
+	          </table>
+	        </div>
+	
+	        <!-- 3행 : 전체 판정 + 사유 + 비고 (등록 모달 하단과 구조 맞추기) -->
+	        <div class="row g-3 mt-2">
+	          <div class="col-md-4">
+	            <label class="form-label">전체 판정</label>
+	            <div>
+	              <span id="qcViewOverallResultBadge"
+	                    class="badge w-100 py-2 fs-6 text-center"></span>
+	            </div>
+	          </div>
+	
+	          <div class="col-md-4">
+	            <label class="form-label">불합격 사유</label>
+	            <textarea class="form-control form-control-sm"
+	                      id="qcViewFailReason"
+	                      rows="1"
+	                      readonly></textarea>
+	          </div>
+	
+	          <div class="col-md-4">
+	            <label class="form-label">비고</label>
+	            <textarea class="form-control form-control-sm"
+	                      id="qcViewRemark"
+	                      rows="1"
+	                      readonly></textarea>
+	          </div>
+	        </div>
+	
+	      </div>
+	
+	      <div class="modal-footer">
+	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+	      </div>
+	
+	    </div>
+	  </div>
+	</div>
+
+</th:block>

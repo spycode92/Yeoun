@@ -40,7 +40,7 @@ dependencies {
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-//	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'		// war 배포
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'		// war 배포
 //	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
@@ -74,16 +74,29 @@ dependencies {
 	
 	//문자열 수식을 실제 연산식으로 처리하는 라이브러리
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
-     implementation 'org.apache.commons:commons-jexl3:3.6.0'
+    implementation 'org.apache.commons:commons-jexl3:3.6.0'
      
      //PDF 파일 의존성 추가
 	implementation 'org.xhtmlrenderer:flying-saucer-pdf-openpdf:9.1.22'
     implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
     implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
 	implementation 'com.openhtmltopdf:openhtmltopdf-slf4j:1.0.10'
+	
+	//AOP 설정
+	// https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
+//	implementation 'org.aspectj:aspectjweaver:1.9.24'
+	// https://mvnrepository.com/artifact/org.aspectj/aspectjrt
+//	implementation 'org.aspectj:aspectjrt:1.9.24'
+	
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
     
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+bootWar {
+	archiveBaseName = 'myapp'
+	archiveVersion = ''
 }

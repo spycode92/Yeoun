@@ -51,7 +51,8 @@ public class EmpPayController {
         model.addAttribute("next", next);
 
         // payslipId 찾기
-        Long payslipId = payrollHistoryService.findPayslipId(empId, yymm);
+        Long payslipId = payrollHistoryService.findConfirmedPayslipId(empId, yymm);
+
 
         if (payslipId == null) {
             model.addAttribute("header", null);

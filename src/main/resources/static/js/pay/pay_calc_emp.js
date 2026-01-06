@@ -1,5 +1,3 @@
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').content;
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
 
 /* ===============================
     사원 기본 정보 로드
@@ -14,7 +12,7 @@ function loadEmpInfo() {
 
     if (!empId) return alert("사원을 선택하세요.");
 
-    fetch(`/pay/calc/emp/info?empId=${empId}&yyyymm=${yyyymm}`)
+    fetch(apiUrl(`pay/calc/emp/info?empId=${empId}&yyyymm=${yyyymm}`))
         .then(res => res.json())
         .then(data => {
             if (!data) {
@@ -85,7 +83,7 @@ function simulateOne() {
 
     if (!empId) return alert("사원을 선택하세요.");
 
-    fetch(`/pay/calc/emp/simulate`, {
+    fetch(apiUrl(`pay/calc/emp/simulate`), {
         method: "POST",
         headers: { 
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -115,7 +113,7 @@ function confirmOne() {
 
     if (!empId) return alert("사원을 선택하세요.");
 
-    fetch(`/pay/calc/emp/confirm`, {
+    fetch(apiUrl(`pay/calc/emp/confirm`), {
         method: "POST",
         headers: { 
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -185,7 +183,7 @@ empKeyword?.addEventListener("input", function () {
         return;
     }
 
-    fetch(`/pay/calc/searchEmployee?keyword=` + encodeURIComponent(keyword))
+    fetch(apiUrl(`pay/calc/searchEmployee?keyword=`) + encodeURIComponent(keyword))
         .then(res => res.json())
         .then(list => {
 
@@ -227,3 +225,4 @@ document.getElementById("btnResetEmp").addEventListener("click", () => {
     const statusBox = document.getElementById("empStatusBox");
     if (statusBox) statusBox.style.display = "none";
 });
+

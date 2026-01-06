@@ -1,9 +1,10 @@
 /**
 	공지사항 JavaScript 
 **/
-const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
-
+//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+//const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+console.log("#@@@@@@@@@@@@@@@@@@csrfToken : ", csrfToken);
+console.log("@@@@@@@@@@@@@@@@@@@csrfHeader : ", csrfHeader);
 const currentUserId = document.getElementById('currentUserId')?.value;
 const currentUserName = document.getElementById('currentUserName')?.value;
 

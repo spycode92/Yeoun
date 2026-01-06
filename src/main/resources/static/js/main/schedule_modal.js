@@ -8,6 +8,7 @@ let checkedUpEmpList;
 // 일정등록 데이트피커 객체 생성
 function createRangePicker() {
 	picker = tui.DatePicker.createRangePicker({
+		language: 'ko',
 	    startpicker: {
 	        date: today,
 	        input: '#startpicker-input',
@@ -199,8 +200,12 @@ document.addEventListener('DOMContentLoaded', function() {
 			fetch('/main/schedule', {
 				method: 'POST'
 				, headers: {
+<<<<<<< HEAD
 					[csrfHeaderName]: csrfToken
 					, 'Content-Type': 'application/json' 
+=======
+					[csrfHeader]: csrfToken
+>>>>>>> refs/remotes/origin/develop_update
 				}
 				, body: JSON.stringify(scheduleWithRepeatDTO)
 			})
@@ -242,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				fetch('/main/schedule', {
 					method: 'PATCH'
 					, headers: {
-						[csrfHeaderName]: csrfToken
+						[csrfHeader]: csrfToken
 					}
 					, body: formData
 				})
@@ -269,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			fetch('/main/schedule', {
 				method: 'DELETE'
 				, headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 				}
 				, body: new FormData(addScheduleForm)
 			})
@@ -316,7 +321,7 @@ async function openScheduleModal(mode, data = null) {
 	const alldayCheckbox = document.getElementById('all-day-checkbox');
 	const organizeInput = document.getElementById('schedule-sharer');
 	const organizeBtn = document.getElementById('select-sharer-btn');
-	
+	const shareEl = document.getElementById('shareField');
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
 //	const endpickerInput = document.getElementById('endpicker-input');
@@ -332,6 +337,7 @@ async function openScheduleModal(mode, data = null) {
 //		form.reset(); // 폼 입력값 초기화
 		deleteBtn.disabled = false;
 		submitBtn.disabled = false;
+		submitBtn.classList.remove('d-none');
 		//폼요소 입력가능하게 변경
 		Array.from(form.elements).forEach(el => {
 		    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
@@ -365,16 +371,20 @@ async function openScheduleModal(mode, data = null) {
 		
 		// 등록모달은 개인으로 기본값설정
 		select.value = 'share';
+		shareEl.style.display = "block";
+		
 		// 종일 체크 해제
 		alldayCheckbox.checked = true
 		form.alldayYN.value = "Y";
 		
 		organizeInput.disabled = true;
+		organizeInput.value = '';
 		organizeBtn.disabled = false;
 
 	} else if (mode === 'edit' && data) {
 		modalTitle.textContent = '일정조회';
 		deleteBtn.classList.remove('d-none');
+		submitBtn.classList.remove('d-none');
 	    submitBtn.textContent = '수정';
 		submitBtn.value ='edit';
 		form.scheduleId.value = data.scheduleId || '';
@@ -413,7 +423,9 @@ async function openScheduleModal(mode, data = null) {
 		    // 권한 없음: 조직선택, 삭제, 수정 버튼 비활성화
 			organizeBtn.disabled = true;
 		    deleteBtn.disabled = true;
+			deleteBtn.classList.add('d-none');
 		    submitBtn.disabled = true;
+			submitBtn.classList.add('d-none');
 			// 데이트피커 비활성화
 			sp.enable && sp.disable();
 			ep.enable && ep.disable();
@@ -588,6 +600,44 @@ let treeGrid = null;
 
 // 조직도그리드 그리기
 async function renderOrgGrid() {
+	// 그리드 언어 설정
+	tui.Grid.setLanguage('ko', {
+	    display: {
+	        noData: '데이터가 없습니다.',
+	        loadingData: '데이터를 불러오는 중입니다.',
+	        resizeHandleGuide: '마우스 드래그를 통해 너비를 조정할 수 있습니다.',
+	    },
+	    net: {
+	        confirmCreate: '생성하시겠습니까?',
+	        confirmUpdate: '수정하시겠습니까?',
+	        confirmDelete: '삭제하시겠습니까?',
+	        confirmModify: '저장하시겠습니까?',
+	        noDataToCreate: '생성할 데이터가 없습니다.',
+	        noDataToUpdate: '수정할 데이터가 없습니다.',
+	        noDataToDelete: '삭제할 데이터가 없습니다.',
+	        noDataToModify: '수정할 데이터가 없습니다.',
+	        failResponse: '데이터 요청 중에 에러가 발생하였습니다.'
+	    },
+	    filter: {
+	        // 문자열 필터 옵션
+	        contains: '포함',
+	        eq: '일치',
+	        ne: '불일치',
+	        start: '시작 문자',
+	        end: '끝 문자',
+	        
+	        // 날짜/숫자 필터 옵션
+	        after: '이후',
+	        afterEq: '이후 (포함)',
+	        before: '이전',
+	        beforeEq: '이전 (포함)',
+
+	        // 버튼 및 기타
+	        apply: '적용',
+	        clear: '초기화',
+	        selectAll: '전체 선택'
+	    }
+	});
 	// 조직도 열때마다 초기화
     if (treeGrid) {
 		treeGrid.destroy();
@@ -598,7 +648,8 @@ async function renderOrgGrid() {
         el: document.getElementById('organizationChartGrid'),
         data: toastTreeData, // 트리화 데이터
         rowHeaders: ['checkbox'],
-        bodyHeight: 300,
+        bodyHeight: 'auto',
+		filter: true,
         treeColumnOptions: {
             name: 'name',
             useCascadingCheckbox: true
@@ -608,7 +659,7 @@ async function renderOrgGrid() {
 			, name: 'name'
 			, treeColumn: true
 			, align: 'left'
-//			, width: 200
+			, filter: 'text'	
 			, formatter: function({row}) {
 				if(row.empId != null){
 					return `${row.name}(${row.empId})`
@@ -619,6 +670,7 @@ async function renderOrgGrid() {
 			 }
         ]
     });
+		
 }
 
 document.getElementById('select-sharer-btn').addEventListener('click', function(){
@@ -672,11 +724,11 @@ async function checkSharers(scheduleType, scheduleId) {
 	// 스케줄타입이 공유가 아니면 리턴
 	if(scheduleType != 'share') return;
 	try {
-		const response = await fetch(`/api/schedules/sharerList/${scheduleId}`, {method: 'GET'});
+		const response = await fetch(apiUrl(`/api/schedules/sharerList/${scheduleId}`), {method: 'GET'});
 		if(!response.ok) throw new Error(await response.text());
 		
 		const data = await response.json();
-		console.log(data);
+//		console.log(data);
 		return data;
 	} catch(error) {
 		console.error('에러', error)

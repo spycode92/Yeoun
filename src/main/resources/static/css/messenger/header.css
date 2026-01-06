@@ -1,0 +1,51 @@
+.nav-item .icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#badge_chat {
+    position: absolute;
+    top: 0px;
+    right: 195px;
+    width: 10px;
+    height: 10px;
+    background: #ff4d4f;
+    border-radius: 50%;
+    color: white;
+    font-size: 9px; /* 갯수알림 부분 */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/*
+#badge_bell {
+ position: relative;
+ top: -12px;
+ left: 45px;
+ background-color: red;
+ color: rgb(255, 255, 255);
+ border-radius: 15px;
+ padding: 3px 8px;
+ border-color: rgb(255, 255, 255);
+ font-size: 12px;
+ display: none;
+}
+*/
+
+/*
+#badge_payment {
+	position: relative;
+    top: -12px;
+    left: 45px;
+    background-color: red;
+    color: rgb(255, 255, 255);
+    border-radius: 15px;
+    padding: 3px 8px;
+    border-color: rgb(255, 255, 255);
+    font-size: 12px;
+    display: none;
+}
+*/

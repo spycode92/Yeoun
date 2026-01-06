@@ -35,12 +35,11 @@ public class MsgRelationDTO {
   		
   	private static ModelMapper modelMapper = new ModelMapper();
   	
-  	public MsgRelation toEntity(MsgRoom roomId, Emp empId, MsgMessage lastReadId) {
+  	public MsgRelation toEntity(MsgRoom roomId, Emp empId) {
 
   		MsgRelation msgRelation = new MsgRelation();
  		msgRelation.setRoomId(roomId);
  		msgRelation.setEmpId(empId);
- 		msgRelation.setLastReadId(lastReadId);
  		
  		return msgRelation;
  	}

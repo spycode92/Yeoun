@@ -1,0 +1,396 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+  <th:block layout:fragment="content">
+  
+    <style>
+    /* 왼쪽 LOT 목록만 스크롤 */
+    #lotTree {
+      max-height: 700px;
+      overflow-y: auto;
+    }
+    
+    .lot-root-link:hover {
+	  background: rgba(0,0,0,.03);
+	  border-radius: 8px;
+	}
+    
+    /* 상태 텍스트 색 */
+	.lot-status-in    { color: #0d6efd; }  /* 진행중: 파랑 */
+	.lot-status-done  { color: #198754; }  /* 완료: 초록 */
+	.lot-status-scrap { color: #6c757d; }  /* 폐기: 회색 */
+	.lot-status-soldout { color: #adb5bd; }  /* 연한 회색 */
+	.lot-status-etc   { color: #212529; }  /* 기타 */
+	.lot-status-expired {
+ 	 	color: #dc3545;   /* bootstrap danger */
+  		font-weight: 600;
+	}
+	
+	/* 안쪽 링크 기본색 강제 */
+	.process-item a,
+	.material-item a {
+	  color: var(--bs-body-color);
+	  text-decoration: none;
+	}
+	
+	/* hover 스타일 통일 */
+	.process-item a:hover,
+	.material-item a:hover {
+	  color: #0d6efd;
+	  text-decoration: underline;
+	}
+	
+	.tree-item-active {
+	  background: rgba(13,110,253,.08);
+	  border-radius: 6px;
+	}
+	
+	/* 공정/자재 클릭된 항목 표시 */
+	.tree-child-link.tree-item-active{
+	  background: rgba(13,110,253,.10);
+	  color: #0d6efd;
+	  border-radius: 6px;
+	  padding: 2px 6px;
+	  display: inline-block;
+	}
+	
+		  /* ===================== 탭 커스텀 ===================== */
+	  .pay-tabs {
+	    border-bottom: 2px solid #e5e7eb;
+	    margin-bottom: 1.5rem;
+	  }
+	  .pay-tabs .nav-link {
+	    position: relative;
+	    color: #6b7280;
+	    font-weight: 600;
+	    padding: 0.75rem 1.5rem;
+	    border: none;
+	    border-radius: 8px 8px 0 0;
+	    transition: all 0.25s ease;
+	  }
+	  .pay-tabs .nav-link:hover {
+	    color: #0d6efd;
+	    background: #f1f5ff;
+	  }
+	  .pay-tabs .nav-link.active {
+	    color: #0d6efd;
+	    background: #ffffff;
+	    box-shadow: 0 -2px 8px rgba(13,110,253,0.1);
+	  }
+	  .pay-tabs .nav-link.active::after {
+	    content: '';
+	    position: absolute;
+	    left: 0; right: 0; bottom: -2px;
+	    height: 3px;
+	    background: #0d6efd;
+	    border-radius: 2px;
+	    animation: underlineIn 0.3s ease forwards;
+	  }
+	  @keyframes underlineIn {
+	    from {width: 0; margin-left: 50%;}
+	    to {width: 100%; margin-left: 0;}
+	  }
+    </style>
+
+    <div class="custom-body container-xxl flex-grow-1 container-p-y" id="tracePage" th:attr="data-mode=${mode}">
+
+      <!-- 페이지 타이틀 -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">LOT 추적</h3>
+        <ul class="nav pay-tabs mb-3">
+		  <li class="nav-item">
+		    <a class="nav-link"
+			   th:href="@{/lot/trace(mode='PRODUCT', keyword=${keyword})}"
+			   th:classappend="${mode}=='PRODUCT' ? ' active'">
+			  완제품 LOT 기준
+			</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link"
+			   th:href="@{/lot/trace(mode='MATERIAL', keyword=${keyword})}"
+			   th:classappend="${mode}=='MATERIAL' ? ' active'">
+			  자재 LOT 기준
+			</a>
+		  </li>
+		</ul>
+      </div>
+
+      <!-- LOT 검색 필터 -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <form id="lotTraceSearchForm" method="get" action="/lot/trace">
+          	<input type="hidden" name="mode" th:value="${mode}">
+            <div class="row gx-3 gy-2 align-items-end">
+
+			  <!-- 공통 : 검색어 -->
+              <div class="col-md-4">
+                <label class="form-label" for="searchKeyword">검색어</label>
+                <input type="text"
+                       class="form-control"
+                       id="searchKeyword"
+                       name="keyword"
+                       th:placeholder="${mode}=='PRODUCT' ? 'LOT 번호 / 제품명' : 'LOT 번호 / 자재명'"
+                       th:value="${keyword}">
+              </div>
+
+			  <!-- PRODUCT 모드 필터 -->
+			  <th:block th:if="${mode}=='PRODUCT'">
+	              <div class="col-md-3">
+	                <label class="form-label" for="pStatus">생산 상태</label>
+					<select class="form-select" id="pStatus" name="status">
+					  <option value="" th:selected="${status == null || status == ''}">전체</option>
+					  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
+					  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
+					  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
+					</select>
+	              </div>
+	
+	              <div class="col-md-3">
+	                <label class="form-label" for="pType">제품 유형</label>
+	                <select class="form-select" id="pType" name="type">
+					  <option value="" th:selected="${type == null || type == ''}">전체</option>
+					  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
+					  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
+					</select>
+	              </div>
+              </th:block>
+              
+			  <!-- MATERIAL 모드 필터 -->
+			  <th:block th:if="${mode}=='MATERIAL'">
+	              <div class="col-md-3">
+	                <label class="form-label" for="mStatus">재고 상태</label>
+					<select class="form-select" id="mStatus" name="status">
+					  <option value="" th:selected="${status == null || status == ''}">전체</option>
+					  <option value="NORMAL" th:selected="${status == 'NORMAL'}">정상</option>
+					  <option value="DISPOSAL_WAIT"  th:selected="${status == 'DISPOSAL_WAIT'}">임박</option>
+					  <option value="DISPOSAL"   th:selected="${status == 'DISPOSAL'}">폐기</option>
+					  <option value="SOLD_OUT"   th:selected="${status == 'SOLD_OUT'}">소진완료</option>
+					</select>
+	              </div>
+	
+	              <div class="col-md-3">
+	                <label class="form-label" for="mType">자재 유형</label>
+	                <select class="form-select" id="mType" name="type">
+					  <option value="" th:selected="${type == null || type == ''}">전체</option>
+					  <option value="RAW" th:selected="${type == 'RAW'}">원재료</option>
+					  <option value="SUB" th:selected="${type == 'SUB'}">부자재</option>
+					  <option value="PKG" th:selected="${type == 'PKG'}">포장재</option>
+					</select>
+	              </div>
+              </th:block>
+
+              <div class="col-md-1">
+                <button type="submit" class="btn btn-outline-primary w-100" id="btnSearch">
+                  검색
+                </button>
+              </div>
+              
+              <div class="col-md-1">
+				 <a th:href="@{/lot/trace(mode=${mode})}" class="btn btn-outline-secondary w-100">
+				    초기화
+				 </a>
+			  </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- LOT 트리 / 상세 영역 -->
+      <div class="row">
+
+		<!-- LOT 계층구조 -->
+		<div class="col-md-5">
+		  <div class="card h-100">
+		    <div class="card-header">
+		      <h5 class="mb-0">LOT 계층구조</h5>
+		    </div>
+		
+		    <div class="card-body" id="lotTree">
+		
+		      <ul class="list-group"
+		          th:if="${lotList != null and !#lists.isEmpty(lotList)}">
+		
+		        <li class="list-group-item"
+		            th:each="lot : ${lotList}">
+		
+		          <!-- ROOT LOT 한 줄 -->
+		          <a th:href="@{#}" href="#"
+				     class="d-block mb-1 lot-root-link text-body text-decoration-none"
+				     th:data-lot-no="${lot.lotNo}">
+				
+				    <span th:text="${lot.lotNo}">LOT-0001</span>
+				    <span th:text="' / ' + ${lot.displayName}"> / 제품명</span>
+				
+				    <!-- 상태만 색상 -->
+					<span class="ms-1 fw-semibold"
+					      th:text="' / ' + ${lot.status}"
+					      th:classappend="
+					        ${mode}=='PRODUCT' ?
+					          (${lot.status}=='공정 진행 중' ? ' lot-status-in' :
+					           (${lot.status}=='생산 완료' ? ' lot-status-done' :
+					            (${lot.status}=='폐기' ? ' lot-status-scrap' : ' lot-status-etc')))
+					        :
+					          (${lot.status}=='정상' ? ' lot-status-done' :
+					           (${lot.status}=='임박' ? ' lot-status-in' :
+					            (${lot.status}=='폐기' ? ' lot-status-scrap' :
+					             (${lot.status}=='유통기한 경과' ? ' lot-status-expired' : 
+					              (${lot.status}=='소진완료' ? ' lot-status-soldout' : ' lot-status-etc')))))">
+					  / 상태
+					</span>
+				  </a>
+
+		
+		          <!-- ROOT 하위: 공정 / 자재 / 설비 그룹 (기본은 숨김) -->
+		          <ul class="list-unstyled ms-3 mt-1 root-children d-none"
+		              th:data-root-lot-no="${lot.lotNo}">
+		
+					<!-- ===================== PRODUCT 모드 ===================== -->
+		            <th:block th:if="${mode}=='PRODUCT'">
+		            
+		            <!-- 공정 그룹 -->
+					<li class="mb-1">
+					  <a th:href="@{#}" href="#"
+					     class="lot-group-toggle text-body text-decoration-none small"
+					     data-group="process"
+					     th:data-lot-no="${lot.lotNo}">
+					    ▶ 공정
+					  </a>
+					
+					  <!-- 공정 리스트: 이제 서버에서 안 채우고 JS로 채울 거라 비워둠 -->
+					  <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					      data-group="process"
+					      th:data-lot-no="${lot.lotNo}">
+					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
+					  </ul>
+					</li>
+					
+		            <!-- 자재 그룹 -->
+					<li class="mb-1">
+					  <a th:href="@{#}" href="#"
+					     class="lot-group-toggle text-body text-decoration-none small"
+					     data-group="material"
+					     th:data-lot-no="${lot.lotNo}">
+					    ▶ 자재
+					  </a>
+					
+					  <!-- 자재 리스트: 이제 서버에서 안 채우고 JS로 채울 거라 비워둠 -->
+					  <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					      data-group="material"
+					      th:data-lot-no="${lot.lotNo}">
+					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
+					  </ul>
+					</li>
+					
+					</th:block>
+					
+					<!-- ===================== MATERIAL 모드 ===================== -->
+					  <th:block th:if="${mode}=='MATERIAL'">
+					
+					    <!-- Forward: 사용된 완제품 LOT 그룹 -->
+					    <li class="mb-1">
+					      <a th:href="@{#}" href="#"
+					         class="lot-group-toggle text-body text-decoration-none small"
+					         data-group="usedProducts"
+					         th:data-lot-no="${lot.lotNo}">
+					        ▶ 사용된 완제품 LOT
+					      </a>
+					
+					      <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					          data-group="usedProducts"
+					          th:data-lot-no="${lot.lotNo}">
+					        <!-- JS에서 채움 -->
+					      </ul>
+					    </li>
+					
+					  </th:block>
+		          </ul>
+		        </li>
+		      </ul>
+		
+		      <div class="text-muted small"
+		           th:if="${lotList == null or #lists.isEmpty(lotList)}">
+		        조회된 LOT가 없습니다.
+		      </div>
+		    
+           	<!-- LOT 페이징 (Bootstrap 5) -->
+			<nav class="d-flex justify-content-center mt-3"
+			     th:if="${totalPages != null and totalPages > 1}"
+			     aria-label="LOT pagination">
+			
+			  <ul class="pagination pagination-sm mb-0">
+			
+			    <!-- 첫 페이지 -->
+			    <li class="page-item" th:classappend="${page == 1} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=1, size=${size})}"
+			         aria-label="First">&laquo;&laquo;</a>
+			    </li>
+			
+			    <!-- 이전 -->
+			    <li class="page-item" th:classappend="${page == 1} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${page-1}, size=${size})}"
+			         aria-label="Previous">&laquo;</a>
+			    </li>
+			
+			    <!-- 페이지 번호: 현재 기준 앞뒤 2개씩(총 5개) -->
+			    <li class="page-item"
+			        th:each="p : ${#numbers.sequence( (page-2 < 1 ? 1 : page-2),
+			                                         (page+2 > totalPages ? totalPages : page+2) )}"
+			        th:classappend="${p == page} ? ' active'">
+			      <a class="page-link"
+			         th:text="${p}"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${p}, size=${size})}">
+			        1
+			      </a>
+			    </li>
+			
+			    <!-- 다음 -->
+			    <li class="page-item" th:classappend="${page == totalPages} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${page+1}, size=${size})}"
+			         aria-label="Next">&raquo;</a>
+			    </li>
+			
+			    <!-- 마지막 -->
+			    <li class="page-item" th:classappend="${page == totalPages} ? ' disabled'">
+			      <a class="page-link"
+			         th:href="@{/lot/trace(mode=${mode}, keyword=${keyword}, status=${status}, type=${type}, page=${totalPages}, size=${size})}"
+			         aria-label="Last">&raquo;&raquo;</a>
+			    </li>
+			
+			  </ul>
+			</nav>
+		    
+		    </div>
+		    <th:block th:replace="qc/qc_view_modal :: qcViewModal"></th:block>
+		  </div>
+		</div>
+
+        <!-- LOT 상세 -->
+		<div class="col-md-7">
+		  <div class="card h-100">
+		    <div class="card-header">
+		      <h5 class="mb-0">LOT 상세</h5>
+		    </div>
+		
+		    <div class="card-body" id="lotDetail">
+		      <!-- 초기 메시지 (AJAX 로딩 전) -->
+		      <div class="text-muted">
+		        왼쪽에서 LOT를 선택하면 상세 정보가 표시됩니다.
+		      </div>
+		    </div>
+		
+		  </div>
+		</div>
+
+
+      </div>
+
+    </div>
+
+  </th:block>
+</th:block>
+<script th:src="@{/js/qc/qc_result.js}"></script>
+<script th:src="@{/js/lot/lotTrace.js}"></script>

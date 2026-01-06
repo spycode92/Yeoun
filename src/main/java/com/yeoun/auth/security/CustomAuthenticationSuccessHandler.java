@@ -35,7 +35,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 										HttpServletResponse response,
 										Authentication authentication) throws IOException, ServletException {
 		
-		log.info(">>>>> authentication.getName() : " + authentication.getName()); 	// 사용자명(username = 현재는 empId 사용)
+//		log.info(">>>>> authentication.getName() : " + authentication.getName()); 	// 사용자명(username = 현재는 empId 사용)
 		
 		// --------------------- 마지막 로그인 시간 업데이트 --------------------- 
 		String empId = authentication.getName();
@@ -49,7 +49,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		// ======================= 사원번호 저장 쿠키 ======================= 
 		// 1. 사원번호 저장 체크박스 파라미터값 가져오기
 		String rememberId = request.getParameter("remember-id");
-		log.info("▶▶▶▶▶▶▶▶▶▶ rememberId : " + rememberId); // null 또는 "on"
+//		log.info("▶▶▶▶▶▶▶▶▶▶ rememberId : " + rememberId); // null 또는 "on"
 		
 		// 2. 쿠키 생성 공통 코드
 		// 2-1) Cookie 객체 생성하여 "remember-id" 라는 이름으로 사용자명(empId) 저장
@@ -70,9 +70,19 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		// 2-4) 응답 객체에 쿠키 추가
 		response.addCookie(cookie);
 		
+		// ======================= 이동할 URL ======================= 
+		// 기본값: 메인 화면
+		String targetUrl = request.getContextPath() + "/main";
+		
+		// 비밀번호 변경 강제 대상이면 비밀번호 변경 화면으로 이동
+		if ("Y".equals(emp.getPwdChangeReq())) {
+//			log.info("[비밀번호 변경 필요] empId={} → /my/password로 리다이렉트", empId);
+			targetUrl = request.getContextPath() + "/my/password";
+		}
+		
 		// =====================================================================================
 		// 로그인 성공 시 이동할 페이지로 리다이렉트 처리
-		response.sendRedirect("/main");
+		response.sendRedirect(targetUrl);
 	}
 	
 	

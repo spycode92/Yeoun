@@ -1,13 +1,10 @@
-const csrf = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
-
 // 출/퇴근 버튼 클릭 시 사원번호를 전달해서 출/퇴근 기록 요청
 async function attendance(empId) {
-	const PROCESS_ATTENDANCE = `/attendance/toggle/${empId}`;
+	const PROCESS_ATTENDANCE = apiUrl(`attendance/toggle/${empId}`);
 	const response = await fetch(PROCESS_ATTENDANCE, { 
 		method: "POST",
 		headers: {
-			[csrfHeader]: csrf, 
+			[csrfHeader]: csrfToken, 
 			"Content-Type": "application/json"
 		}
 	});
@@ -33,10 +30,7 @@ const handleAttendanceToggle = async (empId) => {
 		msg = "지각입니다.";
 	} else if (result.status === "IN") {
 		msg = "복귀합니다.";
-	} else if (result.status === "LUNCH_TIME") {
-		msg = "점심시간입니다.";
 	} else {
-		console.log(result.status);
 		msg = "외출입니다.";
 	}
 	
@@ -48,6 +42,13 @@ const handleAttendanceToggle = async (empId) => {
 	}
 	
 	alert(msg);
+	
+	setTimeout(() => {
+	    if (result.status === "WORKIN" || result.status === "WORK_OUT" || result.status === "LATE") {
+	        location.reload();
+	    }
+	}, 10); 
+	
 }
 
 // 사원번호로 사원 조회
@@ -55,7 +56,7 @@ const searchEmp = async () => {
 	const empId = document.querySelector("#nameWithTitle").value;
 	const empName = document.querySelector("#empName");
 	
-	const SEARCH_EMP = `/attendance/search?empId=${empId}`;
+	const SEARCH_EMP = apiUrl(`attendance/search?empId=${empId}`);
 	
 	try {
 		const response = await fetch(SEARCH_EMP, {method: "GET"});
@@ -79,23 +80,30 @@ const searchEmp = async () => {
 
 let currentMode = "regist";
 let currentAttendanceId = null;
+// 수정 모달에서 기존 시간과 변경된 시간 비교하기 위한 변수
+let originalInTime = null;
 
 // 출퇴근 수기 등록 및 수정 모달
 const openModalAttendance = async (mode, attendanceId = null) => {
 	const modalTitle = document.querySelector("#modalCenterTitle");
 	const saveBtn = document.querySelector("#saveBtn");
+	const searchBtn = document.querySelector("#searchBtn");
+	const searchEmpId = document.querySelector("#nameWithTitle");
 	const modalElement = document.querySelector("#modalCenter");
 	const modalInstance = new bootstrap.Modal(modalElement);
 	
 	currentMode = mode; // 현재 모드 저장
 	currentAttendanceId = attendanceId; // 수정 모드일 경우 id가 들어와서 저장
 	
-	const ATTENDANCE_DETAIL_URL = `/attendance/${attendanceId}`;
+	const ATTENDANCE_DETAIL_URL = apiUrl(`attendance/${attendanceId}`);
 	
 	if (mode === "edit" && attendanceId) { 	// 수정 버튼 클릭 시 동작
 		modalTitle.textContent = "출/퇴근 수정";
 		saveBtn.textContent = "수정";
 		
+		// 수정 모달에서는 사원번호 조회 기능 비활성화
+		searchEmpId.disabled = true
+		searchBtn.disabled = true;
 		
 		// 선택한 데이터 불러오기
 		const response = await fetch(ATTENDANCE_DETAIL_URL);
@@ -107,7 +115,10 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 		await searchEmp();
 		
 		if (data.workIn != null) {
-			document.querySelector("#inTime").value = data.workIn.slice(0, 5);
+			originalInTime = data.workIn.slice(0, 5);
+			document.querySelector("#inTime").value = originalInTime;
+		} else {
+			originalInTime = null;
 		}
 		
 		if (data.workOut != null) {
@@ -118,11 +129,16 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 	} else { // 등록 모드
 		modalTitle.textContent = "출/퇴근 등록";
 		saveBtn.textContent = "등록";
+		originalInTime = null;
+		
+		// 등록 모달에서는 사원번호 조회 활성화
+		searchEmpId.disabled = false;
+		searchBtn.disabled = false;
+		
 		resetModal(); // 모달 초기화
 	}
 	modalInstance.show();
 }
-
 
 // 등록 및 수정 공용 함수 
 const saveAttendance = async () => {
@@ -131,14 +147,62 @@ const saveAttendance = async () => {
 	const workOut = document.querySelector("#endTime").value;
 	const statusCode = document.querySelector("select[name='statusCode']").value;
 	
-	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
+	const url = currentMode === "edit" ? apiUrl(`attendance/${currentAttendanceId}`) : "/attendance";
 	const method = currentMode === "edit" ? "PATCH" : "POST";
+	
+	// 근무정책의 출퇴근 데이터 가져오기
+	const data = await loadWorkPolicy();
+	
+	// 근무정책에 따른 출퇴근 시간 저장하는 변수
+	const MIN_TIME = data.startTime;
+	const MAX_TIME = data.endTime;
+	
+	// 범위 체크 상수를 사용하여 Date 객체로 변환
+	const min = new Date(`2000-01-01T${MIN_TIME}`);
+	const max = new Date(`2000-01-01T${MAX_TIME}`);
+	
+	// 출근 시간을 입력하지 않았을 때
+	if (!workIn) {
+		alert("출근 시간은 필수 입력입니다.");
+		return;
+	}
+	
+	if (!statusCode) {
+		alert("근태 상태는 필수 선택입니다.");
+		return;
+	}
+	
+	const inDate = new Date(`2000-01-01T${workIn}`);
+	
+	// 수정모드에서 시간 변경되었을 때 동작
+	if (originalInTime !== null && workIn !== originalInTime) {
+		
+		if (inDate < min || inDate > max) {
+			alert(`출근시간은 ${MIN_TIME} ~ ${MAX_TIME} 사이여야 합니다.`);
+			return;
+		}
+	}
+	
+	// 퇴근 시간이 있을 때 출근 시간과 비교
+	if (workOut) {
+		const outDate = new Date(`2000-01-01T${workOut}`);
+		
+		if (outDate < inDate) {
+			alert("퇴근시간은 출근시간 이후여야 합니다.");
+			return;
+		}
+		
+		if (outDate < min || outDate > max) {
+			alert(`퇴근시간은 ${MIN_TIME} ~ ${MAX_TIME} 사이여야 합니다.`);
+			return;
+		}
+	}
 	
 	try {
 		const response = await fetch(url, {
 			method,
 			headers: {
-				[csrfHeader]: csrf, 
+				[csrfHeader]: csrfToken, 
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({empId, workIn, workOut, statusCode}),
@@ -170,4 +234,12 @@ function resetModal() {
 	document.querySelector("#inTime").value = "";
 	document.querySelector("#endTime").value = "";
 	document.querySelector("select[name='statusCode']").value = "";
+}
+
+// 근무정책에서 출근시간과 퇴근시간 정보 가져오기
+async function loadWorkPolicy() {
+	const res = await fetch(apiUrl(`attendance/policy/data`));
+	const data = await res.json();
+	
+	return data;
 }

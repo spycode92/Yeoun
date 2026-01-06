@@ -2,7 +2,8 @@ package com.yeoun.messenger.repository;
 
 import com.yeoun.messenger.entity.MsgMessage;
 
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,42 +17,53 @@ public interface MsgMessageRepository extends JpaRepository<MsgMessage, Long> {
     List<MsgMessage> findByRoomId_RoomIdOrderBySentDate(Long roomId);
 	
 	// 메시지 내용 검색
-	@Query("select distinct m.roomId.roomId from MsgMessage m " +
-		       "where m.msgContent like %:keyword%")
+    @Query("""
+       SELECT DISTINCT m.roomId.roomId
+       FROM MsgMessage m
+       WHERE m.msgContent LIKE %:keyword%
+       """)
 	List<Long> findRoomIdByMessageContent(@Param("keyword") String keyword);
 
 	// 검색어를 포함한 메시지 1개 찾기
 	@Query("""
-		select m.msgContent
-		from MsgMessage m
-		where m.roomId.roomId = :roomId
-		  and m.msgContent like %:keyword%
-		order by m.sentDate desc
-		fetch first 1 rows only
+		SELECT m.msgContent
+		FROM MsgMessage m
+		WHERE m.roomId.roomId = :roomId
+		AND m.msgContent LIKE %:keyword%
+		ORDER BY m.sentDate desc
 		""")
-	String findMatchedMessage(@Param("roomId") Long roomId,
-							  @Param("keyword") String keyword);
+	List<String> findMatchedMessages(@Param("roomId") Long roomId,
+									 @Param("keyword") String keyword);
 
 	// 가장 최근 메시지 1개 찾기
-	@Query("""
-		select m.msgContent
-		from MsgMessage m
-		where m.roomId.roomId = :roomId
-		order by m.sentDate desc
-		fetch first 1 rows only
-		""")
-	String findLastMessage(@Param("roomId") Long roomId);
+	MsgMessage findTop1ByRoomId_RoomIdOrderByMsgIdDesc(Long roomId);
 
 	// 특정 메시지 시간
 	@Query("""
-		select m.sentDate 
-		from MsgMessage m
-		where m.roomId.roomId = :roomId
-		order by m.sentDate desc
-		fetch first 1 rows only
+		SELECT m.sentDate 
+		FROM MsgMessage m
+		WHERE m.roomId.roomId = :roomId
+		ORDER BY m.sentDate desc
 		""")
-	LocalDateTime findSentDate(@Param("roomId") Long roomId);
+	List<LocalDateTime> findSentDate(@Param("roomId") Long roomId);
 
+    
+    // 안 읽은 메시지 계산하는 쿼리
+    @Query("""
+        SELECT COUNT(*)
+        FROM MsgMessage m
+        WHERE m.roomId.roomId = :roomId
+    	AND m.msgId > (
+    		SELECT COALESCE(r.lastReadId, 0)
+    		FROM MsgRelation r
+    		WHERE r.roomId.roomId = :roomId
+    		AND r.empId.empId = :empId
+    	)
+    	AND m.msgId <= :msgId
+    	""")
+    Integer countUnreadMessage(@Param("roomId") Long roomId,
+    						   @Param("empId") String empId,
+    						   @Param("msgId") Long msgId);
 
 
 }

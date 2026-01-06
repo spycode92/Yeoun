@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.main.dto.ScheduleDTO;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -75,7 +76,7 @@ public class Schedule {
     private String recurrenceType = "none";
 	
 	// ------------------------------------------------------------------------
-	@OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ScheduleSharer> scheduleSharers;
 	
 	public void changeSchedule(ScheduleDTO scheduleDTO) {

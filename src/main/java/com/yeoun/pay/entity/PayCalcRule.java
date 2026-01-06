@@ -37,8 +37,7 @@ public class PayCalcRule {
  @Column(name = "RULE_ID", precision = 18, nullable = false)
  @Comment("규칙ID (PK)")
  private Long ruleId;
-
- 
+  
  @ManyToOne(fetch = FetchType.LAZY, optional = false)
  @JoinColumn(name = "ITEM_CODE",
          nullable = false,
@@ -106,6 +105,12 @@ public String getExpr() {
   return this.calcFormula;
 }
 
+
+@Transient
+private String itemCode;   // 화면에서 넘어오는 ITEM_CODE 임시 저장
+
+public String getItemCode() { return itemCode; }
+public void setItemCode(String itemCode) { this.itemCode = itemCode; }
 
  
 }

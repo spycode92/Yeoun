@@ -13,8 +13,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name="APPROVER")
-@Getter
 @Setter
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 @IdClass(ApproverId.class)
 public class Approver {
@@ -37,7 +37,7 @@ public class Approver {
 	private String orderApprovers; //결재 순서
 	
 	@Column(name="VIEWING")
-	private String viewing; //결재열람권한
+	private String viewing;
 	
 	
 }

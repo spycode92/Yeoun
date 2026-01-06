@@ -17,7 +17,7 @@ const grid = new tui.Grid({
 		{
 			header: "상태",
 			name : "statusCode",
-			sortable: true
+			filter: "select"
 		},
 		{
 			header: "총근무시간",
@@ -37,12 +37,16 @@ const grid = new tui.Grid({
 	bodyHeight: 500,
 	columnOptions: {
 		resizable: true
+	},
+	pageOptions: { 
+		useClient: true,
+		perPage: 10 
 	}
 });
 
 // 데이터 가져오기
 async function loadAttendanceList(startDate, endDate) {
-	const ATTENDANCE_LIST = `/attendance/my/data?startDate=${startDate}&endDate=${endDate}`;
+	const ATTENDANCE_LIST = apiUrl(`attendance/my/data?startDate=${startDate}&endDate=${endDate}`);
 	try {
 		const res = await fetch(ATTENDANCE_LIST, {method: "GET"});
 		
@@ -73,15 +77,28 @@ async function loadAttendanceList(startDate, endDate) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
+	// 세션에 저장된 날짜
+	const savedStart = sessionStorage.getItem("startDate");
+	const savedEnd   = sessionStorage.getItem("endDate");
 	
-	// 이번 달 1일과 말일 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = today.toISOString().split("T")[0];
+	let startDate;
+	let endDate;
 	
+	if (savedStart && savedEnd && savedStart !== "undefined" && savedEnd !== "undefined") {// 날짜 변경이 있을 경우 저장된 날짜로 가져오기
+		startDate = savedStart;
+		endDate = savedEnd;
+	} else {
+		// 오늘 날짜 구하기
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = today.getMonth() + 1;
+		const day = today.getDate();
+		
+		// 이번 달 1일과 오늘 날짜 계산
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	}
+	 
 	// 날짜 input 기본값 설정
 	document.querySelector("#startDate").value = startDate;
 	document.querySelector("#endDate").value = endDate;
@@ -94,10 +111,75 @@ document.querySelector("#searchbtn").addEventListener("click", async () => {
 	const startDate = document.querySelector("#startDate").value;
 	const endDate = document.querySelector("#endDate").value;
 	
+	sessionStorage.setItem("startDate", startDate);
+	sessionStorage.setItem("endDate", endDate);
+	
 	if (!startDate || !endDate) {
 		alert("조회할 기간을 선택해주세요!");
 		return;
 	}
 	
 	await loadAttendanceList(startDate, endDate);
+});
+
+// -----------------------------------------------------
+// 외근 등록 유효성 검사
+const form = document.querySelector("#outworkForm");
+const dateInput = document.querySelector("#inTime");
+const typeSelect = document.querySelector("select[name='accessType']");
+const outTimeInput = document.querySelector("#outTime");
+const reasonTextarea = document.querySelector("#reason");
+
+form.addEventListener("submit", (event) => {
+	// 근무날짜 미선택 시 전송 안됨
+	if (!dateInput.value) {
+		event.preventDefault();
+		dateInput.classList.add("is-invalid");
+	}
+	
+	// 근무유형 미선택 시 전송 안됨
+	if (!typeSelect.value) {
+		event.preventDefault();
+		typeSelect.classList.add("is-invalid");
+	}
+	
+	// 외근 시작 시간 미입력 했을 경우 전송 안됨
+	if (!outTimeInput.value) {
+		event.preventDefault();
+		outTimeInput.classList.add("is-invalid");
+	}
+	
+	// 외근 사유 2글자 미만일 경우 전송 안됨
+	if (reasonTextarea.value.trim().length < 2) {
+		event.preventDefault();
+		reasonTextarea.classList.add("is-invalid");
+	}
+});
+
+// 근무 날짜 입력 또는 선택 시 에러 문구 삭제
+dateInput.addEventListener("change", () => {
+	if (dateInput.value) {
+		dateInput.classList.remove("is-invalid");
+	}
+});
+
+// 근무유형을 선택했을 경우 에러 문구 삭제
+typeSelect.addEventListener("change", () => {
+	if (typeSelect.value) {
+		typeSelect.classList.remove("is-invalid");
+	}
+});
+
+// 외근 사유 2글자 이상 입력 시 에러 문구 삭제
+reasonTextarea.addEventListener("input", () => {
+	if (reasonTextarea.value.trim().length >= 2) {
+		reasonTextarea.classList.remove("is-invalid");
+	}
+});
+
+// 외근 시작 시간 입력 시 에러 문구 삭제됨
+outTimeInput.addEventListener("input", () => {
+	if (outTimeInput.value) {
+		outTimeInput.classList.remove("is-invalid");
+	}
 });

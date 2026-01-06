@@ -42,6 +42,10 @@ public class Emp implements FileUploadHelpper {
 	@Column(name = "EMP_PWD", nullable = false, length = 200)
 	private String empPwd;		
 	
+	// 비밀번호 변경 필요 여부
+	@Column(name = "PWD_CHANGE_REQ", length = 1)
+	private String pwdChangeReq = "N";
+	
 	// 이름
 	@Column(name = "EMP_NAME", nullable = false, length = 50)
 	private String empName;		
@@ -77,6 +81,10 @@ public class Emp implements FileUploadHelpper {
 	// 입사일 (DATE -> LocalDate)
 	@Column(name = "HIRE_DATE")
 	private LocalDate hireDate;	
+	
+	// 퇴사일
+	@Column(name = "RETIRE_DATE")
+	private LocalDate retireDate;
 	
     // 부서ID (FK: DEPT.DEPT_ID)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -123,11 +131,6 @@ public class Emp implements FileUploadHelpper {
 		// 사용자 권한 목록 객체(List<EmpRole>)에 1개의 권한이 저장된 EmpRole 엔티티 추가
 		empRoles.add(empRole);
 	}
-
-	// ---------------------------------------------------------------
-	// 연차 테이블과 연동
-	@OneToOne(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
-	private AnnualLeave annualLeave;
 	
 	// ---------------------------------------------------------------
 	@Override

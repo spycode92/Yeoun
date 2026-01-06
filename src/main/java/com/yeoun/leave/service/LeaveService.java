@@ -78,20 +78,23 @@ public class LeaveService {
 		AnnualLeave annualLeave = leaveRepository.findByEmp_EmpId(empId)
 				.orElseThrow(() -> new NoSuchElementException("해당 사원의 연차 정보를 찾을 수 없습니다."));
 		
-		LocalDate now = LocalDate.now();
+		// --------------------------------------------------------
+		// 연차 수당 제외로 주석 처리
+//		LocalDate now = LocalDate.now();
 		
 		// 현재 날짜 기준으로 yyyymm 생성
-		String currentDate = String.format("%d%02d", now.getYear(), now.getMonthValue());
+//		String currentDate = String.format("%d%02d", now.getYear(), now.getMonthValue());
 		
-		PayrollPayslip payslip = payslipRepo
-	                .findByPayYymmAndEmpId(currentDate, empId)
-	                .orElseThrow(() -> new IllegalArgumentException("명세서 없음"));
+//		PayrollPayslip payslip = payslipRepo
+//	                .findByPayYymmAndEmpId(currentDate, empId)
+//	                .orElseThrow(() -> new IllegalArgumentException("명세서 없음"));
 		 
+		// 연차 수당 추계액 계산
+//		leaveDTO.calculateAnnualLeaveAllowance(payslip.getBaseAmt(), payslip.getAlwAmt());
+		// --------------------------------------------------------
+		
 		LeaveDTO leaveDTO = LeaveDTO.fromEntity(annualLeave);
 		
-		// 연차 수당 추계액 계산
-		leaveDTO.calculateAnnualLeaveAllowance(payslip.getBaseAmt(), payslip.getAlwAmt());
-		 
 		return leaveDTO;
 	}
 	
@@ -227,6 +230,5 @@ public class LeaveService {
 			// 연차 업데이트
 			leave.updateAnnual(newStart, newEnd, currentYear, workPolicy.getAnnualBasis());
 		}
-		
 	}
 }

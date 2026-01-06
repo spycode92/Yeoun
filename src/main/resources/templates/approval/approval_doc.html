@@ -2,18 +2,174 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
 <head>
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
-<link rel="stylesheet" href="https://uicdn.toast.com/select-box/latest/toastui-select-box.css">
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/select-box/latest/toastui-select-box.css}">
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css}" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.css}" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/editor/latest/toastui-editor.min.css}" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+<link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css}" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+<script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-<script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
-
 </head>
-<style>
-	
-</style>
+<th:block layout:fragment="pageCss">
+	<style>
+		.required-field::before {
+		content: '* ' !important; /* content 속성이 적용되는지 확인 */
+		color: red !important;
+		display: inline-block; /* Try adding this */
+		}
+		
+		/* 페이지 배경을 서류 느낌으로 */
+		body {
+			background: #f8f9fa;
+			background-image: 
+				linear-gradient(90deg, rgba(200,200,200,0.03) 1px, transparent 1px),
+				linear-gradient(rgba(200,200,200,0.03) 1px, transparent 1px);
+			background-size: 25px 25px;
+		}
+		
+		/* h5 제목들 - 간단한 구분선만 */
+		.modal-body h5 {
+			margin-bottom: 15px;
+			padding-bottom: 10px;
+			border-bottom: 1px solid #e9ecef;
+			font-weight: 600;
+			color: #495057;
+		}
+		
+		/* no-box 클래스는 구분선도 제거 */
+		.modal-body h5.no-box {
+			border-bottom: none !important;
+			padding-bottom: 5px !important;
+		}
+		
+		/* 모달을 서류 느낌으로 */
+		.modal-content {
+			background: linear-gradient(135deg, #fefefe 0%, #f8f9fa 100%);
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+			border: 1px solid #e2e8f0;
+		}
+		
+		.modal-body {
+			background: transparent;
+			padding: 15px;
+		}
+		
+		/* 문서 정보 카드 */
+		.document-info-card {
+			background: #fefefe;
+			background-image: 
+				linear-gradient(90deg, rgba(220,220,220,0.05) 1px, transparent 1px),
+				linear-gradient(rgba(220,220,220,0.05) 1px, transparent 1px),
+				radial-gradient(circle at 20% 80%, rgba(120,119,198,0.02) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255,119,48,0.02) 0%, transparent 50%);
+			background-size: 25px 25px, 25px 25px, 400px 400px, 400px 400px;
+			border: 1px solid #e9ecef;
+			border-radius: 12px;
+			padding: 25px;
+			margin-bottom: 15px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+		
+		/* 결재권한자 카드 */
+		.approver-info-card {
+			background: #fefefe;
+			background-image: 
+				linear-gradient(90deg, rgba(220,220,220,0.05) 1px, transparent 1px),
+				linear-gradient(rgba(220,220,220,0.05) 1px, transparent 1px),
+				radial-gradient(circle at 20% 80%, rgba(120,119,198,0.02) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255,119,48,0.02) 0%, transparent 50%);
+			background-size: 25px 25px, 25px 25px, 400px 400px, 400px 400px;
+			border: 1px solid #e9ecef;
+			border-radius: 12px;
+			padding: 25px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+		
+		.modal-header {
+			background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+			border-bottom: 2px solid #dee2e6;
+		}
+		
+		/* 결재권한자 영역 특별 스타일 */
+		#approver {
+			background: #f8f9fa !important;
+			border: 2px dashed #dee2e6 !important;
+			border-radius: 8px !important;
+			padding: 20px !important;
+			margin: 10px 0 !important;
+		}
+		
+		#jeongyeolja {
+			background: #ffffff !important;
+			border: 2px solid #e9ecef !important;
+			border-radius: 8px !important;
+			padding: 20px !important;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+			margin-top: 15px !important;
+		}
+		
+		/* span을 버튼처럼 만들기 */
+		.radio-span-card {
+			display: inline-flex; /* span이지만 내부 요소를 정렬하기 위해 flex 사용 */
+			align-items: center;
+			padding: 10px 18px;
+			background: #F8FAFC;
+			border: 1px solid #E2E8F0;
+			border-radius: 10px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		/* 선택 시 스타일 */
+		.radio-span-card:has(input:checked) {
+			background-color: #EEF2FF;
+			border-color: #4F46E5;
+			box-shadow: 0 2px 5px rgba(79, 70, 229, 0.1);
+		}
+
+		/* 라디오 버튼 크기 크게 */
+		.radio-span-card input[type="radio"] {
+			appearance: none;
+			-webkit-appearance: none;
+			width: 22px;
+			height: 22px;
+			border: 2px solid #CBD5E1;
+			border-radius: 50%;
+			margin: 0 10px 0 0;
+			background: white;
+			cursor: pointer;
+			position: relative;
+		}
+
+		/* 라디오 버튼 체크 시 내부 점 */
+		.radio-span-card input[type="radio"]:checked {
+			border-color: #4F46E5;
+			background-color: #4F46E5;
+		}
+
+		.radio-span-card input[type="radio"]:checked::after {
+			content: '';
+			position: absolute;
+			top: 50%; left: 50%;
+			transform: translate(-50%, -50%);
+			width: 10px; height: 10px;
+			background: white;
+			border-radius: 50%;
+		}
+
+		.radio-span-card label {
+			font-size: 16px;
+			font-weight: 600;
+			color: #334155;
+			margin: 0;
+			cursor: pointer;
+			white-space: nowrap;
+		}
+	</style>
+</th:block>
 <body>
 <th:block layout:fragment="content">
 	<!-- 현재사용자 사번, 이름 저장 -->
@@ -22,263 +178,321 @@
 	
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<h2>전자 결재</h2>
-			<div class="d-flex justify-content-between">
-			<div class="d-flex" style="height: 38.94px;">
-	            <div class="mb-6 mb-0" style="width: 180px;">
-	            	<select class="form-select" onchange="draftValFn(this)">
-	            		<option value="기안서" selected>기안서</option>
-	            		 <option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item.formName}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+		<div class="d-flex justify-content-between">
+			<div class="d-flex justify-content-start">
+				<div class="mb-6 mb-0" style="width: 180px;">
+					<select id="form-type-defalut" class="form-select" onchange="draftValFn(this)">
+						<option value="" selected disabled hidden>기안서</option>
+							<option th:each="item, iterStat : ${formTypes}" 
+									th:value="${item.formName}" 
+									th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
 									th:data-formname="${item.formName}"
 									name="draft">
 						</option>
-	            	</select>
-	            </div>
-	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
-					<button onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
+					</select>
+				</div>
+				<div style="margin-left: 5px;">
+					<button id="writeBtn" data-action="create" onclick="defaultPrint()" class="btn btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#approval-modal" style="background-color: #788393; color:#e9ecef; width: 71px;">
 					작성
 					</button>
-		        </div>
-		        <div class="row flex-nowrap" style="margin-left: 389px;">
+				</div>
+			</div>
+			<div class="d-flex justify-content-end">
+				<div class="d-flex align-items-center gap-2" style="min-width: 280px;margin-right:25px;">
+			
 					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<label class="form-label">결재생성일</label>
 						<input id="searchStartDate" type="date" name="startDate" class="form-control">
 					</div>
-	                ~
-	                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-		                <input id="searchEndDate" type="date" name="endDate" class="form-control">
-	                </div>
-	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서이름" style="width: 200px;height: 38.94px;">
-	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
-		             	<button id="searchBtn" class="btn btn-primary">검색</button>
-	                </div>
-				</div>
+					<span style="margin-top: 33px;">~</span>
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<label class="form-label">결재완료일</label>
+						<input id="searchEndDate" type="date" name="endDate" class="form-control">
+					</div>
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<label class="form-label">기안자및문서제목</label>
+						<input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;margin-left:5px;">
+						
+					</div>
+					<button id="searchBtn" onclick="AllGridSearch()" class="btn btn-primary" style="position: relative;margin-left: 27px;margin-top: 37px;">
+						조회
+					</button>
+				</div>	
 			</div>
 		</div>
 		<hr>
-		<div style="margin-top: 15px;">
-			<nav>
-			  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-			    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
-			    	결재사항
-			    </button>
-			    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
-			    	전체결재
-			    </button>
-			    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-			    	내 결재목록
-			    </button>
-			    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-			    	결재대기
-			    </button>
-			    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-			    	결재완료
-			    </button>
-			  </div>
-			</nav>
-			<div class="tab-content" id="nav-tabContent">
-			  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
-			  	<h2>결재사항</h2>
-			  	<div id="approvalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
-			  		<h2>전체결재</h2>
-			  		<div id="allApprovalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade active" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
-			  		<h2>내 결재목록</h2>
-			  		<div id="myApprovalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade active" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
-			  		<h2>결재대기</h2>
-					<div id="waitingApprovalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade active" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
-			  		<h2>결재완료</h2>
-					<div id="doneApprovalGrid"></div>
-			  </div>
-			</div>
-		</div>
+		<div class="col-xl-15">
+          <div class="nav-align-top mb-4">
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="nav-item">
+                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#nav-approval-tab" aria-controls="navs-approval-tab" aria-selected="true">
+                  결재사항
+                </button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-all-tab" aria-controls="navs-all-tab" aria-selected="false">
+                  전체결재
+                </button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-my-tab" aria-controls="navs-my-tab" aria-selected="false">
+                  내 결재목록
+                </button>
+              </li>
+			   <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-waiting-tab" aria-controls="navs-waiting-tab" aria-selected="false">
+                  결재대기
+                </button>
+              </li>
+			   <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-done-tab" aria-controls="navs-done-tab" aria-selected="false">
+                  결재완료
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content" style="height: 700px;">
+              <div class="tab-pane fade show active"  id="nav-approval-tab" role="tabpanel">
+			  	<div id="approvalGrid" ></div>
+              </div>
+              <div class="tab-pane fade" id="navs-all-tab" role="tabpanel">
+			  	<div id="allApprovalGrid"></div>
+              </div>
+              <div class="tab-pane fade" id="navs-my-tab" role="tabpanel">
+			  	<div id="myApprovalGrid"></div>
+              </div>
+			  <div class="tab-pane fade" id="navs-waiting-tab" role="tabpanel">
+				<div id="waitingApprovalGrid" ></div>
+              </div>
+			  <div class="tab-pane fade" id="navs-done-tab" role="tabpanel">
+				<div id="doneApprovalGrid"></div>
+              </div>
+            </div>
+        </div>
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
-		      <div class="modal-header" data-draggable="true">
-				<!--<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>-->
-				<input type="text" id="Drafting" name="drafting" value="">
-		        <!--<p class="modal-title" id="Drafting" name="drafting" style="font-size: 50px;">기안서 작성</p>-->
-		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-		      </div>
-		      <div class="modal-body">
-		        <h5 class="d-flex">
-					<label>문서 날짜 : </label>
-					<p id="today-date"></p>
-				</h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
-		        	<input id="approval-title" class="form-control" type="text" name="approvalTitle" placeholder="문서제목" style="width:800px;height: 38.94px;">
-				</h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">양식 종류 </label> 
-		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select id="form-menu" class="form-select" onchange="draftValFn(this)">
-		            		<option selected>기안서</option>
-		            		<option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item.formName}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
-									th:data-formname="${item.formName}"
-									name="draft">		
-							</option>
-		            	</select>
-	            	</div>
-		        </h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
-		        	<div class="mb-6 mb-0" style="width: 344px;">
-		        		<p id="approver-name" name="empId" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p> 
-	            	</div>
-		        </h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">결재완료기간</label>
-		        	<div class="row flex-nowrap">
-						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="createdDate" id="create-date" class="form-control">
-						</div>
-		                ~
-		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="finishDate"  id="finish-date" class="form-control">
-		                </div>
-					</div>
-		        </h5>
-				
-		        <h5 id="leavePeriodForm" style="display:none;">
-					<label class="p-1" style="width: 200px;">휴가기간</label>
-		        	<div class="row flex-nowrap">
-						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate"  id="start-date" class="form-control">
-						</div>
-		                ~
-		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate"  id="end-date" class="form-control">
-		                </div>
-					</div>
-		        </h5>
-			
-		       	<h5 id="leaveTypeForm" style="display: none;">
-					<label class="p-1" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
-		        	<div class="mb-6 mb-0" style="width: 344px;">
-		           	<select id="leave-type" name="leaveType" class="form-select">
-		            		<option selected></option>
-		            		<option name="leave" value="연차">연차</option>
-							<option name="leave" value="오전반차">오전반차</option>
-							<option name="leave" value="오후반차">오후반차</option>
-							<option name="leave" value="병가">병가</option>
-							<option name="leave" value="공가">공가</option>
-							<option name="leave" value="연차유급휴가">연차유급휴가</option>
-							<option name="leave" value="출산전후휴가">출산전후휴가</option>
-							<option name="leave" value="배우자출산휴가">배우자출산휴가</option>
-							<option name="leave" value="생리휴가">생리휴가</option>
-							<option name="leave" value="가족돌봄휴가">가족돌봄휴가</option>
-							<option name="leave" value="경조사휴가">경조사휴가</option>
-							<option name="leave" value="여름휴가">여름휴가</option>
-							<option name="leave" value="개인사정">개인사정</option>
-							<option name="leave" value="기타">기타</option>
-		            	</select>
-	            	</div>
-		        </h5>
-		        <h5 id="toDeptForm" style="display: none;">
-					<label class="p-1" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
-		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select id="to-dept-id" name="toDeptId" class="form-select" >
-		            		<option selected>부서</option>
-							<option th:each="item, iterStat : ${deptList}" 
-							 		th:value="${item.deptId}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.deptName} + '(' + ${item.deptId} + ')'">
-							 </option>
-		            	</select>
-	            	</div>
-		        </h5>
-		        <h5 id="expndTypeForm" style="display:none;">
-					<label class="p-1"  style="width: 200px;">지출종류 </label><!-- 지출결의서-->
-		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select id="expnd-type" name="expndType" class="form-select" >
-		            		<option selected>지출종류</option>
-		            		<option name="expense" value="고정지출">고정지출</option>
-							<option name="expense" value="변동지출">변동지출</option>
-							<option name="expense" value="비정기지출">비정기지출</option>
-		            	</select>
-	            	</div>
-		        </h5>
-		        <h5>
-					<label class="p-1" style="width: 200px;">사유내용</label>
-		        	<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
-		        </h5>
-		        <!--<h5 class="d-flex">결재권한자 변경:
-		        	<input class="form-check-input" type="checkbox" id="opt-in">
-		        
-		        </h5>-->
-		        <h5 class="d-flex">
-					<label>결재권한자 : </label> 
-		          	<div id="select-box" style="width: 200px"></div>
-		        </h5>
-     				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
-					<!-- 결재권한자 버튼 생성 영역 -->
-     				</div>	
-     				
-     				<!-- 전결자 클릭시 추가 태그 -->
-			      	<div id="jeongyeolja" style="display:none;border:1px solid red;border-radius: 6px;padding: 12px;">
-			      	
-						<div id="jeongyeolja-content">
-						  <label class="form-check-label" for="radioDefault1">
-						    없음 
-						  </label>
-						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="N" checked>
-						  <label class="form-check-label" for="radioDefault1">
-						    전결  
-						  </label>
-						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="전결">
-						  <label class="form-check-label" for="radioDefault2">
-						    대결  
-						  </label>
-						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="대결">
-						  <label class="form-check-label" for="radioDefault2">
-						    선결  
-						  </label>
-						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
-						  <div>
-						 	<h5>전결자 지정 </h5>
-							<select id="emp_id" name="delegetedApprover" class="form-select" aria-label="Default select example">
-							  <option selected>이름 사원번호</option>
-							  <option th:each="item, iterStat : ${empList}" 
-							 			th:value="${item.empId}" 
-							 			th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
-							 </option> 
+				<form class="modal-content" id="modal-doc" action="/approval/approval_doc"  method="POST" enctype="multipart/form-data">
+				<div class="modal-header" data-draggable="true">
+					<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>
+					<input type="hidden" id="DraftingHidden" name="drafting" value="">
+					<!--<p class="modal-title" id="Drafting" name="drafting" style="font-size: 50px;">기안서 작성</p>-->
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="document-info-card">
+					<h5 class="d-flex">
+						<label class="required-field" style="width: 200px;">문서 날짜 </label>
+						<p id="today-date"></p>
+					</h5>
+					<h5 class="d-flex">
+						<label class="p-1 required-field" style="width: 200px;">
+							문서 제목
+						</label> 	                 
+						<input id="approval-title" class="form-control" type="text" name="approvalTitle" placeholder="문서제목" style="width:800px;height: 38.94px;" required>
+					</h5>
+					<h5 class="d-flex">
+						<label class="p-1 required-field" style="width: 200px;">양식 종류 </label> 
+						<div class="mb-6 mb-0" style="width: 344px;">
+							<select id="form-menu" class="form-select" onchange="draftValFn(this)">
+								<option value="" selected disabled hidden>기안서</option>
+								<option th:each="item, iterStat : ${formTypes}" 
+										th:value="${item.formName}" 
+										th:text="${item.formName}"
+										th:data-formname="${item.formName}"
+										name="draft">		
+								</option>
 							</select>
-						  </div>
 						</div>
+					</h5>
+					<h5 class="d-flex">
+						<label class="p-1 required-field" style="width: 200px;">결재자명(기안자)</label> 
+						<div class="mb-6 mb-0" style="width: 344px;">
+							<p id="approver-name" name="empId" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p> 
+						</div>
+					</h5>
+					<h5 class="d-flex no-box">
+						<label class="p-1 required-field" style="width: 200px;">결재완료기간</label>
+						
+						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="create-date" type="date" name="createdDate" class="form-control" required readonly>
+							</div>
+							<span>~</span>
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="finish-date" type="date" name="finishDate" class="form-control" required>
+							</div>
+						</div>
+					
+					<h5 id="leavePeriodForm" class="no-box" style="display:none;">
+						<label class="p-1 required-field" style="width: 200px;">휴가기간</label>
+						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="start-date" type="date" name="startDate" class="form-control" >
+							</div>
+							<span>~</span>
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="end-date" type="date" name="endDate" class="form-control" >
+							</div>
+						</div>
+					</h5>
+				
+					<h5 id="leaveTypeForm" style="display: none;">
+						<label class="p-1 required-field" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
+						<div class="mb-6 mb-0" style="width: 344px;">
+							<select id="leave-type" name="leaveType" class="form-select">
+								<option selected></option>
+								<option value="연차">연차</option>
+								<option value="반차">오전반차</option>
+								<option value="반차">오후반차</option>
+								<option value="병가">병가</option>
+								<option value="연차">공가</option>
+								<option value="연차">연차유급휴가</option>
+								<option value="연차">출산전후휴가</option>
+								<option value="연차">배우자출산휴가</option>
+								<option value="연차">생리휴가</option>
+								<option value="연차">가족돌봄휴가</option>
+								<option value="연차">경조사휴가</option>
+								<option value="연차">여름휴가</option>
+								<option value="연차">개인사정</option>
+								<option value="연차">기타</option>
+							</select>
+						</div>
+					</h5>
+					<h5 id="positionForm" style="display: none;"> <!--인사발령신청서-->
+						<label class="p-1 required-field" style="width: 200px;">직급</label><!--- 인사발령신청서-->
+						<div class="mb-6 mb-0" style="width: 344px;">
+							<select id="position" name="position" class="form-select" >
+								<option value="" selected>직급</option>
+								<option th:each="item, iterStat : ${positionList}" 
+										th:value="${item.posCode}" 
+										th:text="${item.posName}">
+								</option>
+							</select>
+						</div>
+					</h5>
+					<h5 id="toDeptForm" style="display: none;">
+						<label class="p-1 required-field" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
+						<div class="mb-6 mb-0" style="width: 344px;">
+							<select id="to-dept-id" name="toDeptId" class="form-select" >
+								<option value="" selected>부서</option>
+								<option th:each="item, iterStat : ${deptList}" 
+										th:value="${item.deptId}" 
+										th:text="${item.deptName} + '(' + ${item.deptId} + ')'">
+								</option>
+							</select>
+						</div>
+					</h5>
+					<h5 id="expndTypeForm" style="display:none;">
+						<label class="p-1 required-field"  style="width: 200px;">지출종류 </label><!-- 지출결의서-->
+						<div class="mb-6 mb-0" style="width: 344px;">
+							<select id="expnd-type" name="expndType" class="form-select" >
+								<option value="" selected disabled hidden>지출종류 선택</option>
+								<option name="expense" value="고정지출">고정지출</option>
+								<option name="expense" value="변동지출">변동지출</option>
+								<option name="expense" value="비정기지출">비정기지출</option>
+							</select>
+						</div>
+					</h5>
+					<h5>
+						<label class="p-1" style="width: 200px;margin-bottom: 5px;">사유내용</label>
+						<div>
+							<textarea id="reason-write" class="form-control" name="reason" rows="10" 
+								placeholder="결재사유내용 작성" maxlength="3000"></textarea>
+							<small id="reason-char-count" class="form-text text-muted" style="float:right;">0/3000자</small>
+						</div>
+					</h5>
 					</div>
-	     				<!--에디터-->
-		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
-		      </div>
-		      <div class="modal-footer">
-		      	<div>
-			     	<button type="button" class="btn btn-primary">첨부파일</button>
-			     	<button type="button" class="btn btn-primary" id="approvalCompanionBtn">반려</button>
-			      	<button type="button" class="btn btn-primary" id="approvalCheckBtn">결재확인</button>
-			    </div>
-		      	<hr>
-		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="submit" class="btn btn-primary">등록</button>
-		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-		      </div>
-		</form>
+					
+					<div class="approver-info-card">
+						<h5 class="d-flex">
+							<label style="padding-right: 14px;padding-right: 14px;margin-top: 12px;">결재권한자</label> 
+							<div id="select-box"></div>
+						</h5>
+						<label id="approverInfo">* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
+						<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+						
+						<!-- 결재권한자 버튼 생성 영역 -->
+						</div>	
+						<div id="jeongyeolja" style="display:none; margin-top: 10px; background: #ffffff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); line-height: 1;">
+							
+							<div id="jeongyeolja-content" style="display: flex; align-items: center; gap: 10px;">
+
+								<span class="radio-span-card">
+									<input type="radio" name="radioJeongyeolja" id="radioN" value="N" checked>
+									<label for="radioN">없음</label>
+								</span>
+
+								<span class="radio-span-card">
+									<input type="radio" name="radioJeongyeolja" id="radioJeong" value="전결">
+									<label for="radioJeong">전결</label>
+								</span>
+
+								<span class="radio-span-card">
+									<input type="radio" name="radioJeongyeolja" id="radioDae" value="대결">
+									<label for="radioDae">대결</label>
+								</span>
+
+								<span class="radio-span-card">
+									<input type="radio" name="radioJeongyeolja" id="radioSeon" value="선결">
+									<label for="radioSeon">선결</label>
+								</span>
+
+								<span style="margin-left: 10px; padding: 8px; padding-left: 20px; border-left: 1px solid #E2E8F0; display: flex; align-items: center; gap: 15px;">
+									<strong style="font-size: 15px; white-space: nowrap;">결재권한자 지정</strong>
+									<select id="delegetedApprover" name="delegetedApprover" class="form-select" style="display:none; width: 180px; height: 40px;width: 260px;">
+										<option selected>선택하세요</option>
+										<option th:each="item, iterStat : ${empList}" 
+												th:value="${item.empId}" 
+												th:text="${item.empName} + '(' + ${item.empId} + ')'">
+										</option> 
+									</select>
+								</span>
+
+							</div>					
+						</div>						
+					</div>						
+
+				</div>
+				<div class="modal-footer">
+					<div id="fileListContainer" class="d-flex"></div>
+						<button type="button" id="attachmentBtn" class="btn btn-primary btn-md-sm"> 
+							<i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+								<polyline points="14 2 14 8 20 8"></polyline>
+								<line x1="12" y1="18" x2="12" y2="12"></line>
+								<polyline points="9 15 12 12 15 15"></polyline>
+							</svg></i>첨부파일</button>		
+						<input type="file" id="realFileInput" name="itemImgFiles" accept="image/*,application/pdf" style="display: none;" multiple>
+						<div id="downloadArea"></div>
+				</div>
+				<div class="modal-footer">
+					<div>
+						<button type="button" id="approvalCompanionBtn" class="btn btn-outline-danger btn-md-sm" style="display:none;background-color: #e6381a;color:white;">반려</button>
+						<button type="button" id="approvalCheckBtn" class="btn btn-outline-primary me-2 btn-md-sm" style="display:none;background-color: #696cff;color:white;">결재확인</button>
+					</div>
+					<hr>
+					<button type="button" id="printBtn" class="btn btn-outline-secondary me-1 btn-md-sm" style="background-color: #788393; color:#e9ecef;">
+						<i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 6 2 18 2 18 9"></polyline>
+							<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+							<rect x="6" y="14" width="12" height="8"></rect>
+						</svg></i>
+						인쇄
+					</button>
+					<button type="submit" id="saveBtn" class="btn btn-primary btn-md-sm" >등록</button>
+					<!-- <button type="button" id="modalCloseBtn" class="btn btn-secondary btn-md-sm" data-bs-dismiss="modal">닫기</button> -->
+				</div>
+				
+				</form>
+			</div>
 	    </div>
 	</div>
-	</div>
+</div>
 
 </th:block>
 </body>
 
 <th:block layout:fragment="myScript"> 
+		<script th:inline="javascript" th:src="@{/js/approval/gridCustomRenderers.js}"></script>
 		<script th:inline="javascript" th:src="@{/js/approval/approvalDoc.js}"></script>
 </th:block>

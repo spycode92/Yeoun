@@ -20,6 +20,9 @@ public class HrActionRequestDTO {
     
  	// 발령 일자
     private LocalDate effectiveDate;  
+    
+	// 휴직 종료 예정일
+	private LocalDate leaveEndDate;
 
     // 발령 부서
     private String toDeptId;      
@@ -37,6 +40,7 @@ public class HrActionRequestDTO {
         HrAction action = new HrAction();
         action.setActionType(this.actionType);
         action.setEffectiveDate(this.effectiveDate);
+        action.setLeaveEndDate(this.leaveEndDate);
         action.setActionReason(this.actionReason);
         action.setStatus("대기");       
         return action;

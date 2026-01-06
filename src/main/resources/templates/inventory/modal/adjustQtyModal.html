@@ -1,0 +1,43 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="adjust_quantity_modal">
+
+<!-- Adjust Quantity Modal -->
+<div class="modal fade" id="adjustModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">수량 조절</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">조절 유형</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="adjustType" id="adjustInc" value="INC"
+                            checked>
+                        <label class="form-check-label" for="adjustInc">증가</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="adjustType" id="adjustDec" value="DEC">
+                        <label class="form-check-label" for="adjustDec">감소</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="adjustQty" class="form-label">수량</label>
+                    <input type="number" id="adjustQty" class="form-control" min="1">
+                </div>
+                <div class="mb-3">
+                    <label for="adjustReason" class="form-label">사유</label>
+                    <textarea id="adjustReason" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="adjustSave">저장</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script th:src="@{/js/inventory/inventoryAdjustQty.js}"></script>

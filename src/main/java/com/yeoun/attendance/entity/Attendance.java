@@ -48,7 +48,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 public class Attendance {
 	@Id 
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ATTENDANCE_SEQ_GENERATOR")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ATTENDANCE_SEQ_GENERATOR")
 	private Long attendanceId;
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -131,7 +131,7 @@ public class Attendance {
 			
 			attendance.remark = outWorkLog.getReason();
 		} else {
-			// 최근 없는 일반 출근 처리
+			// 외근 없는 일반 출근 처리
 			attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
 			
 			attendance.workIn = now;
@@ -141,7 +141,7 @@ public class Attendance {
 	}
 	
 	// 퇴근 처리
-	public void recordWorkOut(LocalTime now, LocalTime standardOut) {
+	public void recordWorkOut(LocalTime now) {
 		LocalTime  outTime = now;
 		
 	    if (outTime != null) {

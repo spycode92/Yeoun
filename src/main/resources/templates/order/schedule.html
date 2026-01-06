@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/layout.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>작업자 스케줄러</title>
+
+    <link rel="stylesheet"
+ th:href="@{https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css}" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+	<link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.min.css}" href="https://uicdn.toast.com/grid/latest/tui-grid.min.css" />
+    <script th:src="@{/js/common/formatTimeJS.js}"></script>
+    <style>
+        body {
+            background: #f4f3fb;
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            color: #2f2b43;
+        }
+
+        .title {
+            font-size: 1.625rem;
+            margin-bottom: 1.8rem;
+            color: #697a8d;
+            font-weight: 500;
+        }
+
+        /* ===== 레이아웃 구조 ===== */
+        .scheduler-layout {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            height: calc(100vh - 180px);
+        }
+
+        /* 왼쪽: 캘린더 */
+        .calendar-panel {
+            flex: 7;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 10px 25px rgba(80,72,180,0.08);
+        }
+
+        /* 오른쪽: 작업자 테이블 */
+        .worker-panel {
+            flex: 3;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(80,72,180,0.08);
+        }
+
+        #calendar {
+            height: 100% !important;
+        }
+
+        /* Sneat 기본 min-height 제거 */
+        .custom-body.container-xxl {
+            min-height: auto !important;
+        }
+
+        /* ===== TUI 불필요 요소 제거 ===== */
+        .toastui-calendar-milestone,
+        .toastui-calendar-task,
+        .toastui-calendar-allday {
+            display: none !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: 0 !important;
+        }
+
+        .toastui-calendar-timegrid-time {
+            font-size: 14px;
+        }
+
+        .toastui-calendar-event-time .toastui-calendar-event-time-content {
+            font-size: 16px !important;
+            font-weight: 600;
+            color: black;
+            white-space: normal !important;
+        }
+    </style>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+        <div class="title">
+            <i class="bi bi-kanban-fill"></i>
+            작업자 스케줄러
+        </div>
+
+        <div class="scheduler-layout">
+            
+            <!-- LEFT: CALENDAR -->
+            <div class="calendar-panel">
+                <div id="calendar"></div>
+            </div>
+
+            <!-- RIGHT: WORKER LIST -->
+            <div class="worker-panel">
+                <h5 class="mb-3">작업자 목록</h5>
+                <div id="workerList"></div>
+            </div>
+
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="myScript">
+	<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.min.js"></script>
+    <script>
+        // v2에서는 전역에 tui.Calendar로 올라옴
+        const Calendar = tui.Calendar;
+
+        // 캘린더 인스턴스 생성
+        const calendar = new Calendar('#calendar', {
+            defaultView: 'week',
+            usageStatistics: false,      // GA 끄기
+            isReadOnly: true,            // 조회 전용
+            week: {
+                workweek: true,            // 토·일 숨김
+                startDayOfWeek: 1,         // 월요일 시작
+                hourStart: 9,
+                hourEnd: 18,
+                dayNames: ['월', '화', '수', '목', '금'],
+                showTimezoneCollapseButton: false,
+                showNowIndicator: false,
+                taskView: false,
+                eventView: ['time'],     // all-day 행 숨기고 시간 그리드만 표시
+            },
+            calendars: [
+                {
+                    id: 'WORK_ORDER',
+                    name: '전체 작업지시',
+                    backgroundColor: '#6366f1'
+                }
+            ],
+            template: {
+            	time(event) {
+            		const start = formatTimeOnly24(event.start);
+            		const end	= formatTimeOnly24(event.end);
+            		return `${start}-${end} <br/> ${event.title}`;
+            	}
+            }
+        });
+        
+        let ALL_EVENTS = [];
+        
+        async function loadAllWorkOrders() {
+        	const res  = await fetch('/order/schedule/data');
+        	const data = await res.json();
+        	
+        	calendar.clear();	// 초기화
+        	ALL_EVENTS = mapToCalendarEvents(data);
+        	calendar.createEvents(ALL_EVENTS);
+        }
+        
+        // 페이지 진입 시 초기 로드
+        loadAllWorkOrders();
+        
+        // 작업지시 바인딩
+        function mapToCalendarEvents(workOrders) {
+        	return workOrders.map(order => ({
+        		id: order.workId,
+        		calendarId: 'WORK_ORDER',
+        		title: `${order.lineName} <br/> ${order.productName} <br/> ${order.planQty}개`,
+        		start: order.startTime,
+        		end: order.endTime,
+        		backgroundColor: order.colorCode,
+        		isReadOnly: true,
+        		
+        		raw: {
+        			empIds: order.workers
+        		}
+        	}));
+        }
+        
+     // Toast UI Grid 생성
+             	
+        	const STATUS_META = {
+        			  AVAIL: { text: '작업가능', color: '#10b981' },
+        			  WORK:  { text: '작업중',   color: '#6366f1' },
+        			  AWAY:  { text: '자리비움', color: '#f43f5e' }
+        			};
+     
+        const workerGrid = new tui.Grid({
+            el: document.getElementById('workerList'),
+            bodyHeight: 'fitToParent',
+            rowHeaders: ['checkbox'],   // 체크박스
+            scrollX: false,
+            scrollY: true,
+
+            columns: [
+                {
+                    header: '사번',
+                    name: 'empId',
+                    width: 120,
+                    align: 'center'
+                },
+                {
+                    header: '이름',
+                    name: 'empName',
+                    width: 90
+                },
+                {
+                    header: '상태',
+                    name: 'status',
+                    width: 120,
+                    align: 'center',
+                    formatter({ value }) {
+                    	const meta = STATUS_META[value] || {
+                    		text: value,
+                    		color: '#4b5563'
+                    	}
+
+                        return `<span style='
+                            padding: 4px 8px;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            color: white;
+                            background: ${meta.color};
+                            font-size: 0.85rem;
+                        '>${meta.text}</span>`;
+                    }
+                }
+            ]
+        });
+     
+     // 작업자 불러오기
+     async function loadWorkers() {
+    	await fetch("/order/workers/data", {
+    		headers: {
+                "Content-Type": "application/json",
+                [csrfHeader]: csrfToken
+    		}
+    	})
+    	 	.then(response => {
+    	 		if(!response.ok) throw new Error("HTTP " + response.status);
+    	 		return response.json();
+    	 	})
+    	 	.then (data => {
+    	 		console.log("작업지시 목록 : ", data);
+    	 		workerGrid.resetData(data);
+    	 		
+   	 		  	data.forEach((row, index) => {
+   	 			    if (row.status === 'WORK') {
+   	 			      workerGrid.check(index);
+   	 			    }
+   	 			});
+    	 	})
+    	 	.catch (err => {
+    	 		console.error("작업지시 목록 조회 오류", err);
+    	 		alert("조회 중 오류 발생!")
+    	 	});
+     }
+     
+     // 페이지 진입 시 초기로드
+     loadWorkers();
+     
+     // ==================================================
+     // 필터링 로직
+     
+     function getCheckedEmpSet() {
+	  return new Set(
+	    workerGrid.getCheckedRows().map(r => String(r.empId))
+	  );
+	}
+
+
+     // 다중조건
+     function filterByCheckedWorkers() {
+	  const checkedSet = getCheckedEmpSet();
+	  console.log("checkSet......... 여기가문제?", checkedSet);
+	
+	  // 아무도 안 골랐으면 전체
+	  if (checkedSet.size === 0) {
+	    calendar.clear();
+	    calendar.createEvents(ALL_EVENTS);
+	    return;
+	  }
+	
+	  const filtered = ALL_EVENTS.filter(event => {
+		  const workers = (event.raw.empIds || []).map(String);
+		  console.log(event.raw.empIds, checkedSet);
+
+		
+		  // 하나라도 겹치면 true
+		  return workers.some(empId => checkedSet.has(empId));
+		  });
+		
+		  calendar.clear();
+		  calendar.createEvents(filtered);
+	  }
+
+     workerGrid.on('check', filterByCheckedWorkers);
+     workerGrid.on('uncheck', filterByCheckedWorkers);
+
+
+
+    </script>
+</th:block>
+</body>
+</html>

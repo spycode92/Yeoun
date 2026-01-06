@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/pay/rule_item")
@@ -30,7 +31,32 @@ public class PayItemMstController {
         binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
     }
 
-  
+    /** 급여항목 페이지 */
+    @GetMapping
+    public String itemPage(Model model,
+                           @RequestParam(value = "msg", required = false) String msg,
+                           @RequestParam(value = "err", required = false) String err,
+                           @RequestParam Map<String, String> params) {
+
+        model.addAttribute("activeTab", "item");
+
+        // 목록(비페이지네이션) — 템플릿의 items 블록과 매칭
+        model.addAttribute("items", payItemMstRepository.findAllByOrderBySortNoAsc());
+
+        // 등록 모달 바인딩 객체 — 템플릿의 th:object="${item}"와 매칭
+        if (!model.containsAttribute("item")) {
+            model.addAttribute("item", new PayItemMst()); // DTO 쓰면 new PayItemForm()으로 교체
+        }
+
+        // 검색 파라미터(셀렉트 유지/입력값 유지용)
+        model.addAttribute("params", params);
+
+        if (msg != null) model.addAttribute("msg", msg);
+        if (err != null) model.addAttribute("err", err);
+
+        return "pay/pay_item";
+    }
+
 
     /** 등록 */
     @PostMapping

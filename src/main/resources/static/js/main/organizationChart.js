@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // 최근 공지사항 목록 데이터조회
 async function getOrganizationChart() {
-	await fetch(`/api/schedules/organizationChart`, {method: 'GET'})
+	await fetch(apiUrl(`api/schedules/organizationChart`), {method: 'GET'})
 	.then(response => {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱

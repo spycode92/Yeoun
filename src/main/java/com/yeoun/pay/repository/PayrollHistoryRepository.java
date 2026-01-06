@@ -112,5 +112,7 @@ public interface PayrollHistoryRepository extends JpaRepository<PayrollPayslip, 
     Long findPayslipId(@Param("empId") String empId,
                        @Param("yymm") String yymm);
 
+    
+    
 
 }

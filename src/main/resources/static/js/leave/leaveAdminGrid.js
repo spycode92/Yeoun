@@ -1,8 +1,4 @@
-// 메타 태그에서 CSRF 값 가져오기
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
-
-const LEAVE_API_BASE = "/leave"
+const LEAVE_API_BASE = apiUrl(`leave`)
 
 const grid = new tui.Grid({
 	el: document.getElementById("grid"),
@@ -44,7 +40,7 @@ const grid = new tui.Grid({
 			header: "수정",
 			name : "btn",
 			formatter: (rowInfo) => {
-				return  `<button class="btn btn-primary" data-id="${rowInfo.row.id}">수정</button>`
+				return  `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">수정</button>`
 			}
 		},
 	],
@@ -52,14 +48,18 @@ const grid = new tui.Grid({
 		resizable: true
 	},
 	bodyHeight: 500,	
+	pageOptions: { 
+		useClient: true,
+		perPage: 10 
+	}
 });
 
 // 데이터 가져오기
 async function loadLeaveList(empId = null) {
 	// 사원번호 검색 여부에 따라 쿼리파라미터 다르게 보냄
 	const LEAVE_LIST = empId
-	    ? `/leave/list/data?empId=${empId}`
-	    : `/leave/list/data`;
+	    ? apiUrl(`leave/list/data?empId=${empId}`)
+	    : apiUrl(`leave/list/data`);
 		
 	try {
 		const res = await fetch(LEAVE_LIST, {method: "GET"});
@@ -132,8 +132,23 @@ document.querySelector("#modifyBtn").addEventListener("click", async () => {
 	}
 	
 	const changeType = getChangeType();
+	const currentLeave = document.querySelector("#currentLeave").value;
 	const changeDays = document.querySelector("#changeDays").value;
 	const reason = document.querySelector("#reason").value;
+	
+	// 총연차가 0일 때 마이너스가 되지 않도록 처리
+	if (changeType === "decrease") {
+		if (currentLeave - changeDays < 0) {
+			alert("차감할 수 있는 연차가 부족합니다.");
+			return;
+		}
+	}
+	
+	// 사유를 입력하지 않았을 경우 전송되지 않도록 처리
+	if (reason.trim().length === 0) {
+		alert("사유는 필수 입력입니다.");
+		return;
+	}
 	
 	const url = `${LEAVE_API_BASE}/${currentLeaveId}`;
 	const response = await fetch(url, {

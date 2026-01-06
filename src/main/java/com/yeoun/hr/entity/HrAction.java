@@ -52,9 +52,13 @@ public class HrAction {
 	@Column(name = "ACTION_TYPE", length = 20, nullable = false)
 	private String actionType;
 	
-	// 효력일자
+	// 발령 효력일자 (휴직 시작일 / 복직일 / 퇴직일 등 공통 사용)
 	@Column(name = "EFFECTIVE_DATE")
 	private LocalDate effectiveDate;
+	
+	// 휴직 종료 예정일
+	@Column(name = "LEAVE_END_DATE")
+	private LocalDate leaveEndDate;
 	
 	// 이전부서ID
     @ManyToOne(fetch = FetchType.LAZY)
@@ -77,7 +81,7 @@ public class HrAction {
     private Position toPosition;
 	
 	// 발령사유
-	@Column(name = "REASON", length = 200)
+	@Column(name = "REASON", length = 4000)
 	private String actionReason;
 	
 	// 승인상태

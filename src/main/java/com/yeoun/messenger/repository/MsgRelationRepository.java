@@ -31,27 +31,35 @@ public interface MsgRelationRepository extends JpaRepository<MsgRelation, Long> 
     @Query("""
         UPDATE MsgRelation r 
         SET r.lastReadId = :lastReadId 
-        WHERE r.empId = :empId 
-        AND r.roomId = :roomId
+        WHERE r.empId.empId = :empId 
+        AND r.roomId.roomId = :roomId
     """)
     void updateLastRead(@Param("empId")String empId, @Param("roomId")Long roomId, @Param("lastReadId")Long lastReadId);
 
     // 방에 속한 모든 멤버를 조회
     List<MsgRelation> findByRoomId_RoomId(Long roomId);
     
+    // 방에서 특정 사용자 한 명을 찾기
     Optional<MsgRelation> findByRoomId_RoomIdAndEmpId_EmpId(@Param("roomId")Long roomId, @Param("empId")String empId);
     
 	// 참여자 이름 검색
-	@Query("select distinct r.roomId.roomId from MsgRelation r " +
-		       "join r.empId e " +
-		       "where e.empName like %:keyword%")
+	@Query("""
+		SELECT DISTINCT r.roomId.roomId
+		FROM MsgRelation r 
+		JOIN r.empId e 
+		WHERE e.empName LIKE %:keyword%
+	   """)
 	List<Long> findRoomIdByMemberName(@Param("keyword") String keyword);
 
     // 내가 속한 방 목록
-    @Query("select r.roomId.roomId FROM MsgRelation r " +
-            "WHERE TRIM(r.participantYn) = 'Y' " +
-            "AND r.empId.empId = :empId")
+    @Query("""
+    	SELECT r.roomId.roomId
+    	FROM MsgRelation r
+        WHERE TRIM(r.participantYn) = 'Y'
+        AND r.empId.empId = :empId
+       """)
     List<Long> findRoomIdsByEmpId(@Param("empId") String empId);
+
 	
 
 }

@@ -443,3 +443,23 @@ box-shadow: none;
   flex-wrap: wrap;             /* 자동 줄바꿈 */
   gap: 6px;
 }
+
+/* 채팅 탭 아이콘에 붙는 알림 빨간 점 */
+
+/* 기준점 잡기 */
+#tab-chats {
+  position: relative; 
+}
+
+/* 알림 있을 때 붙는 빨간 점 */
+#tab-chats.has-alert::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  right: -8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff4d4f;      /* 빨간색 */
+}
+

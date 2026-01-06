@@ -50,3 +50,26 @@ function moveMonth(dateObj) {
 
   location.href = `/pay/emp_pay?yymm=${yymm}`;
 }
+
+
+/* ===============================
+   계산 대상 월 변경 시 페이지 이동
+================================ */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const monthInput = document.getElementById("month");
+
+    if (!monthInput) return;
+
+    function goMonth() {
+        const v = monthInput.value;
+        if (!v) return;
+
+        const yyyymm = v.replace("-", "");
+        location.href = `/pay/emp_pay?yymm=${yyyymm}`;
+    }
+
+    monthInput.addEventListener("change", goMonth);
+    monthInput.addEventListener("input", goMonth);
+});
+

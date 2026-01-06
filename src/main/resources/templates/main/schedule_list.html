@@ -6,13 +6,13 @@
 	<head>
 	    <style type="text/css">
 			.tui-calendar-container, .tui-datepicker, .tui-timepicker  {
-				z-index: 10 !important; 
+				z-index: 100 !important; 
 			}
 	    </style>
-	    <link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
-		<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
-		<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-	    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+	    <link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css}" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
+		<link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css}" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+		<link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css}" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+	    <link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.css}" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 	    
 	</head>
 	<body>
@@ -21,6 +21,7 @@
 		<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
 		
 			<div class="custom-body container-xxl flex-grow-1 container-p-y">
+				<h2>일정관리</h2>
 				<div class="d-flex align-items-center">
 					<button class="btn-sm btn-outline-primary" type="button" onclick="location.href='/main'">뒤로</button>
 				</div>
@@ -69,9 +70,9 @@
 			<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 			
-<!-- 			<script src="/js/main/schedule_list_origin.js"></script> -->
-			<script src="/js/main/schedule_list.js"></script>
-<!-- 			<script src="/js/main/schedule_modal.js"></script> -->
+<!-- 			<script th:src="@{/js/main/schedule_list_origin.js}"></script> -->
+			<script th:src="@{/js/main/schedule_list.js}"></script>
+<!-- 			<script th:src="@{/js/main/schedule_modal.js}"></script> -->
 			
 	</th:block>
 		</body>

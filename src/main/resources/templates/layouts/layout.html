@@ -14,7 +14,8 @@
  -->
 <!-- beautify ignore:start -->
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr"
-	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
+	data-theme="theme-default" 
+	th:attr="data-assets-path=@{/assets/}"
 	data-template="vertical-menu-template-free"
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -32,14 +33,14 @@
 <title>여운</title>
 <meta name="description" content="" />
 <!-- FontAweosome -->
-<script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script>
+<!-- <script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script> -->
 
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
 
 <!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" th:href="@{https://fonts.googleapis.com}" href="https://fonts.googleapis.com" />
+<link rel="preconnect" th:href="@{https://fonts.gstatic.com}" href="https://fonts.gstatic.com" crossorigin />
 <link
 	href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
 	rel="stylesheet" />
@@ -48,7 +49,7 @@
 <link rel="stylesheet" th:href="@{/assets/vendor/fonts/boxicons.css}" />
 
 <!-- Core CSS -->
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.css}" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <link rel="stylesheet"
       th:href="@{/assets/vendor/css/core.css}"
       class="template-customizer-core-css" />
@@ -65,25 +66,34 @@
 
 <link rel="stylesheet" th:href="@{/css/common.css}"/>
 
+<!-- Socket -->
+<link rel="stylesheet" th:href="@{/css/messenger/header.css}">
+
 <!-- Page CSS -->
 
 <!-- Toast Grid CSS-->
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
-<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
-
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/grid/latest/tui-grid.css}" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+<link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css}" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
+<!-- bootstrap css -->
+<link rel="stylesheet"
+ th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css}" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <!-- Helpers -->
 <script th:src="@{/assets/vendor/js/helpers.js}"></script>
 
 <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
 <script th:src="@{/assets/js/config.js}"></script>
-
+<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
 <!-- 개별 페이지 head 영역 -->
 <th:block layout:fragment="head"></th:block>
+<script>
+	const csrfToken  = document.querySelector('meta[name="_csrf_token"]').content;
+	const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
+</script>
 
 </head>
 
-<body>
+<body th:attr="data-mode=${mode}">
 	<!-- Layout wrapper -->
 	<div class="layout-wrapper layout-content-navbar">
 		<div class="layout-container">
@@ -93,6 +103,22 @@
 				<!-- header 추가 되고 --> 
 				<th:block th:insert="~{fragments/header}"></th:block>
 <!-- 				<th:block layout:fragment="nav"></th:block> -->
+				<!-- 페이지 알림 뱃지 추가 -->
+				<span id="refresh-badge"
+					class="badge bg-danger refresh-badge"
+					style="display:none;">
+					<span class="badge-text"></span>
+				    <!-- 새로고침 버튼 -->
+				    <button type="button" class="badge-refresh-btn" title="새로고침">
+				        <i class="bi bi-arrow-repeat"></i>
+				    </button>
+				
+				    <!-- 닫기 버튼 -->
+				    <button type="button" class="badge-close-btn" title="닫기">
+				        <i class="bi bi-x-lg"></i>
+				    </button>
+				</span>
+				<th:block layout:fragment="pageCss"></th:block>
 				<!-- Content 추가 -->
 				<th:block layout:fragment="content"></th:block>
 				<!-- header 추가 되고 --> 
@@ -131,11 +157,27 @@
 	<!-- Place this tag in your head or just before your close body tag. -->
 	<script async defer src="https://buttons.github.io/buttons.js"></script>
 	<script th:src="@{/custom_bg/custom_bg.js}"></script>
-	
+
+	<!-- Sock JS -->
+ 	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<!-- 소켓 -->
+	<script th:src="@{/js/common/connectSocket.js}"></script>
+	<script th:src="@{/js/common/headerAlarm.js}"></script>
+		
+
+
+
 	<!-- 내 정보 모달 -->
 	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
 	
     <!-- 개별 페이지의 자바스크립트 영역 -->
 	<th:block layout:fragment="myScript"></th:block>
+	
+	<!-- 공통 사원 상세 모달 (내 정보/사원 상세 모두 여기 사용) -->
+	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
+	
+	
+	
 </body>
 </html>

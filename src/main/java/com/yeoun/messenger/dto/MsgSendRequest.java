@@ -12,5 +12,6 @@ import lombok.ToString;
 public class MsgSendRequest {
     private Long roomId;
     private String senderId;
-    private String message;
+    private String msgContent;
+    private String msgType;
 }

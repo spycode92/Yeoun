@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.common.util.FileUtil;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -25,7 +27,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
-public class ApprovalDoc {
+public class ApprovalDoc implements FileUtil.FileUploadHelpper {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "APPROVAL_DOC_SEQ_GENERATOR")
@@ -58,6 +60,9 @@ public class ApprovalDoc {
 	
 	@Column(name="END_DATE")
 	private LocalDate endDate; //종료휴가날짜
+
+	@Column(name="TO_POS_CODE")
+	private String toPosCode;   //직급코드
 	
 	@Column(name="TO_DEPT_ID")
 	private String toDeptId; //발령부서
@@ -68,6 +73,17 @@ public class ApprovalDoc {
 	@Column(name="EXPND_TYPE")
 	private String expndType; //지출종류
 	
-	@Column(name="REASON")
+	@Column(name="REASON",length = 4000)
 	private String reason; //사유
+
+	@Override
+	public String getTargetTable() {
+		return "APPROVAL_DOC";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+		return this.approvalId;
+	}
+
 }

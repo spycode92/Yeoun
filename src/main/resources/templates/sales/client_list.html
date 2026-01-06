@@ -1,0 +1,156 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+<style>
+/* 헤더 제목 가운데 */
+.ag-theme-quartz .ag-header-cell-label {
+    justify-content: center;
+}
+
+/* 셀 값 가운데 */
+.ag-theme-quartz .ag-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+</style>
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 메시지 출력 -->
+    <div id="clientMsgHolder" th:if="${msg}" th:data-msg="${msg}"></div>
+
+    <h2>거래처 / 협력사 관리</h2>
+
+    <!-- ===========================================================
+         탭 (거래처 / 협력사)
+    ============================================================ -->
+    <ul class="nav nav-tabs mb-3" id="clientTabs">
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${type == null or type == 'CUSTOMER'} ? 'active' : ''"
+               th:href="@{/sales/client(type='CUSTOMER')}">
+                거래처
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${type == 'SUPPLIER'} ? 'active' : ''"
+               th:href="@{/sales/client(type='SUPPLIER')}">
+                협력사
+            </a>
+        </li>
+    </ul>
+
+
+    <!-- ===========================================================
+         검색 영역
+    ============================================================ -->
+    <div class="row align-items-center g-2 mb-3">
+        <div class="col-12 col-lg-9">
+
+            <form class="row g-2 align-items-center"
+                  th:action="@{/sales/client}"
+                  method="get"
+                  role="search">
+
+                <!-- hidden: 현재 선택된 탭 -->
+                <input type="hidden" name="type" th:value="${type}"/>
+
+                <!-- 거래처명 검색 -->
+                <div class="col-12 col-md-auto">
+                    <input class="form-control"
+                           id="keyword"
+                           name="keyword"
+                           type="search"
+                           placeholder="거래처명 / 사업자번호 / 담당자명 검색"
+                           style="width:280px;"
+                           th:value="${keyword}">
+                </div>
+                
+                <!-- 🔥 협력사 전용: 취급 품목 검색 -->
+					<div class="col-12 col-md-auto"
+					     th:if="${type == 'SUPPLIER'}">
+					    <input class="form-control"
+					           id="itemKeyword"
+					           name="itemKeyword"
+					           type="search"
+					           placeholder="취급 품목명 / 자재코드"
+					           style="width:220px;"
+					           th:value="${itemKeyword}">
+					</div>
+					                
+
+               <div class="col-6 col-md-auto d-grid gap-2 d-md-flex">
+				    <button class="btn btn-outline-primary"
+				            id="btnSearch"
+				            type="submit">
+				        검색
+				    </button>
+				
+				    <!-- 🔥 초기화 버튼 -->
+				    <button class="btn btn-outline-secondary"
+				            id="btnReset"
+				            type="button">
+				        초기화
+				    </button>
+				</div>
+
+        </form>
+
+    </div>
+
+    <!-- 신규 거래처 등록 버튼 : 우측 정렬 -->
+    <div class="col-12 col-lg-auto ms-lg-auto d-grid">
+        <a class="btn btn-primary w-100"
+           th:href="@{/sales/client/create}">
+            등록
+        </a>
+    </div>
+</div>
+
+    <!-- ===========================================================
+         AG GRID 영역
+    ============================================================ -->
+    <div class="card">
+        <div class="card-body">
+            <div id="clientGrid"
+                 class="ag-theme-quartz"
+                 style="height:600px"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===========================================================
+     🔥 초기 데이터 전달 (window 객체에 할당)
+============================================================ -->
+<script th:inline="javascript">
+    // window 객체에 명시적으로 할당
+    window.initialClientList = /*[[${list}]]*/ [];
+    window.currentType = /*[[${type}]]*/ 'CUSTOMER';
+    
+    // 디버깅용 로그
+    console.log('📌 초기 데이터 설정:', {
+        type: window.currentType,
+        count: window.initialClientList?.length ?? 0,
+        data: window.initialClientList
+    });
+</script>
+
+
+<!-- AG Grid v31+ 최신버전 -->
+<link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css}" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css"/>
+
+<!-- 1. AG Grid (반드시 clientList.js 보다 먼저 로드) -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+<!-- 2. 커스텀 JS (AG Grid 로드 후) -->
+<script th:src="@{/js/sales/clientList.js}"></script>
+
+
+</th:block>
+</th:block>

@@ -8,10 +8,8 @@
 <link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
 
 <!-- Core CSS -->
-<link rel="stylesheet" href="../assets/vendor/css/core.css"
-	class="template-customizer-core-css" />
-<link rel="stylesheet" href="../assets/vendor/css/theme-default.css"
-	class="template-customizer-theme-css" />
+<link rel="stylesheet" th:href="@{/assets/vendor/css/core.css}" class="template-customizer-core-css" />
+<link rel="stylesheet" th:href="@{/assets/vendor/css/theme-default.css}" class="template-customizer-theme-css" />
 
 <!-- Vendors CSS -->
 <link rel="stylesheet" th:href="@{/css/common.css}"/>
@@ -19,67 +17,117 @@
 </head>
 <body>
 
-		<!-- 화면 전체 높이에서 중앙 정렬 -->
-		<div class="min-vh-100 d-flex align-items-center justify-content-center">
+	<!-- 화면 전체 높이에서 중앙 정렬 -->
+	<div class="min-vh-100 d-flex align-items-center justify-content-center">
 		
-		  <!-- 로그인 카드 -->
-		  <div class="card shadow-sm border-0" style="max-width: 460px; width: 100%;">
-		    <div class="card-body p-4 p-md-5">
+		<!-- 로그인 카드 -->
+		<div class="card shadow-sm border-0" style="max-width: 460px; width: 100%;">
+			<div class="card-body p-4 p-md-5">
 		    
-			<!-- 여운 Logo -->
-			<div class="text-center mb-4">
-			  <img th:src="@{/icon/yeoun-logo.png}" width="200" alt="Yeo-un Logo">
-			</div>
-			<!-- /여운 Logo -->
+				<!-- 여운 Logo -->
+				<div class="text-center mb-4">
+			  		<img th:src="@{/icon/yeoun-logo.png}" width="200" alt="Yeo-un Logo">
+				</div>
+				<!-- /여운 Logo -->
 			
-			  <!-- 로그인 실패 시 에러 메시지 출력 -->
-			  <div th:if="${param.error}" class="alert alert-danger small">
-			    아이디 또는 비밀번호가 올바르지 않습니다.
-			  </div>
+			  	<!-- 로그인 실패 시 에러 메시지 출력 -->
+			  	<div th:if="${param.error}" class="alert alert-danger small">
+			    	<div class="fw-semibold">사번 또는 비밀번호를 다시 확인해 주세요.</div>
+			    	<div class="small">비밀번호를 잊으신 경우 인사팀으로 문의바랍니다.</div>
+			 	</div>
 			  
-			  <div th:if="${param.session}" class="alert alert-warning small">
-			     세션이 만료되었습니다. 다시 로그인해주세요.
-			  </div>
-
-		      <form id="formAuthentication" th:action="@{/login}" method="post" class="mb-3">
-		      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			  	<!-- 정상 로그아웃 -->
+			  	<div th:if="${param.logout}" class="alert alert-success small">
+					정상적으로 로그아웃되었습니다.
+			  	</div>
+			  
+			  	<!-- 세션 만료 (타임아웃, 서버 재시작 등) -->
+			  	<div th:if="${param.session}" class="alert alert-warning small">
+			    	세션이 만료되었습니다. 다시 로그인해주세요.
+			  	</div>
+			  	
+				<form id="formAuthentication" th:action="@{/login}" method="post" class="mb-3">
+		      	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 		      
+		      	<!-- 사원번호 -->
 		        <div class="mb-3">
-		          <label for="empId" class="form-label">사원번호</label>
-		          <input type="text" class="form-control" id="empId" name="empId" th:value="${rememberId}"
-		                 placeholder="사원번호를 입력하세요" autofocus>
+		        	<label for="empId" class="form-label">사원번호</label>
+		          	<input type="text" class="form-control" id="empId" name="empId" th:value="${rememberId}"
+		                   placeholder="사원번호를 입력하세요" autofocus>
 		        </div>
 		
+				<!-- 비밀번호 -->
 		        <div class="mb-3 form-password-toggle">
-		          <label class="form-label" for="empPwd">비밀번호</label>
-		          <div class="input-group input-group-merge">
-		            <input type="password" id="empPwd" class="form-control" name="empPwd"
-		                   placeholder="비밀번호를 입력하세요" aria-describedby="empPwd">
-		          </div>
+		        	<label class="form-label" for="empPwd">비밀번호</label>
+		          	<div class="input-group input-group-merge">
+		            	<input type="password" id="empPwd" class="form-control" name="empPwd"
+		                   	   placeholder="비밀번호를 입력하세요" aria-describedby="empPwd">
+		          	</div>
 		        </div>
 		
+				<!-- 쿠키 저장 -->
 		        <div class="mb-4">
-		          <div class="d-flex justify-content-between">
-		            <div class="form-check mb-0">
-		              <input class="form-check-input" type="checkbox" id="remember-id" name="remember-id" th:checked="${rememberId != null}">
-		              <label class="form-check-label" for="remember-id"> 사원번호 저장 </label>
-		            </div>
-		            <div class="form-check mb-0">
-		              <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
-		              <label class="form-check-label" for="remember-me"> 자동 로그인 </label>
-		            </div>
-		          </div>
+		        	<div class="d-flex justify-content-between">
+		            	<div class="form-check mb-0">
+		              		<input class="form-check-input" type="checkbox" id="remember-id" name="remember-id" th:checked="${rememberId != null}">
+		              		<label class="form-check-label" for="remember-id"> 사원번호 저장 </label>
+		            	</div>
+			            <div class="form-check mb-0">
+			              	<input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
+			              	<label class="form-check-label" for="remember-me"> 자동 로그인 </label>
+			            </div>
+		          	</div>
 		        </div>
 		
+				<!-- 로그인 버튼 -->
 		        <div class="mb-3">
 		          <button class="btn btn-primary d-grid w-100" type="submit">로그인</button>
 		        </div>
+		        
+		        <!-- 테스트용 로그인 버튼 -->
+		        <div class="mb-3">
+		          <button type="button" class="btn btn-outline-primary d-grid w-100" onclick="autoLoginAs('2511793', '1234')">
+	          		  시스템 관리자 로그인
+          		  </button>
+		        </div>
+
+		        <div class="mb-3">
+		          <button type="button" class="btn btn-outline-primary d-grid w-100" onclick="autoLoginAs('1904184', '1234')">
+	          		  인사부 부장 로그인
+          		  </button>
+		        </div>
+
+		        <div class="mb-3">
+		          <button type="button" class="btn btn-outline-primary d-grid w-100" onclick="autoLoginAs('2303363', '1234')">
+	          		  생산부 부장 로그인
+          		  </button>
+		        </div>
+
+		        <div class="mb-3">
+		          <button type="button" class="btn btn-outline-primary d-grid w-100" onclick="autoLoginAs('1907475', '1234')">
+	          		  일반 사원 로그인
+          		  </button>
+		        </div>
+		        
+		        
+		        
+		        
 		      </form>
 		
-		    </div>
-		  </div>
-		</div>
-
+			</div>
+		</div> <!-- 로그인 카드 끝 -->
+	</div>
 
 </body>
+
+<script>
+function autoLoginAs(id, pwd) {
+	
+	document.getElementById("empId").value = id;
+	document.getElementById("empPwd").value = pwd;
+	
+	document.getElementById("formAuthentication").submit();
+}
+</script>
+
 </html>

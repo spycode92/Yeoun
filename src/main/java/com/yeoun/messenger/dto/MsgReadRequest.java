@@ -13,4 +13,5 @@ public class MsgReadRequest {
 	private String ReaderId;
 	private Long RoomId;
 	private Long MsgId;
+	private String groupYn;
 }

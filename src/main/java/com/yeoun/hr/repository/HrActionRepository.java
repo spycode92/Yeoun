@@ -19,27 +19,25 @@ public interface HrActionRepository extends JpaRepository<HrAction, Long> {
 	// 인사 발령 목록
 	List<HrAction> findAll();
 	
-	// 인사 발령 목록 (검색 + 페이징)
-    @Query("""
-        select a
-        from HrAction a
-          join a.emp e
-        where
-    	  a.status = '적용완료'
-    	  and
-          (:keyword is null or :keyword = '' 
-            or e.empId like concat('%', :keyword, '%')
-            or e.empName like concat('%', :keyword, '%'))
-          and (:actionType is null or :actionType = '' or a.actionType = :actionType)
-          and (:startDate is null or a.effectiveDate >= :startDate)
-          and (:endDate is null or a.effectiveDate <= :endDate)
-        order by effectiveDate desc
-        """)
-    Page<HrAction> searchHrActions(@Param("keyword") String keyword,
+	// 인사 발령 목록 (검색)
+	@Query("""
+	    select a
+	    from HrAction a
+	      join a.emp e
+	    where
+	      a.status = '적용완료'
+	      and (:keyword is null or :keyword = '' 
+	             or e.empId like concat('%', :keyword, '%')
+	             or e.empName like concat('%', :keyword, '%'))
+	      and (:actionType is null or :actionType = '' or a.actionType = :actionType)
+	      and (:startDate is null or a.effectiveDate >= :startDate)
+	      and (:endDate is null or a.effectiveDate <= :endDate)
+	    order by a.effectiveDate desc
+	    """)
+    List<HrAction> searchHrActions(@Param("keyword") String keyword,
                                    @Param("actionType") String actionType,
                                    @Param("startDate") LocalDate startDate,
-                                   @Param("endDate") LocalDate endDate,
-                                   Pageable pageable);
+                                   @Param("endDate") LocalDate endDate);
 
     // 전자결재 연결
     Optional<HrAction> findByApprovalId(Long approvalId);

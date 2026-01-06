@@ -1,0 +1,63 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="live">
+
+  	<div class="row g-2 align-items-center">
+	  <form id="processSearchForm" class="w-100">
+	    <div class="row gx-3 gy-2 align-items-end">
+	
+	      <!-- 작업지시일자 -->
+	      <div class="col-md-3">
+	        <label class="form-label" for="workDate">작업지시일자</label>
+	        <input type="date" class="form-control" id="workDate">
+	      </div>
+	
+	      <!-- 현재공정 -->
+	      <div class="col-md-2">
+	        <label class="form-label" for="searchProcess">현재공정</label>
+	        <select class="form-select" id="searchProcess">
+	          <option value="">전체</option>
+	          <option value="블렌딩">블렌딩</option>
+	          <option value="여과">여과</option>
+	          <option value="충전">충전</option>
+	          <option value="캡/펌프">캡/펌프</option>
+	          <option value="QC 검사">QC 검사</option>
+	          <option value="라벨링">라벨링</option>
+	        </select>
+	      </div>
+	
+	      <!-- 상태 -->
+	      <div class="col-md-2">
+	        <label class="form-label" for="searchHStatus">상태</label>
+	        <select class="form-select" id="searchHStatus">
+	          <option value="">전체</option>
+	          <option value="RELEASED">대기</option>
+	          <option value="IN_PROGRESS">진행중</option>
+	        </select>
+	      </div>
+	
+	      <!-- 검색어 -->
+	      <div class="col-md-3">
+	        <label class="form-label" for="searchKeyword">검색어</label>
+	        <input type="text" class="form-control" id="searchKeyword"
+	               placeholder="작업지시번호 / 제품코드 / 제품명">
+	      </div>
+	
+	      <!-- 버튼들 -->
+	      <div class="col-md-2">
+	        <button type="button" class="btn btn-outline-primary" id="btnSearchProcess" style="min-width:100px;">검색</button>
+	        <button type="button" class="btn btn-outline-secondary" id="btnResetProcess" style="min-width:100px;">초기화</button>
+	      </div>
+	
+	    </div>
+	  </form>
+	</div>
+
+
+  <br>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div id="processGrid"></div>
+    </div>
+  </div>
+  
+</th:block>

@@ -12,8 +12,8 @@ const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
 const groupButton		= document.getElementById('group-button'); // 그룹채팅 시작 버튼
 
-const searchInput		    = document.querySelector('.chat-search input'); // 검색창
-const searchButton		    = document.querySelector('.chat-search span'); // 검색버튼
+const searchInput		= document.querySelector('.chat-search input'); // 검색창
+const searchButton		= document.querySelector('.chat-search span'); // 검색버튼
 
 const statusIndicator	= document.getElementById('status-indicator');	// 내 상태
 const statusText		= document.getElementById('status-text'); // 내 상태 텍스트
@@ -22,6 +22,207 @@ const workStatus		= document.getElementById('work-status'); // 수동 근무 상
 
 //현재 모드: 'friend' / 'chat'
 let currentMode = 'friend';
+
+//===============================
+//  소켓 연결 후 방 구독
+//===============================
+
+connectWebSocket(() => {
+	subscribeEvent();
+	//sendRead();	// 읽음 이벤트 전송
+});
+
+//===============================
+//  구독
+//===============================
+
+function subscribeEvent() {
+
+	// STOMP 연결 전이면
+	if (!connected) {
+		console.warn("STOMP가 아직 연결되지않았습니다. 구독 불가.");
+		return;
+	}
+	
+	// 1) 친구 상태 변경 구독
+	stompClient.subscribe(`/topic/status/change`, (message) => {
+	    changeStatus(JSON.parse(message.body));
+	});
+	
+	// 2) 메시지 수신 구독
+	stompClient.subscribe(`/user/queue/messenger`, (message) => {
+	    receiveNewMessage(JSON.parse(message.body));
+	});
+}
+
+// ==========================
+// 채팅 목록 AJAX 불러오기
+// ==========================
+async function loadChatList() {
+
+    try {
+        const res = await fetch(apiUrl(`messenger/list/chat`), {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                [csrfHeader] : csrfToken
+            }
+        });
+
+        if (!res.ok) {
+            console.error("채팅 목록 로딩 실패", res.status);
+            return;
+        }
+
+        const list = await res.json();
+
+        const panel = document.querySelector("#chats-panel");
+        panel.innerHTML = ""; // 기존꺼 지움
+
+        if (list.length === 0) {
+            panel.innerHTML = `<p class="text-muted p-3">대화 내역이 없습니다.</p>`;
+            return;
+        }
+
+        list.forEach(room => {
+            const item = document.createElement("div");
+            item.className = "chat-item";
+            item.dataset.id = room.roomId;
+
+            item.innerHTML = `
+        <img class="rounded-circle" src="/img/msg_img_${room.profileImg}.png">
+
+        <div class="chat-center">
+          <p class="chat-title">${room.groupName ?? ''}</p>
+          <p class="chat-last">${room.previewMessage ?? ''}</p>
+        </div>
+
+        <div class="chat-right">
+          <span class="chat-time">${room.previewTime ?? ''}</span>
+          ${
+                room.unreadCount > 0
+                    ? `<span class="badge-unread">${room.unreadCount}</span>`
+                    : ""
+            }
+        </div>
+      `;
+
+            // ==========================
+            // 더블클릭으로 창 열기
+            // ==========================
+            item.addEventListener("dblclick", () => {
+                window.open(
+                    `/messenger/room/${room.roomId}`,
+                    "_blank",
+                    "width=500,height=700,resizable=no,scrollbars=no"
+                );
+            });
+
+            panel.appendChild(item);
+        });
+
+    } catch (err) {
+        console.error("채팅 목록 불러오기 에러:", err);
+    }
+}
+
+
+// ==========================
+// 상태 실시간 변화 구독
+// ==========================
+function changeStatus(req){
+	
+	console.log("changeStatus 진입............... ", req);
+	
+	// 해당 친구 DOM 찾기
+	const item = document.querySelector(`.friend-item [data-id="${req.empId}"]`);
+	console.log("changeStatus 안의 item.......... ", item);
+	if (!item) return;
+
+	const dot = item.closest(".friend-item").querySelector(".status-dot");
+	console.log("changeStatus 안의 dot.......... ", dot);
+	if (!dot) return;
+
+	// 1) dot 색상 변경
+	dot.classList.remove("online", "offline", "away", "busy");
+	
+	switch (req.avlbStat) {
+	    case "ONLINE":  dot.classList.add("online");  break;
+	    case "AWAY":    dot.classList.add("away");    break;
+	    case "BUSY":    dot.classList.add("busy");    break;
+	    case "OFFLINE": dot.classList.add("offline"); break;
+	}
+
+	// 2) 상태 변경 => 왜인지는 모르겠지만 ITEM 자체가 status-msg라서 필요없어진 코드!
+	//const msg = item.getElementsByClassName("status-msg");
+	//if (!msg) return;
+
+	// 백엔드에서 보내는 workStat → UI 문구 매핑
+	const workMap = {
+	    WORKING: "근무 중",
+	    MEETING: "회의 중",
+	    CALL: "통화 중",
+	    FOCUS: "집중 업무 중",
+	    LUNCH: "식사 중",
+	    OUTING: "외출 중",
+	    FIELDWORK: "외근 중",
+	    WFH: "재택근무 중",
+	    VACATION: "휴가 중"
+	};
+
+	console.log("req.workStat::::::::::", req.workStat);
+	// workStat이 null이면 "-"
+	item.textContent = workMap[req.workStat] || "-";
+}
+
+// ==========================
+// 채팅방 실시간 변화 구독
+// ==========================
+function receiveNewMessage(req){
+
+    console.log("tabChats : ", tabChats);
+
+	if (currentMode == 'friend'){
+        tabChats.classList.add('has-alert');
+	} else if (currentMode == 'chat'){
+        tabChats.classList.remove('has-alert');
+
+        // 1) 기존에 있던 같은 roomId 방 제거
+        const existing = chatsPanel.querySelector(`.chat-item[data-id="${String(req.roomId)}"]`);
+        if (existing){
+            existing.remove();
+        }
+
+        // 2) 새 방 생성
+        const item = document.createElement('div');
+        item.classList.add('chat-item');
+        item.dataset.id = req.roomId;
+
+        item.innerHTML = `
+            <img class="rounded-circle"
+                 src="/img/msg_img_${req.profileImg}.png">
+            
+            <div class="chat-center">
+                <p class="mb-0 fw-bold">${req.groupName}</p>
+                <small class="text-muted">${req.preview}</small>
+            </div>
+            
+            <div class="chat-right">
+                <span class="chat-time">${req.sentTime}</span>
+                ${req.unreadCount > 0
+                    ? `<span class="badge-unread">${req.unreadCount}</span>`
+                    : ''
+                }
+            </div>
+        `;
+
+        // 3) 최상단 추가
+        chatsPanel.prepend(item);
+
+	}
+
+}
+
 
 // ==========================
 // 각 친구의 상태
@@ -134,7 +335,7 @@ function filterChats() {
     const keyword = searchInput.value.trim();
     if (!keyword) return;
     
-    fetch(`/messenger/rooms/search?keyword=${encodeURIComponent(keyword)}`)
+    fetch(apiUrl(`messenger/rooms/search?keyword=${encodeURIComponent(keyword)}`))
     .then(response => response.json())
     .then(rooms => {
     	renderRoomList(rooms);
@@ -211,6 +412,10 @@ function activeChatsTab() {
 	document.querySelectorAll('.chat-item').forEach(item => {
 		item.style.display = 'flex';
 	});
+
+    // ========= 추가 ==========
+    loadChatList();
+
 }
 	
 // 친구 탭 클릭
@@ -267,27 +472,60 @@ let manuallySet = false;  // 수동 상태 변경 여부
 // ==========================
 // 서버로 상태 전송 함수
 // ==========================
-async function sendStatusToServer(presence, reason = null) {
+async function sendStatusToServer(presence, reason, isUnload = false) {
+	
+	console.log("sendStatusToServer 진입!!!!!");
+	console.log("presence... : " , presence);
+	console.log("reason... : ", reason);
+
+    const payload = JSON.stringify({
+        avlbStat: presence,     // ONLINE / AWAY / BUSY / OFFLINE
+        workStat: reason        // MEETING / LUNCH / WORKING / etc
+    });
+
+    // 🔥 OFFLINE 전용 처리
+    if (isUnload && presence === "OFFLINE" && navigator.sendBeacon) {
+        navigator.sendBeacon("/messenger/status/offline", "");
+        return;
+    }
+	
     try {
-        const res = await fetch('/messenger/status', {
+        const res = await fetch(apiUrl(`messenger/status`), {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
+                [csrfHeader]: csrfToken
             },
-            body: JSON.stringify({
-                avlbStat: presence,   		  // ONLINE / AWAY / BUSY / OFFLINE
-                manualWorkStat: reason        // MEETING / LUNCH / WORKING / etc
-            })
+            body: payload
         });
 
         const text = await res.text();
-        console.log("상태 전송 완료:", presence, reason, text);
+        console.log("상태 전송 완료... text:", text);
 
     } catch (err) {
         console.error("상태 전송 실패:", err);
     }
 }
+
+// =====================
+// 창 열리면 자동 온라인 처리
+// =====================
+window.addEventListener("load", () => {
+    sendStatusToServer("ONLINE", "WORKING");
+});
+
+// =====================
+// 창 닫힐때 자동 오프라인 처리
+// =====================
+window.addEventListener("beforeunload", () => {
+    sendStatusToServer("OFFLINE", null, true);
+});
+
+window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+        sendStatusToServer("OFFLINE", null, true);
+    }
+});
 
 // =====================
 // 수동 상태 변경
@@ -362,7 +600,12 @@ setInterval(() => {
 // 업무 사유(workStatus) 선택 시 → 1차 상태 자동 변경
 // ==========================
 workStatus.addEventListener('change', () => {
+	
+	console.log("workStatus change.........");
+	
     const value = workStatus.value;
+	
+	console.log("workStatus.value..........", value);
 
     // 업무 사유 선택은 수동 변경으로 취급 → 자동 자리비움 잠시 중지
     manuallySet = true;
@@ -399,36 +642,41 @@ workStatus.addEventListener('change', () => {
     // UI 적용
     statusIndicator.style.backgroundColor = newStatus.color;
     statusText.textContent = newStatus.text;
+	
+	console.log("newStatus.color............", newStatus.color);
+	console.log("newStatus.text.............", newStatus.text);
 
     // ==========================
     // 업무 사유 선택 시 서버로 전송
     // ==========================
     const reasonMap = {
-        '회의 중': 'MEETING',
-        '통화 중': 'CALL',
-        '집중 업무 중': 'FOCUS',
-        '식사 중': 'LUNCH',
-        '외출 중': 'OUTING',
-        '외근 중': 'FIELDWORK',
-        '휴가 중': 'VACATION',
-        '근무 중': 'WORKING',
-        '재택근무 중': 'WFH'
+        'MEETING': 'MEETING',
+        'CALL': 'CALL',
+        'FOCUS': 'FOCUS',
+        'LUNCH': 'LUNCH',
+        'OUTING': 'OUTING',
+        'FIELDWORK': 'FIELDWORK',
+        'VACATION': 'VACATION',
+        'WORKING': 'WORKING',
+        'WFH': 'WFH'
     };
 
     const presenceMap = {
-        '회의 중': 'BUSY',
-        '통화 중': 'BUSY',
-        '집중 업무 중': 'BUSY',
-        '식사 중': 'AWAY',
-        '외출 중': 'AWAY',
-        '외근 중': 'AWAY',
-        '휴가 중': 'OFFLINE',
-        '근무 중': 'ONLINE',
-        '재택근무 중': 'ONLINE'
+        'MEETING': 'BUSY',
+        'CALL': 'BUSY',
+        'FOCUS': 'BUSY',
+        'LUNCH': 'AWAY',
+        'OUTING': 'AWAY',
+        'FIELDWORK': 'AWAY',
+        'VACATION': 'OFFLINE',
+        'WORKING': 'ONLINE',
+        'WFH': 'ONLINE'
     };
-
     const reason = reasonMap[value];
     const presence = presenceMap[value];
+	
+	console.log("reasonMap[value].............", reasonMap);
+	console.log("presenceMap[value].............", presenceMap);
 
     // 서버 전송
     sendStatusToServer(presence, reason);
@@ -489,10 +737,10 @@ document.addEventListener("click", (event) => {
   // 3. 서버에 즐겨찾기 상태 전송
   
   const id = starBtn.dataset.id;
-  fetch(`/messenger/favorite/${id}`, {
+  fetch(apiUrl(`messenger/favorite/${id}`), {
     method: "PATCH",
     headers: {
-    	[csrfHeaderName] : csrfToken
+    	[csrfHeader] : csrfToken
     },
     credentials: "include"
   })
@@ -607,21 +855,23 @@ document.getElementById('create-group-btn')
   const groupName = groupNameInput ? groupNameInput.value.trim() : null;
 
   // 3) createRoom 호출
-  const roomId = await createRoom({
+  const data = await createRoom({
     members: members,
     groupYn: 'Y',              // 그룹 채팅
     groupName: groupName,      // 입력값 또는 null
     firstMessage: null,        // 그룹은 firstMessage 없음
     msgType: null,             // 그룹은 msgType 없음
-    csrfHeaderName: csrfHeaderName,
+    csrfHeader: csrfHeader,
     csrfToken: csrfToken
   });
-  
-  console.log("roomId :: ", roomId);
-  console.log("members :: ", members);
-  console.log("groupName :: ", groupName);
 
-  if (!roomId) {
+  console.log(data);
+  console.log("type!!!!!!!", typeof data);
+  console.log("roomId :: ", data.roomId);
+  console.log("groupName :: ", data.groupName);
+  console.log("groupYn :: ", data.groupYn);
+
+  if (!data.roomId) {
     alert("그룹 채팅방 생성에 실패했습니다.");
     return;
   }
@@ -632,12 +882,28 @@ document.getElementById('create-group-btn')
 
   // 5) 생성된 그룹 채팅방 오픈
   window.open(
-    '/messenger/room/' + roomId,
+    '/messenger/room/' + data.roomId + '?groupYn=' + data.groupYn,
     '_blank',
     'width=500,height=700,resizable=no,scrollbars=no'
   );
 });
 
+// ==========================
+// 채팅방 클릭 → 해당 unread 제거
+// ==========================
+chatsPanel.addEventListener("dblclick", (event) => {
+
+    // 가장 가까운 chat-item 찾기
+    const item = event.target.closest(".chat-item");
+    if (!item) return;
+
+    // 채팅방 안의 unread badge 찾기
+    const badge = item.querySelector(".badge-unread");
+    if (badge) {
+        badge.remove();
+    }
+
+});
 
 
 

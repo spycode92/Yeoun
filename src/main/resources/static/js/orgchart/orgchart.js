@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   // 1. 서버에서 조직도 데이터 가져오기
-  fetch('/api/org/tree')
+  fetch(apiUrl(`api/org/tree`))
     .then(res => res.json())
     .then(data => {
 	  

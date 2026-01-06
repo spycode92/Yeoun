@@ -4,6 +4,8 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +21,11 @@ public class WebSecurityConfig {
 	private final CustomUserDetailsService customuserDetailsService;
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	
+	@Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+	
 	// ====================================================================
 	// 스프링 시큐리티 보안 필터 설정
 	// => 리턴타입이 SecurityFilterChain 타입을 리턴하는 메서드여야 함
@@ -33,16 +40,24 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session
 	                    .invalidSessionUrl("/login?session=expired")
 	            )
+
+				// ================== CSRF 예외 설정 ==================
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers(
+								"/messenger/status/offline"
+						)
+				)
 				
 				// --------- 요청에 대한 접근 허용 여부 등의 요청 경로에 대한 권한 설정 -------
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 				    // 공통: 정적 리소스 및 로그인/회원가입 등 완전 공개 구역
 					.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
+					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**", "/files/download/**").permitAll()
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**")
+		            .requestMatchers("/orgchart/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
+		            				 "/my/**")
 		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
@@ -50,7 +65,7 @@ public class WebSecurityConfig {
 		            .requestMatchers("/auth/**")
 		            	.hasAnyRole("SYS_ADMIN")
 		                
-		            // 인사관리 - 부서장도 가능
+		            // 인사관리 - 관리자 및 인사팀, 부서장
 	                .requestMatchers("/emp")
 	                    .hasAnyRole("SYS_ADMIN", "HR_ADMIN", "DEPT_MANAGER")
 
@@ -71,13 +86,13 @@ public class WebSecurityConfig {
                     	.hasAnyRole("SYS_ADMIN")
                     	
 	                // 급여 관리
-                    	// 사원용 급여명세서
-                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**")
-                    	    .authenticated()
+                	// 사원용 급여명세서
+                	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**" ,"/pay/pdf/**")
+                	    .authenticated()
 
-                    	// 급여 관리자 페이지
-                    	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
-                       	.hasAnyRole("SYS_ADMIN", "HR_ADMIN")
+                	// 급여 관리자 페이지
+                	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
+                   	.hasAnyRole("SYS_ADMIN", "PAYROLL_ADMIN")
                     	
                     	
 	                // 전자결재 설정(양식/결재선 관리 등)
@@ -85,9 +100,49 @@ public class WebSecurityConfig {
 	                // 공지 관리
 	                // MES 관리자
 	                // MES 일반 사용자
+						.requestMatchers("/order/**")
+						.permitAll()
+						.requestMatchers("/equipment/**")
+						.permitAll()
+						
+					// ================== MES (생산부) ==================
+					.requestMatchers("/production/**", "/process/**", "/lot/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "MES_MANAGER")
+					.requestMatchers("/production/orderChart/**").permitAll()
+					.requestMatchers("/production/itemOrderChart/**").permitAll()
+					.requestMatchers("/production/itemChart/**").permitAll()
+					// ================== 품질관리 ==================
+					.requestMatchers("/qc/**")
+					.hasAnyRole("SYS_ADMIN", "QC_USER", "QC_ADMIN")
 
+					// 물류관리부
+					// 대시보드
+					.requestMatchers("/inventory/dashboard/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_ADMIN")
+					// 재고조회
+					.requestMatchers("/inventory/list/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "LOG_USER")
+					// 재고이력
+					.requestMatchers("/inventory/history/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "LOG_USER")
+					// 재고실사
+					.requestMatchers("/inventory/stock-take/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					// 입고관리
+					.requestMatchers("/inventory/inbound/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					// 출고관리
+					.requestMatchers("/inventory/outbound/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					
+					//영업관리
+					.requestMatchers("/sales/**")
+					.hasAnyRole("SYS_ADMIN", "SALES_ADMIN")
+					
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()
+	                
+	                
 				 )
 				// ---------- 로그인 처리 설정 ---------
 				.formLogin(login -> login
@@ -103,20 +158,25 @@ public class WebSecurityConfig {
 				.logout(logout -> logout
 					.logoutUrl("/logout") 				// 로그아웃 요청 URL 지정(POST 방식 요청으로 취급함)
 					.logoutSuccessUrl("/login?logout") 	// 로그아웃 성공 후 리디렉션 할 URL 지정
+					.invalidateHttpSession(true)		// 로그아웃 시 세션을 무효화(세션 데이터 모두 삭제)
+					.deleteCookies("JSESSIONID", "remember-me")  // 로그아웃 시 삭제할 쿠키 지정 (JESSIONID = 세션 ID를 담고 있는 기본 쿠키)
+					.clearAuthentication(true) 			// 로그아웃 시 인증 정보를 완전히 제거
 					.permitAll()
 				)
 				// ---------- 접근 권한 오류 --------------
 				.exceptionHandling(ex -> ex
-						// 인증은 됐는데(로그인 O) 권한이 없을 때 → 403
-						.accessDeniedHandler((request, response, e) -> {
-							response.sendRedirect("/error/403");
-						})
+					// 인증은 됐는데(로그인 O) 권한이 없을 때 → 403
+					.accessDeniedHandler((request, response, e) -> {
+						response.sendRedirect("/error/403");
+					})
 				)
 				// ---------- 자동 로그인 처리 설정 ----------
 				.rememberMe(rememberMeCustormizer -> rememberMeCustormizer
-						.rememberMeParameter("remember-me") 		// 자동 로그인 수행을 위한 체크박스 파라미터명 지정(체크 여부 자동으로 판별)
-						.key("my-fixed-secret-key") 				// 서버 재시작해도 이전 로그인에서 사용했던 키 동일하게 사용
-						.tokenValiditySeconds(60 * 60 * 24 * 30) 	// 자동 로그인 토큰 유효기간 설정(30일)
+					.rememberMeParameter("remember-me") 		// 자동 로그인 수행을 위한 체크박스 파라미터명 지정(체크 여부 자동으로 판별)
+					.key("my-fixed-secret-key") 				// 서버 재시작해도 이전 로그인에서 사용했던 키 동일하게 사용
+					.tokenValiditySeconds(60 * 60 * 24 * 30) 	// 자동 로그인 토큰 유효기간 설정(30일)
+					.userDetailsService(customuserDetailsService) 
+					.authenticationSuccessHandler(customAuthenticationSuccessHandler)
 				)
 				.build();
     }

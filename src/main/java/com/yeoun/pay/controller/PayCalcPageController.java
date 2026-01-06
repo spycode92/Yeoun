@@ -276,7 +276,12 @@ public class PayCalcPageController {
         List<Map<String, String>> result = new ArrayList<>();
 
         for (EmpForPayrollProjection e : list) {
-            if (e.getEmpName().contains(keyword)) {
+
+            boolean match =
+                    (e.getEmpName() != null && e.getEmpName().contains(keyword)) ||
+                    (e.getEmpId()   != null && e.getEmpId().contains(keyword));
+
+            if (match) {
                 result.add(Map.of(
                         "empId", e.getEmpId(),
                         "empName", e.getEmpName()
@@ -332,6 +337,16 @@ public class PayCalcPageController {
             );
         }
     }
+    
+
+    
+    @GetMapping("/list")
+    @ResponseBody
+    public List<PayslipViewDTO> getList(@RequestParam("yyyymm") String yyyymm) {
+        return querySvc.findForView(yyyymm);
+    }
+
+
 
     
 }

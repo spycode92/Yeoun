@@ -10,32 +10,41 @@
 
 	  <!-- 발령 등록 폼 -->
       <form id="hrActionForm" th:object="${hrActionRequestDTO}">
-        <!-- 2. 사원 검색 영역 -->
+	  	<!-- 1. 사원 검색 영역 -->
         <div class="card mb-3">
           <div class="card-body">
             <div class="row g-3 align-items-end">
-              <div class="col-md-3">
+            
+       	 	  <!-- 발령 구분 -->
+       	 	  <div class="col-md-2">
+       	 	    <label class="form-label">재직 상태</label>
+	            <select class="form-select" id="searchStatus">
+		          <option value="">전체</option>
+		          <option value="ACTIVE">재직</option>
+		          <option value="LEAVE">휴직</option>
+	            </select>
+	          </div>
+            
+              <!-- 1-1. 부서 셀렉트 -->
+              <div class="col-md-2">
                 <label class="form-label">부서</label>
                 <select class="form-select" id="searchDept">
-                  <option value="">전체</option>
-                  <option th:each="d : ${deptList}"
-          				  th:value="${d.deptId}"
-       					  th:text="${d.deptName}">
-  				  </option>
+	           	  <option value="">전체</option>
+	              <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}"></option>
                 </select>
               </div>
-              <div class="col-md-3">
+              <!-- 1-2. 직급 셀렉트 -->
+              <div class="col-md-2">
                 <label class="form-label">직급</label>
                 <select class="form-select" id="searchPos">
                   <option value="">전체</option>
-				  <option th:each="p : ${posList}"
-				          th:value="${p.posCode}"
-				          th:text="${p.posName}">
+				  <option th:each="p : ${posList}" th:value="${p.posCode}" th:text="${p.posName}">
 				  </option>
                 </select>
               </div>
+              <!-- 1-3. 이름 / 사번 검색 -->
               <div class="col-md-4">
-                <label class="form-label">이름 / 사번</label>
+                <label class="form-label">이름 / 사원번호</label>
                 <input type="text" class="form-control" id="searchKeyword"
                        placeholder="예) 이름 또는 사원번호">
               </div>
@@ -48,9 +57,9 @@
           </div>
         </div>
 
-        <!-- 3. 사원 목록 + 3-1 선택된 사원 정보 + 4. 발령 정보 입력 -->
+        <!-- 2. 사원 목록 + 3-1 선택된 사원 정보 + 4. 발령 정보 입력 -->
         <div class="row g-3">
-          <!-- 사원 목록 -->
+          <!-- 2. 사원 목록 -->
           <div class="col-12 col-lg-6">
             <div class="card h-100">
               <div class="card-header">
@@ -111,50 +120,45 @@
                   </div>
                   <div class="card-body">
                     <div class="row g-3">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <label class="form-label required">발령 구분</label>
                         <select class="form-select" th:field="*{actionType}">
                           <option value="">발령구분 선택</option>
-                          <option th:each="code : ${actionTypeList}"
-                                  th:value="${code.codeId}"
-                                  th:text="${code.codeName}"></option>
+                          <option th:each="code : ${actionTypeList}" th:value="${code.codeId}" th:text="${code.codeName}"></option>
                         </select>
                       </div>
-                      <div class="col-md-6">
-                        <label class="form-label required">발령 일자</label>
-                        <input type="date" class="form-control"
-                               th:field="*{effectiveDate}">
+                      <div class="col-md-4">
+                        <label class="form-label required">발령 효력일 (복직/퇴직/휴직일 등)</label>
+                        <input type="date" class="form-control" th:field="*{effectiveDate}">
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">휴직 종료 예정일</label>
+                        <input type="date" class="form-control" th:field="*{leaveEndDate}" disabled>
                       </div>
 
                       <div class="col-md-6">
-                        <label class="form-label required">발령 부서</label>
+                        <label class="form-label">발령 부서</label>
                         <select class="form-select" th:field="*{toDeptId}">
                           <option value="">부서 선택</option>
-                          <option th:each="d : ${deptList}"
-          					      th:value="${d.deptId}"
-       					 	      th:text="${d.deptName}">
+                          <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}">
   				 		  </option>
                         </select>
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label required">발령 직급</label>
+                        <label class="form-label">발령 직급</label>
                         <select class="form-select" th:field="*{toPosCode}">
                           <option value="">직급 선택</option>
-                          <option th:each="p : ${posList}"
-				                  th:value="${p.posCode}"
-				                  th:text="${p.posName}">
+                          <option th:each="p : ${posList}" th:value="${p.posCode}" th:text="${p.posName}">
 				          </option>
                         </select>
                       </div>
 
                       <div class="col-12">
                         <label class="form-label">발령 사유</label>
-                        <textarea class="form-control" rows="3"
-                                  th:field="*{actionReason}"
-                                  placeholder="최소 10자 이상 입력해주세요."></textarea>
+                        <textarea class="form-control" rows="3" th:field="*{actionReason}" placeholder="최소 10자 이상 입력해주세요."></textarea>
                       </div>
 
-                    <div class="mb-3">
+                    <div class="mb-3" id="approvalLineBox" style="display:none;">
 					  <label class="form-label">결재선</label>
 					  <div class="border rounded p-2 bg-light">
 					    <div>1차 결재자: <span id="appr1">-</span></div>
@@ -185,7 +189,7 @@
       </form>
 	</div>
 	
-<script src="/js/hr/hrAction.js"></script>	
+<script th:src="@{/js/hr/hrAction.js}"></script>	
 	
 </th:block>
 </body>

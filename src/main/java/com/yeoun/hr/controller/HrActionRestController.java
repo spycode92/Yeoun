@@ -2,9 +2,6 @@ package com.yeoun.hr.controller;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,14 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.repository.ApprovalFormRepository;
-import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.service.EmpService;
 import com.yeoun.hr.dto.HrActionDTO;
-import com.yeoun.hr.dto.HrActionPageResponse;
 import com.yeoun.hr.dto.HrActionRequestDTO;
 import com.yeoun.hr.service.HrActionService;
 
@@ -43,24 +37,13 @@ public class HrActionRestController {
 	
 	// 인사 발령 목록 (검색 + 페이징)
 	@GetMapping("/actions")
-	public HrActionPageResponse getHrActionList(@RequestParam(defaultValue = "0", name = "page") int page,
-									        	@RequestParam(defaultValue = "10", name = "size") int size,
-									        	@RequestParam(defaultValue = "", name = "keyword") String keyword,
+	public List<HrActionDTO> getHrActionList(@RequestParam(defaultValue = "", name = "keyword") String keyword,
 									        	@RequestParam(required = false, name = "actionType") String actionType,
 									        	@RequestParam(required = false, name = "startDate") String startDate,
-									        	@RequestParam(required = false, name = "endDate") String endDate
-	) {
+									        	@RequestParam(required = false, name = "endDate") String endDate) {
 
-	    Page<HrActionDTO> hrPage =
-	            hrActionService.getHrActionList(page, size, keyword, actionType, startDate, endDate);
+		return hrActionService.getHrActionList(keyword, actionType, startDate, endDate);
 
-	    return new HrActionPageResponse(
-	            hrPage.getContent(),
-	            hrPage.getNumber(),
-	            hrPage.getSize(),
-	            hrPage.getTotalElements(),
-	            hrPage.getTotalPages()
-	    );
 	}
 
 	
@@ -76,8 +59,9 @@ public class HrActionRestController {
 	@GetMapping("/employees")
 	public List<EmpListDTO> getEmployeesForAction(@RequestParam(required = false, name = "deptId") String deptId,
 	        									  @RequestParam(required = false, name = "posCode") String posCode,
+	        									  @RequestParam(required = false, name = "status") String status,
 	        									  @RequestParam(required = false, name = "keyword") String keyword) {
-		return empService.getEmpListForHrAction(deptId, posCode, keyword);
+		return empService.getEmpListForHrAction(deptId, posCode, status, keyword);
 	}
 	
 	// 결재자 목록 API (발령 대상자 기준)

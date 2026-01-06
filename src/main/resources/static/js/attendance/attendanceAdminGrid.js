@@ -42,12 +42,7 @@ const grid = new tui.Grid({
 		{
 			header: "상태",
 			name : "statusCode",
-			sortable: true,
-			filter: {
-				type: "text",
-				showApplyBtn: true, 
-				showClearBtn: true
-			}
+			filter: "select"
 		},
 		{
 			header: "총근무시간",
@@ -67,13 +62,17 @@ const grid = new tui.Grid({
 			header: "수정",
 			name : "btn",
 			formatter: (rowInfo) => {
-				return  `<button class="btn btn-primary" data-id="${rowInfo.row.id}">수정</button>`
+				return  `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">수정</button>`
 			}
 		},
 	],
-	bodyHeight: 500,	
+	bodyHeight: 417,	
 	columnOptions: {
 		resizable: true
+	},
+	pageOptions: { 
+		useClient: true,
+		perPage: 10 
 	}
 });
 
@@ -92,7 +91,7 @@ grid.on("click", (ev) => {
 
 // 데이터 가져오기
 async function loadAttendanceList(startDate, endDate) {
-	const ATTENDANCE_ADMIN_LIST = `/attendance/list/data?startDate=${startDate}&endDate=${endDate}`;
+	const ATTENDANCE_ADMIN_LIST = apiUrl(`attendance/list/data?startDate=${startDate}&endDate=${endDate}`);
 	try {
 		const res = await fetch(ATTENDANCE_ADMIN_LIST, {method: "GET"});
 		
@@ -129,18 +128,32 @@ async function loadAttendanceList(startDate, endDate) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
+	// 세션에 저장된 날짜
+	const savedStart = sessionStorage.getItem("startDate");
+	const savedEnd   = sessionStorage.getItem("endDate");
 	
-	// 이번 달 1일과 말일 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = today.toISOString().split("T")[0];
+	let startDate;
+	let endDate;
+	
+	if (savedStart && savedEnd && savedStart !== "undefined" && savedEnd !== "undefined") {// 날짜 변경이 있을 경우 저장된 날짜로 가져오기
+		startDate = savedStart;
+		endDate = savedEnd;
+	} else {
+		// 오늘 날짜 구하기
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = today.getMonth() + 1;
+		const day = today.getDate();
+		
+		// 이번 달 1일과 오늘 날짜 계산
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	}
 	
 	// 날짜 input 기본값 설정
 	document.querySelector("#startDate").value = startDate;
 	document.querySelector("#endDate").value = endDate;
+	
 	
 	await loadAttendanceList(startDate, endDate);
 });
@@ -149,6 +162,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.querySelector("#searchbtn").addEventListener("click", async () => {
 	const startDate = document.querySelector("#startDate").value;
 	const endDate = document.querySelector("#endDate").value;
+	
+	console.log("startDate". startDate);
+	console.log("endDate". endDate);
+	
+	sessionStorage.setItem("startDate", startDate);
+	sessionStorage.setItem("endDate", endDate);
 	
 	if (!startDate || !endDate) {
 		alert("조회할 기간을 선택해주세요!");

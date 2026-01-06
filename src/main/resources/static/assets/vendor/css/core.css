@@ -57,7 +57,7 @@
 }
 /*custom_bg.js 파일에서 color-theme를 원하는 색으로 설정후 복붙으로 사용가능 
  * 폰트 @import는 theme-default.css파일에 있음 */
-:root[color-theme='dark'] {
+html.theme-dark {
   --bs-blue: #007bff;
   --bs-indigo: #6610f2;
   --bs-purple: #696cff;
@@ -96,25 +96,24 @@
   --bs-body-color-rgb: 105, 122, 141;
   --bs-body-bg-rgb: 245, 245, 249;
   /*폰트 테마 설정*/
-  --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  --bs-header-font-size: 25px;/*헤더 폰트크기*/
-  --bs-menubar-font-size: 25px;/*메뉴바 폰트크기*/
-  --bs-menubar-sub-font-size: 22px;/*메뉴바 서브 폰트크기*/
+  --bs-header-font-size: 19px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 19px;/*메뉴바 폰트크기*/
+  --bs-menubar-sub-font-size: 16px;/*메뉴바 서브 폰트크기*/
   --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
   --bs-body-font-size: 16px;/*본문,푸터 글자크기 변경*/
-  --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
-  --bs-body-font-weight: 9900;/**/
+  --bs-body-font-family: "Pretendard";/*폰트 테마 설정*/
+  --bs-body-font-weight: 300;/**/
   --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
-  --bs-body-color: #45ADFE;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-color: #EFECE3;/*헤더,메뉴바,본문 폰트 색상*/
   --bs-body-bg: rgb(68, 68, 78);/*헤더,메뉴바,본문 배경색*/
   --bs-body-bg-out: #666;/*본문밖 밖 배경색*/
-  --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
+  --bs-big-menu-btn: #96A78D;/*데쉬보드 색상*/
   --bs-big-menu-color: #FFF;/*데쉬보드 글자색*/
 }
 
-:root[color-theme='green'] {
+html.theme-green {
   --bs-blue: #007bff;
   --bs-indigo: #6610f2;
   --bs-purple: #696cff;
@@ -153,24 +152,23 @@
   --bs-body-color-rgb: 105, 122, 141;
   --bs-body-bg-rgb: 245, 245, 249;
   /*폰트 테마 설정*/
-  --bs-font-sans-serif: "Paperozi", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  --bs-header-font-size: 25px;/*헤더 폰트크기*/
-  --bs-menubar-font-size: 25px;/*메뉴바 폰트 크기*/
-  --bs-menubar-sub-font-size: 22px;/*메뉴바 서브 폰트크기*/
+  --bs-header-font-size: 19px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 19px;/*메뉴바 폰트크기*/
+  --bs-menubar-sub-font-size: 16px;/*메뉴바 서브 폰트크기*/
   --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
   --bs-body-font-size: 16px;/*본문,푸터 글자크기 변경*/
-  --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
-  --bs-body-font-weight: 9900;
+  --bs-body-font-family: "Paperozi";/*폰트 테마 설정*/
+  --bs-body-font-weight: 300;
   --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
-  --bs-body-color: #000;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-color: #FBEFEF;
   --bs-body-bg: rgb(101, 140, 88);/*헤더,메뉴바,본문 배경색*/
   --bs-body-bg-out: rgb(187, 200, 99);/*본문밖 밖 배경색*/
-  --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
+  
+  --bs-big-menu-btn: #96A78D;/*데쉬보드 색상*/
   --bs-big-menu-color: #FFF;/*데쉬보드 글자색*/
 }
-
 *,
 *::before,
 *::after {
@@ -2935,6 +2933,10 @@ textarea.form-control-lg {
   font-size: 0.75rem;
   border-radius: 0.25rem;
 }
+.btn-md-sm {
+    padding: 0.45rem 0.8rem; /* sm보다 크고 기본보다 작음 */
+    line-height: 1.5;
+  }
 
 .fade {
   transition: opacity 0.15s linear;
@@ -8077,6 +8079,7 @@ form select.selectpicker.is-invalid ~ .btn {
 }
 .modal .modal-header .btn-close {
   margin-top: -1.25rem;
+  margin: 12px;
 }
 
 .modal-footer {
@@ -15109,6 +15112,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   flex: 0 0 auto;
   flex-direction: column;
   margin: 0;
+  margin-left: 10px;
   padding: 0;
   list-style: none;
 }

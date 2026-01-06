@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	showNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch(apiUrl(`notice/${selectedNoticeId}`), {
 			method: 'PATCH'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(showNoticeForm)
 		})
@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		alert("정말 삭제하시겠습니까?");
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch(apiUrl(`notice/${selectedNoticeId}`), {
 			method: 'DELETE'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}		
 		})
 		.then(response => {
@@ -81,10 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	createNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices', {
+		fetch(apiUrl(`notice`), {
 			method: 'POST'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(createNoticeForm)
 		})
@@ -134,7 +134,7 @@ function NoticeDetailFormatDate(date) {
 
 // 조회할 공지 데이터 불러오기
 async function getNoticeData(noticeId) {
-	await fetch('/api/notices/' + noticeId)
+	await fetch(apiUrl(`api/notices/${noticeId}`))
 	.then(response => { // response가 200이 아닐때
 		if (!response.ok) throw new Error('공지사항을 불러올 수 없습니다.');
     	
@@ -173,7 +173,7 @@ async function inputReadData(data){
 	}
 	
 	document.getElementById('notice-writer-read').textContent = `(${deptName})${createdUserName}`
-	document.getElementById('notice-createdDate-read').textContent = NoticeDetailFormatDate(createdDate);
+//	document.getElementById('notice-createdDate-read').textContent = NoticeDetailFormatDate(createdDate);
 //	console.log("formatDate(createdDate) : ", formatDate(createdDate));
 	document.getElementById('notice-updatedDate-read').textContent = NoticeDetailFormatDate(updatedDate);
 //	console.log("formatDate(updatedDate) : ", formatDate(updatedDate));
@@ -186,7 +186,7 @@ async function inputReadData(data){
 
 // 조회할 공지 파일 데이터 가져오기
 async function getNoticeFileData(noticeId) {
-	await fetch('/api/notices/file/' + noticeId)
+	await fetch(apiUrl(`api/notices/file/${noticeId}`))
 	.then(response => { // response가 200이 아닐때
 		if (!response.ok) throw new Error('공지사항을 불러올 수 없습니다.');
     	
@@ -267,7 +267,7 @@ function inputReadFileData(fileData) {
 }
 // 파일 삭제 함수
 async function deleteFile(elem) {
-	if(!confirm("상품을 삭제하시겠습니까?")) {
+	if(!confirm("파일을 삭제하시겠습니까?")) {
 		return;
 	}
 
@@ -276,13 +276,13 @@ async function deleteFile(elem) {
 	
 	await $.ajax({
 		// RESTful API 형식으로 주소를 지정할 경우 삭제는 DELETE 방식의 메서드 활용하며, URL 뒤에 삭제할 번호를 경로 변수 형태로 포함
-		url: "/files/" + fileId,
+		url: apiUrl(`files/${fileId}`),
 		type: "delete",
 		// data 속성에 변수값 전달 시 속성명과 변수명이 동일하면 하나만 기술해도 됨
 		dataType: "json",
 		// AJAX 요청 전 먼저 CSRF 값을 서버측으로 전송
 		beforeSend: function(xhr) {
-			xhr.setRequestHeader(csrfHeaderName, csrfToken);
+			xhr.setRequestHeader(csrfHeader, csrfToken);
 		},
 		success: async function(response) {
 			if(response.result) {
@@ -310,6 +310,9 @@ function hasRole(role) {
 
 // 공지조회 모달 열때 공지쓰기 권한이 있는지 판별
 async function initReadModal(createdUser) {
+	const fixDiv = document.getElementById('noticeFixDiv'); 
+	const uploadArea = document.getElementById('uploadArea');
+	
 	
 	if(hasRole('ROLE_NOTICE_WRITER')) { // 권한이있을때
 		Array.from(showNoticeForm.elements).forEach(el => {
@@ -322,7 +325,13 @@ async function initReadModal(createdUser) {
 		});
 		deleteNoticeBtn.disabled = false;
 		modifyNoticeBtn.disabled = false;
+		deleteNoticeBtn.style.display = 'block';
+		modifyNoticeBtn.style.disabled = 'block';
+		fixDiv.style.display = 'flex';
+		uploadArea.style.display = 'block';
 	} else { //권한이 없을때 수정,삭제 불가능
+		
+		
 		Array.from(showNoticeForm.elements).forEach(el => {	
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
 				el.readOnly = true;
@@ -333,6 +342,11 @@ async function initReadModal(createdUser) {
 		});
 		deleteNoticeBtn.disabled = true;
 		modifyNoticeBtn.disabled = true;
+		deleteNoticeBtn.style.display = 'none';
+		modifyNoticeBtn.style.display = 'none';
+		fixDiv.style.display = 'none';
+		uploadArea.style.display = 'none';
+		
 	}
 }
 

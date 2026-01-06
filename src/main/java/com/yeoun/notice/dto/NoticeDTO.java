@@ -39,6 +39,7 @@ public class NoticeDTO {
 	private String updatedDeptId;
 	private String updatedDeptName;
 	
+	
 	private static ModelMapper modelMapper = new ModelMapper();
 	
 	public Notice toEntity() {
@@ -79,10 +80,10 @@ public class NoticeDTO {
 
 		if(notice.getUpdateEmp() != null) {
 			noticeDTO.updatedUser = notice.getUpdateEmp().getEmpId();
-			noticeDTO.empId = notice.getUpdateEmp().getEmpId();
-			noticeDTO.empName = notice.getUpdateEmp().getEmpName();
-			noticeDTO.deptId = notice.getUpdateEmp().getDept().getDeptId();
-			noticeDTO.deptName = notice.getUpdateEmp().getDept().getDeptName();
+			noticeDTO.updatedEmpId = notice.getUpdateEmp().getEmpId();
+			noticeDTO.updatedEmpName = notice.getUpdateEmp().getEmpName();
+			noticeDTO.updatedDeptId = notice.getUpdateEmp().getDept().getDeptId();
+			noticeDTO.updatedDeptName = notice.getUpdateEmp().getDept().getDeptName();
 		}
 		
 		return noticeDTO;

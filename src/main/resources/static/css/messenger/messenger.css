@@ -11,7 +11,7 @@
   color: rgb(58, 65, 111);
   background-image: linear-gradient(to right, rgba(238, 240, 248, 0.5), rgb(238, 240, 248), rgba(238, 240, 248, 0.5));
   font-family: 'Pretendard';
-  -webkit-font-smoothing: antialiased; /* ✅ 폰트 깨짐 방지 */
+  -webkit-font-smoothing: antialiased; /* 폰트 깨짐 방지 */
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   -webkit-text-size-adjust: 100%;
